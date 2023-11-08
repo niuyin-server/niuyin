@@ -1,6 +1,6 @@
-# qiniu-server
+# niuyin
 
-七牛云短视频平台实战
+牛音短视频平台开发，剑指抖音
 
 # springCloud微服务架构
 
