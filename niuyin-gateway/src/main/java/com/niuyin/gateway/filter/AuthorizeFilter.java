@@ -1,13 +1,17 @@
 package com.niuyin.gateway.filter;
 
+import com.alibaba.fastjson2.JSON;
 import com.niuyin.gateway.constant.TokenConstants;
 import com.niuyin.gateway.util.JwtUtil;
+import com.niuyin.gateway.util.R;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -16,9 +20,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
+@Order(-100) //优先级设置  值越小  优先级越高
 @Component
-public class AuthorizeFilter implements Ordered, GlobalFilter {
+public class AuthorizeFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         //1.获取request和response对象
@@ -28,6 +35,7 @@ public class AuthorizeFilter implements Ordered, GlobalFilter {
         //2.判断是否是登录
         if (request.getURI().getPath().contains("/login")
                 || request.getURI().getPath().contains("/register")
+                || request.getURI().getPath().contains("/hot")
                 || request.getURI().getPath().contains("/swagger-ui")) {
             return chain.filter(exchange);//放行
         }
@@ -37,8 +45,13 @@ public class AuthorizeFilter implements Ordered, GlobalFilter {
 
         //4.判断token是否存在
         if (StringUtils.isBlank(token)) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            throw new RuntimeException("用户未登录");
+//            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            //指定编码，否则在浏览器中会中文乱码
+//            throw new RuntimeException("用户未登录");
+            response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
+            R<?> result = R.fail(401, "用户未登录");
+            DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(result).getBytes());
+            return response.writeWith(Mono.just(dataBuffer));
         }
 
         //5.判断token是否有效
@@ -48,8 +61,10 @@ public class AuthorizeFilter implements Ordered, GlobalFilter {
             //是否是过期
             int result = JwtUtil.verifyToken(claimsBody);
             if (result == 1 || result == 2) {
-                response.setStatusCode(HttpStatus.UNAUTHORIZED);
-                return response.setComplete();
+//                response.setStatusCode(HttpStatus.UNAUTHORIZED);
+                response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
+                DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "用户未登录")).getBytes());
+                return response.writeWith(Mono.just(dataBuffer));
             }
             //获取用户信息
             Object userId = claimsBody.get("id");
@@ -63,18 +78,11 @@ public class AuthorizeFilter implements Ordered, GlobalFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("用户未登录");
+//            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
+            DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "用户未登录")).getBytes());
+            return response.writeWith(Mono.just(dataBuffer));
         }
         return chain.filter(exchange);
-    }
-
-    /**
-     * 优先级设置  值越小  优先级越高
-     *
-     * @return
-     */
-    @Override
-    public int getOrder() {
-        return 0;
     }
 }
