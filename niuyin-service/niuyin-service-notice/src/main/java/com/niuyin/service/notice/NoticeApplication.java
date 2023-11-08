@@ -24,8 +24,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableRedisConfig
 @EnableAsync
 @Import({MybatisPlusConfig.class, Swagger2Configuration.class})
-public class NoticeService {
+public class NoticeApplication {
     public static void main(String[] args) {
-        SpringApplication.run(NoticeService.class, args);
+        SpringApplication.run(NoticeApplication.class, args);
     }
 }

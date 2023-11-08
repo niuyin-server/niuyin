@@ -272,18 +272,26 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
                 LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
                 commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
-                videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
+                try {
+                    videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 // 封装用户信息
                 Member poublishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
                 videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
                 videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
                 // 是否关注
-                Long loginUserId = UserContext.getUserId();
-                if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
-                    videoVO.setWeatherFollow(true);
-                } else {
-                    Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
-                    videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
+                try {
+                    Long loginUserId = UserContext.getUserId();
+                    if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
+                        videoVO.setWeatherFollow(true);
+                    } else {
+                        Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
+                        videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 videoVOList.add(videoVO);
             } catch (Exception e) {
