@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.qiniu.feign.config.FeignConfig,\
+  com.qiniu.feign.user.fallback.RemoteUserServiceFallback,\
+  com.qiniu.feign.video.fallback.RemoteVideoServiceFallback,\
+  com.qiniu.feign.behave.fallback.RemoteBehaveServiceFallback,\
+  com.qiniu.feign.social.fallback.RemoteSocialServiceFallback

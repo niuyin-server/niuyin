@@ -1,0 +1,51 @@
+server:
+  port: 9090
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: qiniu-gateway
+  profiles:
+    active: pro
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 106.14.105.101:8848
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+      config:
+        server-addr: 106.14.105.101:8848
+        file-extension: yml
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+    gateway:
+      httpclient:
+        #        response-timeout: PT10S # 全局的响应超时时间，网络链接后，后端服务多久不返回网关就报错 The response timeout.
+        connect-timeout: 5000 # 全局的TCP连接超时时间默认时间是45秒，修改为5秒
+        # 链接池配置
+        pool:
+          max-connections: 10000 # 最大连接数
+          max-life-time: 10 # 最大连接时间
+          acquire-timeout: 10 # 返回时间
+          max-idle-time: 10000 # 最大空闲时间
+          type: ELASTIC # 设置固定链接池
+    #ELASTIC：弹性链接池，连接数上限为Integer.MAX，默认值就是这个类型
+    #FIXED: 固定连接池，最大连接数采用spring.cloud.gateway.httpclient.pool.max-connections的配置
+    #DISABLED：不使用任何连接池
+    sentinel:
+      transport:
+        dashboard: 106.14.105.101:8090
+      #        dashboard: localhost:8080
+      eager: true
+      http-method-specify: true
+      # nacos配置持久化
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 106.14.105.101:8848
+            dataId: sentinel-qiniu-gateway
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: gw-flow
+logging:
+  level:
+    com.qiniu: debug
+    org.springframework: warn
