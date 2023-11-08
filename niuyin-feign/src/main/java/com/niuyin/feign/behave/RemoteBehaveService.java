@@ -27,12 +27,12 @@ public interface RemoteBehaveService {
     @GetMapping("/api/v1/comment/{videoId}")
     R<Long> getCommentCountByVideoId(@PathVariable("videoId") String videoId);
 
-    @DeleteMapping("/api/v1/video/{vodeoId}")
+    @DeleteMapping("/api/v1/video/{videoId}")
     R<?> deleteVideoDocumentByVideoId(@PathVariable("videoId") String videoId);
 
     @DeleteMapping("/{videoId}")
-    public R<?> deleteVideoLikeRecord(@PathVariable String videoId);
+    R<?> deleteVideoLikeRecord(@PathVariable String videoId);
 
     @DeleteMapping("/{videoId}")
-    public R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId);
+    R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId);
 }
