@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niuyin.service.video.mapper.VideoMapper">
+
+    <select id="getVideoUrlByVideoId" resultType="java.lang.String">
+        SELECT video_url
+        FROM video
+        WHERE video_id = #{videoId}
+    </select>
+    <select id="getUserLikesVideos" resultType="com.niuyin.model.video.domain.Video">
+        SELECT v.video_title, v.video_desc, v.video_url, v.view_num, v.like_num, v.favorites_num
+        FROM video v
+                 JOIN video_user_like vul ON v.video_id = vul.video_id
+        WHERE vul.user_id = #{userId}
+        ORDER BY v.create_time DESC
+            LIMIT #{pageNum}, #{pageSize}
+    </select>
+    <select id="getUserFavoritesVideos" resultType="com.niuyin.model.video.domain.Video">
+        SELECT v.video_title, v.video_desc, v.video_url, v.view_num, v.like_num, v.favorites_num
+        FROM video v
+                 JOIN video_user_favorites vuf ON v.video_id = vuf.video_id
+        WHERE vuf.user_id = #{userId}
+        ORDER BY v.create_time DESC
+            LIMIT #{pageNum}, #{pageSize}
+    </select>
+</mapper>
+

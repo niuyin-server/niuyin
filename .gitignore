@@ -13,14 +13,6 @@ target/
 *.iml
 *.ipr
 
-#/qiniu-gateway/src/main/resources/bootstrap.yml
-#/qiniu-service/qiniu-service-behave/src/main/resources/bootstrap.yml
-#/qiniu-service/qiniu-service-notice/src/main/resources/bootstrap.yml
-#/qiniu-service/qiniu-service-search/src/main/resources/bootstrap.yml
-#/qiniu-service/qiniu-service-social/src/main/resources/bootstrap.yml
-#/qiniu-service/qiniu-service-user/src/main/resources/bootstrap.yml
-#/qiniu-service/qiniu-service-video/src/main/resources/bootstrap.yml
-
 ### Eclipse ###
 .apt_generated
 .classpath

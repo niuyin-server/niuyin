@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.qiniu</groupId>
-    <artifactId>qiniu-server</artifactId>
+    <groupId>com.niuyin</groupId>
+    <artifactId>niuyin-server</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
@@ -16,12 +16,12 @@
     </parent>
 
     <modules>
-        <module>qiniu-service</module>
-        <module>qiniu-gateway</module>
-        <module>qiniu-feign</module>
-        <module>qiniu-common</module>
-        <module>qiniu-model</module>
-        <module>qiniu-starter</module>
+        <module>niuyin-service</module>
+        <module>niuyin-gateway</module>
+        <module>niuyin-feign</module>
+        <module>niuyin-common</module>
+        <module>niuyin-model</module>
+        <module>niuyin-starter</module>
     </modules>
 
     <properties>
@@ -83,36 +83,24 @@
         <dependencies>
             <!-- feign -->
             <dependency>
-                <groupId>com.qiniu</groupId>
-                <artifactId>qiniu-feign</artifactId>
+                <groupId>com.niuyin</groupId>
+                <artifactId>niuyin-feign</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- common -->
             <dependency>
-                <groupId>com.qiniu</groupId>
-                <artifactId>qiniu-common</artifactId>
+                <groupId>com.niuyin</groupId>
+                <artifactId>niuyin-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>com.qiniu</groupId>
-                <artifactId>qiniu-model</artifactId>
+                <groupId>com.niuyin</groupId>
+                <artifactId>niuyin-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
-
-            <!--            <dependency>-->
-            <!--                <groupId>com.qiniu</groupId>-->
-            <!--                <artifactId>qiniu-util</artifactId>-->
-            <!--                <version>${project.version}</version>-->
-            <!--            </dependency>-->
-
-            <!--            <dependency>-->
-            <!--                <groupId>com.roydon</groupId>-->
-            <!--                <artifactId>qiniu-utils</artifactId>-->
-            <!--                <version>${project.version}</version>-->
-            <!--            </dependency>-->
             <!-- spring cloud -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
