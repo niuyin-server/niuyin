@@ -6,9 +6,9 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.social.UserFollow;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class UserFollowController {
     private IUserFollowService userFollowService;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     /**
      * 关注
@@ -58,17 +58,17 @@ public class UserFollowController {
             LambdaQueryWrapper<UserFollow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
             List<UserFollow> list = userFollowService.list(lambdaQueryWrapper);
-            List<User> res = new ArrayList<>();
+            List<Member> res = new ArrayList<>();
             list.forEach(l -> {
-                User user = remoteUserService.userInfoById(l.getUserFollowId()).getData();
+                Member user = remoteMemberService.userInfoById(l.getUserFollowId()).getData();
                 res.add(user);
             });
             return PageDataInfo.genPageData(res, res.size());
         }
         IPage<UserFollow> userFollowIPage = userFollowService.followPage(pageDTO);
-        List<User> userList = new ArrayList<>();
+        List<Member> userList = new ArrayList<>();
         userFollowIPage.getRecords().forEach(uf -> {
-            User user = remoteUserService.userInfoById(uf.getUserFollowId()).getData();
+            Member user = remoteMemberService.userInfoById(uf.getUserFollowId()).getData();
             userList.add(user);
         });
         return PageDataInfo.genPageData(userList, userFollowIPage.getTotal());

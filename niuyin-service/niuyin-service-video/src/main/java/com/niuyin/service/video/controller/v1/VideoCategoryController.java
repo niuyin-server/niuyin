@@ -3,14 +3,14 @@ package com.niuyin.service.video.controller.v1;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.feign.social.RemoteSocialService;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.behave.RemoteBehaveService;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoUserComment;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
@@ -38,7 +38,7 @@ public class VideoCategoryController {
     private IVideoCategoryService videoCategoryService;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     @Resource
     private RedisService redisService;
@@ -76,7 +76,7 @@ public class VideoCategoryController {
             commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
             videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
             // 封装用户信息
-            User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
+            Member poublishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
             videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
             videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
             // 是否关注

@@ -1,10 +1,10 @@
 package com.niuyin.service.search.controller.v1;
 
 import com.niuyin.common.domain.R;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;
@@ -28,7 +28,7 @@ public class VideoSearchController {
     private VideoSearchService videoSearchService;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     /**
      * 分页搜索视频
@@ -44,7 +44,7 @@ public class VideoSearchController {
         // 封装用户，视频点赞量，喜欢量。。。
         videoSearchVOS.forEach(v -> {
             VideoSearchUserVO videoSearchUserVO = BeanCopyUtils.copyBean(v, VideoSearchUserVO.class);
-            User user = remoteUserService.userInfoById(v.getUserId()).getData();
+            Member user = remoteMemberService.userInfoById(v.getUserId()).getData();
             videoSearchUserVO.setAvatar(user.getAvatar());
             res.add(videoSearchUserVO);
         });

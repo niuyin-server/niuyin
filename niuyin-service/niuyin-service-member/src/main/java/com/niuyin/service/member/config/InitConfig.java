@@ -1,4 +1,4 @@
-package com.niuyin.service.social.config;
+package com.niuyin.service.member.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

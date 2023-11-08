@@ -12,7 +12,7 @@
     <artifactId>niuyin-service</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>niuyin-service-user</module>
+        <module>niuyin-service-member</module>
         <module>niuyin-service-video</module>
         <module>niuyin-service-search</module>
         <module>niuyin-service-social</module>

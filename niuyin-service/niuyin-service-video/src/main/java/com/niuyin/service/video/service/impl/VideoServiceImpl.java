@@ -8,7 +8,7 @@ import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
 import com.niuyin.feign.social.RemoteSocialService;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoSensitive;
@@ -24,8 +24,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.feign.behave.RemoteBehaveService;
 import com.niuyin.model.search.vo.VideoSearchVO;
-import com.niuyin.model.user.domain.User;
-import com.niuyin.model.video.domain.*;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.dto.VideoPageDto;
@@ -76,7 +75,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private RabbitTemplate rabbitTemplate;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     @Resource
     private RedisService redisService;
@@ -165,12 +164,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
             // 获取用户信息
-            User userCache = redisService.getCacheObject("userinfo:" + userId);
+            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
             if (StringUtils.isNotNull(userCache)) {
                 videoSearchVO.setUserNickName(userCache.getNickName());
                 videoSearchVO.setUserAvatar(userCache.getAvatar());
             } else {
-                User remoteUser = remoteUserService.userInfoById(userId).getData();
+                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
                 videoSearchVO.setUserNickName(remoteUser.getNickName());
                 videoSearchVO.setUserAvatar(remoteUser.getAvatar());
             }
@@ -275,7 +274,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
                 videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
                 // 封装用户信息
-                User poublishUser = remoteUserService.userInfoById(v.getUserId()).getData();
+                Member poublishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
                 videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
                 videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
                 // 是否关注

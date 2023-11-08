@@ -3,14 +3,14 @@ package com.niuyin.service.video;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
 import com.niuyin.model.search.vo.VideoSearchVO;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoSensitive;
@@ -55,7 +55,7 @@ public class VideoTestApplication {
     private VideoSensitiveMapper videoSensitiveMapper;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     @Resource
     private IVideoCategoryRelationService videoCategoryRelationService;
@@ -203,12 +203,12 @@ public class VideoTestApplication {
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
             // 获取用户信息
-            User userCache = redisService.getCacheObject("userinfo:" + userId);
+            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
             if (StringUtils.isNotNull(userCache)) {
                 videoSearchVO.setUserNickName(userCache.getNickName());
                 videoSearchVO.setUserAvatar(userCache.getAvatar());
             } else {
-                User remoteUser = remoteUserService.userInfoById(userId).getData();
+                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
                 videoSearchVO.setUserNickName(remoteUser.getNickName());
                 videoSearchVO.setUserAvatar(remoteUser.getAvatar());
             }

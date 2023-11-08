@@ -6,9 +6,9 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.dto.VideoFeedDTO;
@@ -42,7 +42,7 @@ public class VideoController {
     private RedisService redisService;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     /**
      * 热门视频
@@ -60,9 +60,9 @@ public class VideoController {
         videoIds.forEach(vid -> {
             Video video = videoService.selectById((String) vid);
             VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
-            User user = new User();
+            Member user = new Member();
             try {
-                user = remoteUserService.userInfoById(video.getUserId()).getData();
+                user = remoteMemberService.userInfoById(video.getUserId()).getData();
             } catch (Exception e) {
                 e.printStackTrace();
             }

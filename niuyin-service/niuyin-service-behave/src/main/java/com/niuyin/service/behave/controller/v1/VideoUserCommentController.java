@@ -9,9 +9,9 @@ import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.VideoUserComment;
 import com.niuyin.model.video.dto.VideoUserCommentPageDTO;
 import com.niuyin.model.video.vo.VideoUserCommentVO;
@@ -37,7 +37,7 @@ public class VideoUserCommentController {
     private IVideoUserCommentService videoUserCommentService;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     @Resource
     private RedisService redisService;
@@ -60,12 +60,12 @@ public class VideoUserCommentController {
             VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
             Long userId = r.getUserId();
             // 先走redis，有就直接返回
-            User userCache = redisService.getCacheObject("userinfo:" + userId);
+            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
             if (StringUtils.isNotNull(userCache)) {
                 appNewsCommentVO.setNickName(userCache.getNickName());
                 appNewsCommentVO.setAvatar(userCache.getAvatar());
             } else {
-                User user = remoteUserService.userInfoById(userId).getData();
+                Member user = remoteMemberService.userInfoById(userId).getData();
                 if (StringUtils.isNotNull(user)) {
                     appNewsCommentVO.setNickName(user.getNickName());
                     appNewsCommentVO.setAvatar(user.getAvatar());
@@ -75,12 +75,12 @@ public class VideoUserCommentController {
             List<VideoUserComment> children = this.videoUserCommentService.getChildren(commentId);
             List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
             childrenVOS.forEach(c -> {
-                User userCache2 = redisService.getCacheObject("userinfo:" + c.getUserId());
+                Member userCache2 = redisService.getCacheObject("member:userinfo:" + c.getUserId());
                 if (StringUtils.isNotNull(userCache2)) {
                     c.setNickName(userCache2.getNickName());
                     c.setAvatar(userCache2.getAvatar());
                 } else {
-                    User cUser = remoteUserService.userInfoById(c.getUserId()).getData();
+                    Member cUser = remoteMemberService.userInfoById(c.getUserId()).getData();
                     if (StringUtils.isNotNull(cUser)) {
                         c.setNickName(cUser.getNickName());
                         c.setAvatar(cUser.getAvatar());
@@ -90,11 +90,11 @@ public class VideoUserCommentController {
                     // 回复了回复
                     VideoUserComment byId = this.videoUserCommentService.getById(c.getParentId());
                     c.setReplayUserId(byId.getUserId());
-                    User userCache3 = redisService.getCacheObject("userinfo:" + byId.getUserId());
+                    Member userCache3 = redisService.getCacheObject("member:userinfo:" + byId.getUserId());
                     if (StringUtils.isNotNull(userCache2)) {
                         c.setReplayUserNickName(userCache3.getNickName());
                     } else {
-                        User byUser = remoteUserService.userInfoById(byId.getUserId()).getData();
+                        Member byUser = remoteMemberService.userInfoById(byId.getUserId()).getData();
                         if (StringUtils.isNotNull(byUser)) {
                             c.setReplayUserNickName(byUser.getNickName());
                         }

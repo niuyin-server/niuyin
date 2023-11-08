@@ -8,10 +8,10 @@ import com.niuyin.service.social.mapper.UserFollowMapper;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.feign.user.RemoteUserService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.social.UserFollow;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     private UserFollowMapper userFollowMapper;
 
     @Resource
-    private RemoteUserService remoteUserService;
+    private RemoteMemberService remoteMemberService;
 
     @Override
     public boolean followUser(Long userId) {
@@ -43,7 +43,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             // 不可关注自己
             throw new CustomException(HttpCodeEnum.NOT_ALLOW_FOLLOW_YOURSELF);
         }
-        User user = remoteUserService.userInfoById(userId).getData();
+        Member user = remoteMemberService.userInfoById(userId).getData();
         if (StringUtils.isNull(user)) {
             // 用户不存在
             throw new CustomException(HttpCodeEnum.USER_NOT_EXIST);

@@ -1,6 +1,6 @@
 package com.niuyin.common.context;
 
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 
 /**
  * UserContext
@@ -10,15 +10,15 @@ import com.niuyin.model.user.domain.User;
  **/
 public class UserContext {
 
-    private final static ThreadLocal<User> USER_THREAD_LOCAL = new ThreadLocal<>();
+    private final static ThreadLocal<Member> USER_THREAD_LOCAL = new ThreadLocal<>();
 
     //存入线程中
-    public static void setUser(User user) {
+    public static void setUser(Member user) {
         USER_THREAD_LOCAL.set(user);
     }
 
     //从线程中获取
-    public static User getUser() {
+    public static Member getUser() {
         return USER_THREAD_LOCAL.get();
     }
 

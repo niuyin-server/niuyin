@@ -1,7 +1,7 @@
 package com.niuyin.common.filter;
 
 import com.niuyin.common.context.UserContext;
-import com.niuyin.model.user.domain.User;
+import com.niuyin.model.member.domain.Member;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -18,7 +18,7 @@ public class UserTokenInterceptor implements HandlerInterceptor {
         String userId = request.getHeader("userId");
         if (userId != null) {
             //存入到当前线程中
-            User user = new User();
+            Member user = new Member();
             user.setUserId(Long.valueOf(userId));
             UserContext.setUser(user);
         }

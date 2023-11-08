@@ -2,6 +2,7 @@ package com.niuyin.feign.behave;
 
 import com.niuyin.common.constant.ServiceNameConstants;
 import com.niuyin.common.domain.R;
+import com.niuyin.feign.behave.fallback.RemoteBehaveServiceFallback;
 import com.niuyin.feign.video.fallback.RemoteVideoServiceFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @AUTHOR: roydon
  * @DATE: 2023/11/4
  **/
-@FeignClient(contextId = "remoteBehaveService", value = ServiceNameConstants.BEHAVE_SERVICE, fallbackFactory = RemoteVideoServiceFallback.class)
+@FeignClient(contextId = "remoteBehaveService", value = ServiceNameConstants.BEHAVE_SERVICE, fallbackFactory = RemoteBehaveServiceFallback.class)
 public interface RemoteBehaveService {
 
     /**
