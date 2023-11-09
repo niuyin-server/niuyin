@@ -138,8 +138,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         video.setUserId(userId);
         video.setCreateTime(LocalDateTime.now());
         video.setCreateBy(userId.toString());
-        video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ?
-                video.getVideoUrl() + VideoCacheConstants.VIDEO_VIEW_COVER_IMAGE_KEY : videoPublishDto.getCoverImage());
+        video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ? video.getVideoUrl() + VideoCacheConstants.VIDEO_VIEW_COVER_IMAGE_KEY : videoPublishDto.getCoverImage());
         //前端不传不用处理 将前端传递的分类拷贝到关联表对象
         if (StringUtils.isNotNull(videoPublishDto.getCategoryId())) {
             VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
