@@ -13,13 +13,16 @@ import java.util.List;
  * @since 2023-10-25 20:33:09
  */
 @Mapper
-public interface VideoMapper extends BaseMapper<Video>{
+public interface VideoMapper extends BaseMapper<Video> {
 
     String getVideoUrlByVideoId(String videoId);
 
     List<Video> getUserLikesVideos(Long userId, int pageNum, int pageSize);
 
     List<Video> getUserFavoritesVideos(Long userId, int pageNum, int pageSize);
+
+
+    Long selectAllLikeNumForUser(Long userId);
 
 }
 

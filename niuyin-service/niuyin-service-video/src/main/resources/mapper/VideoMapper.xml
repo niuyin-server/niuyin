@@ -23,5 +23,9 @@
         ORDER BY v.create_time DESC
             LIMIT #{pageNum}, #{pageSize}
     </select>
+    <select id="selectAllLikeNumForUser" parameterType="Long" resultType="Long">
+        select sum(like_num) from video v
+        where v.user_id=#{userId}
+    </select>
 </mapper>
 

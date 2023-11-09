@@ -1,5 +1,6 @@
 package com.niuyin.service.video.controller.v1;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
@@ -143,6 +144,19 @@ public class VideoController {
         videoService.deleteVideoByVideoIds(videoId);
         return null;
     }
+
+    /**
+     * 根据用户id获取该用户所发布的所有视频的点赞数
+     *
+     * @param userId
+     * @return
+     */
+    @GetMapping("/videoLikecNums/{userId}")
+    public Long getVideoLikeAllNumByUserId(@PathVariable("userId") Long userId) {
+
+        return videoService.getVideoLikeAllNumByUserId(userId);
+    }
+
 
 }
 

@@ -367,6 +367,17 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return hotVideoVOList;
     }
 
+    /**
+     * 查询用户总获赞数
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public Long getVideoLikeAllNumByUserId(Long userId) {
+        return videoMapper.selectAllLikeNumForUser(userId);
+    }
+
     // 视频算分
     private Long computeVideoScore(Video video) {
         Long score = 0L;
