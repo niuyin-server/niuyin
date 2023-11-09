@@ -2,10 +2,12 @@ package com.niuyin.service.behave.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.video.domain.VideoUserFavorites;
+import com.niuyin.model.video.domain.VideoUserLike;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +70,20 @@ public class VideoUserFavoritesController {
         queryWrapper.eq(VideoUserFavorites::getVideoId,videoId);
         return R.ok(videoUserFavoritesService.removeById(videoId));
     }
+
+    /**
+     * 用户是否收藏某视频
+     *
+     * @param videoId
+     * @return
+     */
+    @GetMapping("/weather/{videoId}")
+    public R<Boolean> weatherFavorite(@PathVariable("videoId") String videoId) {
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId);
+        queryWrapper.eq(VideoUserFavorites::getUserId, UserContext.getUserId());
+        return R.ok(videoUserFavoritesService.count(queryWrapper) > 0);
+    }
+
 }
 

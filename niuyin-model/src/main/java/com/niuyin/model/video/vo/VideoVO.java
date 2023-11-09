@@ -16,6 +16,10 @@ public class VideoVO extends Video {
     private Long commentNum;
     private String userNickName;
     private String userAvatar;
+    // 是否点赞
+    private boolean weatherLike;
+    // 是否收藏
+    private boolean weatherFavorite;
     // 是否关注
     private boolean weatherFollow;
 

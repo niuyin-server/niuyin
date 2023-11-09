@@ -35,4 +35,22 @@ public interface RemoteBehaveService {
 
     @DeleteMapping("/{videoId}")
     R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId);
+
+    /**
+     * 是否点赞某视频
+     *
+     * @param videoId
+     * @return
+     */
+    @GetMapping("/api/v1/like/weather/{videoId}")
+    R<Boolean> weatherLike(@PathVariable("videoId") String videoId);
+
+    /**
+     * 是否收藏某视频
+     *
+     * @param videoId
+     * @return
+     */
+    @GetMapping("/api/v1/favorite/weather/{videoId}")
+    R<Boolean> weatherFavorite(@PathVariable("videoId") String videoId);
 }

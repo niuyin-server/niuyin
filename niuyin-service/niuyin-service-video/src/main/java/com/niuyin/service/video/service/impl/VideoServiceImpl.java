@@ -278,12 +278,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     e.printStackTrace();
                 }
                 // 封装用户信息
-                Member poublishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
-                videoVO.setUserNickName(StringUtils.isNull(poublishUser) ? null : poublishUser.getNickName());
-                videoVO.setUserAvatar(StringUtils.isNull(poublishUser) ? null : poublishUser.getAvatar());
-                // 是否关注
+                Member publishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
+                videoVO.setUserNickName(StringUtils.isNull(publishUser) ? null : publishUser.getNickName());
+                videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
+                // 是否关注、是否点赞、是否收藏
                 try {
                     Long loginUserId = UserContext.getUserId();
+                    videoVO.setWeatherLike(remoteBehaveService.weatherLike(v.getVideoId()).getData());
+                    videoVO.setWeatherFavorite(remoteBehaveService.weatherFavorite(v.getVideoId()).getData());
                     if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
                         videoVO.setWeatherFollow(true);
                     } else {

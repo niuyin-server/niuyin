@@ -2,6 +2,7 @@ package com.niuyin.service.behave.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.feign.video.RemoteVideoService;
@@ -58,10 +59,24 @@ public class VideoUserLikeController {
     }
 
     @DeleteMapping("/{videoId}")
-    public R<?> deleteVideoLikeRecord(@PathVariable String videoId){
+    public R<?> deleteVideoLikeRecord(@PathVariable String videoId) {
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getVideoId,videoId);
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId);
         return R.ok(videoUserLikeService.remove(queryWrapper));
+    }
+
+    /**
+     * 用户是否点赞某视频
+     *
+     * @param videoId
+     * @return
+     */
+    @GetMapping("/weather/{videoId}")
+    public R<Boolean> weatherLike(@PathVariable("videoId") String videoId) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId);
+        queryWrapper.eq(VideoUserLike::getUserId, UserContext.getUserId());
+        return R.ok(videoUserLikeService.count(queryWrapper) > 0);
     }
 
 }

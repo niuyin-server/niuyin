@@ -49,6 +49,16 @@ public class RemoteBehaveServiceFallback implements FallbackFactory<RemoteBehave
             public R<?> deleteVideoFavoriteRecordByVideoId(String videoId) {
                 return R.fail(null);
             }
+
+            @Override
+            public R<Boolean> weatherLike(String videoId) {
+                return R.fail(false);
+            }
+
+            @Override
+            public R<Boolean> weatherFavorite(String videoId) {
+                return R.fail(false);
+            }
         };
     }
 }
