@@ -95,5 +95,11 @@ public interface IVideoService extends IService<Video> {
      */
     List<HotVideoVO> computeHotVideoScore(List<Video> videoList);
 
+    /**
+     * 视频总获赞量
+     *
+     * @param userId
+     * @return
+     */
     Long getVideoLikeAllNumByUserId(Long userId);
 }

@@ -125,6 +125,7 @@ public class VideoController {
     @PostMapping("/userpage")
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
+        // 封装vo
         return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
     }
 
@@ -146,17 +147,15 @@ public class VideoController {
     }
 
     /**
-     * 根据用户id获取该用户所发布的所有视频的点赞数
+     * 用户视频总获赞量
      *
      * @param userId
      * @return
      */
-    @GetMapping("/videoLikecNums/{userId}")
-    public Long getVideoLikeAllNumByUserId(@PathVariable("userId") Long userId) {
-
-        return videoService.getVideoLikeAllNumByUserId(userId);
+    @GetMapping("/likeNums/{userId}")
+    public R<Long> getVideoLikeAllNumByUserId(@PathVariable("userId") Long userId) {
+        return R.ok(videoService.getVideoLikeAllNumByUserId(userId));
     }
-
 
 }
 

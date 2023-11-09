@@ -44,7 +44,7 @@ public class VideoUserLikeController {
     }
 
     /**
-     * 用户点赞分页查询
+     * todo 使用sql 用户点赞分页查询
      */
     @PostMapping("/mylikepage")
     public PageDataInfo myLikePage(@RequestBody VideoPageDto pageDto) {
@@ -53,11 +53,16 @@ public class VideoUserLikeController {
         if (videoIds.isEmpty()) {
             return PageDataInfo.genPageData(null, 0);
         }
-//        List<Video> videos = videoService.queryVideoByVideoIds(videoIds );
         List<Video> videos = remoteVideoService.queryVideoByVideoIds(videoIds).getData();
         return PageDataInfo.genPageData(videos, likeIPage.getTotal());
     }
 
+    /**
+     * 取消点赞
+     *
+     * @param videoId
+     * @return
+     */
     @DeleteMapping("/{videoId}")
     public R<?> deleteVideoLikeRecord(@PathVariable String videoId) {
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
