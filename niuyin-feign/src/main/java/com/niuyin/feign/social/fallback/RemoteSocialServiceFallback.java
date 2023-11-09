@@ -2,6 +2,7 @@ package com.niuyin.feign.social.fallback;
 
 import com.niuyin.common.domain.R;
 import com.niuyin.feign.social.RemoteSocialService;
+import com.niuyin.model.video.vo.UserFollowsFansVo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 

@@ -22,4 +22,5 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @return
      */
     IPage<VideoUserLike> queryMyLikeVideoPage(VideoPageDto pageDto);
+
 }

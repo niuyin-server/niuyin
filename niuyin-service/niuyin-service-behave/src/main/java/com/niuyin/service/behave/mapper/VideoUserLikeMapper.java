@@ -11,7 +11,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2023-10-30 14:32:59
  */
 @Mapper
-public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike>{
-
+public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
 }
 

@@ -28,6 +28,7 @@ public class RemoteVideoServiceFallback implements FallbackFactory<RemoteVideoSe
             public R<List<Video>> queryVideoByVideoIds(List<String> videoIds) {
                 return R.fail(null);
             }
+
         };
     }
 }

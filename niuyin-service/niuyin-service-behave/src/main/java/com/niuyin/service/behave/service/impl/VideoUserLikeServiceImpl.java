@@ -92,4 +92,5 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         queryWrapper.eq(VideoUserLike::getUserId, UserContext.getUserId());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
+
 }

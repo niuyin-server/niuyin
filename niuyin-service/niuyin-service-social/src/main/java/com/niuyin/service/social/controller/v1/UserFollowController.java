@@ -10,6 +10,7 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.video.vo.UserFollowsFansVo;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,6 +88,25 @@ public class UserFollowController {
         queryWrapper.eq(UserFollow::getUserFollowId, userId);
         return R.ok(userFollowService.count(queryWrapper) > 0);
     }
+
+    /**
+     * 根据用户id查询该用户的关注和粉丝
+     *
+     * @param userId
+     * @return
+     */
+    @GetMapping("/followFans/{userId}")
+    public R<UserFollowsFansVo> followAndFans(@PathVariable("userId") Long userId) {
+        UserFollowsFansVo userFollowsFansVo = new UserFollowsFansVo();
+        LambdaQueryWrapper<UserFollow> queryWrapperFans = new LambdaQueryWrapper<>();
+        queryWrapperFans.eq(UserFollow::getUserId, userId);
+        userFollowsFansVo.setFanNums(userFollowService.count(queryWrapperFans));
+        LambdaQueryWrapper<UserFollow> queryWrapperFollows = new LambdaQueryWrapper<>();
+        queryWrapperFollows.eq(UserFollow::getUserFollowId, userId);
+        userFollowsFansVo.setFollowedNums(userFollowService.count(queryWrapperFollows));
+        return R.ok(userFollowsFansVo);
+    }
+
 
 }
 

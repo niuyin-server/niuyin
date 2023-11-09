@@ -79,5 +79,6 @@ public class VideoUserLikeController {
         return R.ok(videoUserLikeService.count(queryWrapper) > 0);
     }
 
+
 }
 

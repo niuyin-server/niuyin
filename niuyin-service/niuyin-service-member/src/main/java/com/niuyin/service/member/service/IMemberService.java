@@ -5,6 +5,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
+import com.niuyin.model.video.vo.UserFollowsFansVo;
 
 /**
  * 用户表(User)表服务接口
@@ -38,4 +39,5 @@ public interface IMemberService extends IService<Member> {
      * 修改密码
      */
     boolean updatePass(UpdatePasswordDTO dto);
+
 }

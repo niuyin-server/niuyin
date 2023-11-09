@@ -8,16 +8,20 @@ import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.IdUtils;
 import com.niuyin.common.utils.ServletUtils;
 import com.niuyin.common.utils.audit.SensitiveWordUtil;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.IpUtils;
 import com.niuyin.common.utils.JwtUtil;
+import com.niuyin.feign.social.RemoteSocialService;
+import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.UserSensitive;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
+import com.niuyin.model.video.vo.UserFollowsFansVo;
 import com.niuyin.service.member.constants.UserCacheConstants;
 import com.niuyin.service.member.mapper.MemberMapper;
 import com.niuyin.service.member.service.IUserSensitiveService;
@@ -51,6 +55,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Resource
     private IUserSensitiveService userSensitiveService;
+
+    @Resource
+    private RemoteSocialService remoteSocialService;
+
+    @Resource
+    RemoteVideoService remoteVideoService;
 
     /**
      * 通过ID查询单条数据
@@ -195,4 +205,5 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         updateUser.setPassword(DigestUtils.md5DigestAsHex((dto.getConfirmPassword().trim() + user.getSalt()).getBytes()));
         return this.updateById(updateUser);
     }
+
 }
