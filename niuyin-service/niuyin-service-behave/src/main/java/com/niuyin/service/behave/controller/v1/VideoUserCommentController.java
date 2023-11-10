@@ -143,5 +143,15 @@ public class VideoUserCommentController {
     public R<Long> getCommentCountByVideoId(@PathVariable("videoId") String videoId) {
         return R.ok(videoUserCommentService.queryCommentCountByVideoId(videoId));
     }
+
+    /**
+     * 点赞评论接口
+     */
+    @GetMapping("/{commentId}")
+    public R<Boolean> likeComment(@PathVariable("commentId") Long commentId) {
+
+        return R.ok(true);
+    }
+
 }
 

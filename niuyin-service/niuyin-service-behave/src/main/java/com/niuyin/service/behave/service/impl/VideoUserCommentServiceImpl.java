@@ -73,6 +73,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         LambdaQueryWrapper<VideoUserComment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserComment::getVideoId, pageDTO.getVideoId());
         queryWrapper.eq(VideoUserComment::getParentId, 0);
+        queryWrapper.eq(VideoUserComment::getStatus, VideoCommentStatus.NORMAL.getCode());
         return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
     }
 
@@ -86,6 +87,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     public List<VideoUserComment> getChildren(Long commentId) {
         LambdaQueryWrapper<VideoUserComment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserComment::getOriginId, commentId);
+        queryWrapper.eq(VideoUserComment::getStatus, VideoCommentStatus.NORMAL.getCode());
         return list(queryWrapper);
     }
 
