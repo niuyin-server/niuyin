@@ -147,7 +147,7 @@ public class VideoUserCommentController {
     /**
      * 点赞评论接口
      */
-    @GetMapping("/{commentId}")
+    @GetMapping("/like/{commentId}")
     public R<Boolean> likeComment(@PathVariable("commentId") Long commentId) {
 
         return R.ok(true);

@@ -78,7 +78,7 @@ public class VideoController {
     }
 
     /**
-     * 视频流接口 ,默认返回5条数据
+     * 视频流接口 ,默认返回5条数据 todo 点赞数、评论数、收藏数单独封装
      */
     @PostMapping("/feed")
     public R<List<VideoVO>> feed(@RequestBody VideoFeedDTO videoFeedDTO) {
@@ -158,4 +158,3 @@ public class VideoController {
     }
 
 }
-

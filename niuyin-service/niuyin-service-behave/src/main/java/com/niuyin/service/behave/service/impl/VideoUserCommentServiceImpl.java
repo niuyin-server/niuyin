@@ -12,6 +12,7 @@ import com.niuyin.model.video.dto.VideoUserCommentPageDTO;
 import com.niuyin.service.behave.enums.VideoCommentStatus;
 import com.niuyin.service.behave.mapper.VideoUserCommentMapper;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -59,7 +60,25 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         queryWrapper.eq(VideoUserComment::getCommentId, commentId);
         queryWrapper.set(VideoUserComment::getStatus, VideoCommentStatus.DELETED.getCode());
         // 隐式删除
-        return update(queryWrapper);
+        boolean update = update(queryWrapper);
+        // 异步删除子评论
+        deleteOriginChildren(commentId);
+        return update;
+    }
+
+    /**
+     * 批量删除祖先评论下的所有子评论
+     */
+    @Async
+    public void deleteOriginChildren(Long commentId) {
+        // 先查出此评论
+        VideoUserComment byId = this.getById(commentId);
+        if (byId.getParentId() == 0 && byId.getOriginId() == 0) {
+            // 该评论为顶级评论，删除其子评论
+            LambdaUpdateWrapper<VideoUserComment> queryWrapper = new LambdaUpdateWrapper<>();
+            queryWrapper.eq(VideoUserComment::getOriginId, commentId);
+            this.remove(queryWrapper);
+        }
     }
 
     /**
@@ -92,7 +111,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     }
 
     /**
-     * 查找指定视频评论量
+     * 查找指定视频评论量 todo 对逻辑删除过的子评论进行过滤
      *
      * @param videoId
      * @return
