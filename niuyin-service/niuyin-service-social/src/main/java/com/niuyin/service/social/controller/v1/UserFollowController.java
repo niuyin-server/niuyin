@@ -98,12 +98,14 @@ public class UserFollowController {
     @GetMapping("/followFans/{userId}")
     public R<UserFollowsFansVo> followAndFans(@PathVariable("userId") Long userId) {
         UserFollowsFansVo userFollowsFansVo = new UserFollowsFansVo();
-        LambdaQueryWrapper<UserFollow> queryWrapperFans = new LambdaQueryWrapper<>();
-        queryWrapperFans.eq(UserFollow::getUserId, userId);
-        userFollowsFansVo.setFanNums(userFollowService.count(queryWrapperFans));
+        // 查询关注数量
         LambdaQueryWrapper<UserFollow> queryWrapperFollows = new LambdaQueryWrapper<>();
-        queryWrapperFollows.eq(UserFollow::getUserFollowId, userId);
+        queryWrapperFollows.eq(UserFollow::getUserId, userId);
         userFollowsFansVo.setFollowedNums(userFollowService.count(queryWrapperFollows));
+        // 查询粉丝数
+        LambdaQueryWrapper<UserFollow> queryWrapperFans = new LambdaQueryWrapper<>();
+        queryWrapperFans.eq(UserFollow::getUserFollowId, userId);
+        userFollowsFansVo.setFanNums(userFollowService.count(queryWrapperFans));
         return R.ok(userFollowsFansVo);
     }
 
