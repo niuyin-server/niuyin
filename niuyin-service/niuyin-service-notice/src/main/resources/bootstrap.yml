@@ -1,18 +1,18 @@
 server:
-  port: 9701
+  port: 9709
 spring:
   application:
     name: niuyin-notice
   profiles:
-    active: dev
+    active: pro
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
       config:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
         file-extension: yml
         shared-configs:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
