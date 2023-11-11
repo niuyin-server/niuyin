@@ -13,9 +13,10 @@ import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoSensitive;
 import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.video.domain.VideoTag;
+import com.niuyin.service.video.constants.VideoConstants;
 import com.niuyin.service.video.mapper.VideoMapper;
-import com.niuyin.service.video.service.IVideoCategoryRelationService;
-import com.niuyin.service.video.service.IVideoSensitiveService;
+import com.niuyin.service.video.service.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -34,7 +35,6 @@ import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
-import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -88,6 +88,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private RemoteSocialService remoteSocialService;
+
+    @Resource
+    private IVideoTagService videoTagService;
+
+    @Resource
+    private IVideoTagRelationService videoTagRelationService;
 
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
@@ -146,6 +152,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             videoCategoryRelation.setVideoId(video.getVideoId());
             // 再将videoCategoryRelation对象存入video_category_relation表中
             videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
+        }
+        // 视频标签处理
+        // 视频标签限制个数，五个
+        if (StringUtils.isNotNull(videoPublishDto.getVideoTags())) {
+            if (videoPublishDto.getVideoTags().length > VideoConstants.VIDEO_TAG_LIMIT) {
+                log.error("视频标签大于5个，不做处理");
+            } else {
+                videoTagRelationService.saveVideoTagRelationBatch(video.getVideoId(), videoPublishDto.getVideoTags());
+            }
         }
         // 将video对象存入video表中
         boolean save = this.save(video);
