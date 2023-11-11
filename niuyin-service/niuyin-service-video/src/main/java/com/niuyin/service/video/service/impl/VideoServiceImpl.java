@@ -12,7 +12,7 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoSensitive;
-import com.niuyin.model.video.domain.VideoUserComment;
+import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoSensitiveService;

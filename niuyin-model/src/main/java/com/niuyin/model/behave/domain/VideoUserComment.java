@@ -1,4 +1,4 @@
-package com.niuyin.model.video.domain;
+package com.niuyin.model.behave.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

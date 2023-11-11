@@ -1,4 +1,4 @@
-package com.niuyin.model.video.vo;
+package com.niuyin.model.behave.vo;
 
 import lombok.Data;
 

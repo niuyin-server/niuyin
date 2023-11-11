@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.niuyin.model.video.domain.VideoUserFavorites;
+import com.niuyin.model.behave.domain.VideoUserFavorites;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

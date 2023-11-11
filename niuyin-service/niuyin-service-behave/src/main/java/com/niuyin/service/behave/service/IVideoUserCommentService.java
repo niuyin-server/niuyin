@@ -2,8 +2,8 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.video.domain.VideoUserComment;
-import com.niuyin.model.video.dto.VideoUserCommentPageDTO;
+import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
 import java.util.List;
 
