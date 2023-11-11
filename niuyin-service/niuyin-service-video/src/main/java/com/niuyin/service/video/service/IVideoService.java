@@ -77,7 +77,7 @@ public interface IVideoService extends IService<Video> {
      *
      * @param videoId
      */
-    void deleteVideoByVideoIds(String videoId);
+    void deleteVideoByVideoId(String videoId);
 
     /**
      * 筛选大于ctime的视频数据

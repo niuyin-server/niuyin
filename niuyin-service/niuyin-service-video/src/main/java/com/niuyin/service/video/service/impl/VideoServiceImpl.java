@@ -38,6 +38,7 @@ import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -318,7 +319,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoVOList;
     }
 
-    private void viewNumIncrement(String videoId) {
+    @Async
+    public void viewNumIncrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
     }
 
@@ -340,7 +342,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Transactional
     @Override
-    public void deleteVideoByVideoIds(String videoId) {
+    public void deleteVideoByVideoId(String videoId) {
         //从视频表删除视频（单条）
         videoMapper.deleteById(videoId);
         //从视频分类表关联表删除信息（单条）
