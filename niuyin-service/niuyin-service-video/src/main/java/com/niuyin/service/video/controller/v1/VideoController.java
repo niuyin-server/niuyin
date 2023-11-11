@@ -142,7 +142,7 @@ public class VideoController {
 
     @DeleteMapping("/{videoId}")
     public R<?> deleteVideoByVideoIds(@PathVariable("videoId") String videoId) {
-        videoService.deleteVideoByVideoIds(videoId);
+        videoService.deleteVideoByVideoId(videoId);
         return null;
     }
 
