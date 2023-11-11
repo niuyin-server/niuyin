@@ -4,14 +4,16 @@ import com.niuyin.common.domain.R;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileUploadBase;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
 @Slf4j
-@ControllerAdvice  //控制器增强类
+@RestControllerAdvice  //控制器增强类
 public class ExceptionCatch {
 
     /**
@@ -21,7 +23,6 @@ public class ExceptionCatch {
      * @return
      */
     @ExceptionHandler(Exception.class)
-    @ResponseBody
     public R<?> exception(Exception e) {
         e.printStackTrace();
         log.error("catch exception:{}", e.getMessage());
@@ -35,14 +36,18 @@ public class ExceptionCatch {
      * @return
      */
     @ExceptionHandler(CustomException.class)
-    @ResponseBody
     public R<?> exception(CustomException e) {
         log.error("catch exception:{}", e.getMessage());
         return R.fail(e.getHttpCodeEnum().getCode(), e.getHttpCodeEnum().getMsg());
     }
 
-    @ExceptionHandler(value = MultipartException.class)
-    @ResponseBody
+    /**
+     * 处理文件上传异常
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MultipartException.class)
     public R<?> handleBusinessException(MaxUploadSizeExceededException e) {
         log.error("catch exception:{}", e.getMessage());
         String msg;
@@ -56,6 +61,16 @@ public class ExceptionCatch {
             msg = HttpCodeEnum.FILE_SIZE_ERROR.getMsg();
         }
         return R.fail(HttpCodeEnum.FILE_SIZE_ERROR.getCode(), msg);
+    }
+
+    /**
+     * 请求体验证异常
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error(e.getMessage(), e);
+        String message = e.getBindingResult().getFieldError().getDefaultMessage();
+        return R.fail(message);
     }
 
 }

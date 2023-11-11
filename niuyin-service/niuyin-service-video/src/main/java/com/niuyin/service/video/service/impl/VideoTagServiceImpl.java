@@ -1,0 +1,59 @@
+package com.niuyin.service.video.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.domain.R;
+import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.model.common.enums.HttpCodeEnum;
+import com.niuyin.model.video.domain.VideoTag;
+import com.niuyin.service.video.mapper.VideoTagMapper;
+import com.niuyin.service.video.service.IVideoTagService;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+/**
+ * 视频标签表(VideoTag)表服务实现类
+ *
+ * @author roydon
+ * @since 2023-11-11 16:05:09
+ */
+@Service("videoTagService")
+public class VideoTagServiceImpl extends ServiceImpl<VideoTagMapper, VideoTag> implements IVideoTagService {
+    @Resource
+    private VideoTagMapper videoTagMapper;
+
+    /**
+     * 保存标签
+     *
+     * @param videoTag
+     * @return
+     */
+    @Override
+    public VideoTag saveTag(VideoTag videoTag) {
+        // 首先查询该标签是否已存在
+        VideoTag queriedTag = this.queryByTag(videoTag.getTag().trim());
+        if (StringUtils.isNotNull(queriedTag)) {
+            // 存在此标签立即返回标签id
+            return queriedTag;
+        }
+        // 该标签不存在，执行新增逻辑
+        videoTag.setTag(videoTag.getTag().trim()); //去空格
+        this.save(videoTag);
+        return videoTag;
+    }
+
+    /**
+     * 根据tag返回标签
+     *
+     * @param tag
+     * @return
+     */
+    @Override
+    public VideoTag queryByTag(String tag) {
+        LambdaQueryWrapper<VideoTag> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoTag::getTag, tag.trim());
+        return getOne(queryWrapper);
+    }
+}
