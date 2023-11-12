@@ -28,9 +28,6 @@ public class VideoUserFavoritesController {
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
 
-//    @Resource
-//    private IVideoService videoService;
-
     @Resource
     private RemoteVideoService remoteVideoService;
 
@@ -57,16 +54,16 @@ public class VideoUserFavoritesController {
     public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
         IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
         List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
-        if (videoIds.isEmpty()){
-            return PageDataInfo.genPageData(null,0);
+        if (videoIds.isEmpty()) {
+            return PageDataInfo.genPageData(null, 0);
         }
         return PageDataInfo.genPageData(remoteVideoService.queryVideoByVideoIds(videoIds).getData(), favoritesPage.getTotal());
     }
 
     @DeleteMapping("/{videoId}")
-    public R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId){
+    public R<?> deleteVideoFavoriteRecordByVideoId(@PathVariable String videoId) {
         LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserFavorites::getVideoId,videoId);
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId);
         return R.ok(videoUserFavoritesService.removeById(videoId));
     }
 
@@ -84,5 +81,12 @@ public class VideoUserFavoritesController {
         return R.ok(videoUserFavoritesService.count(queryWrapper) > 0);
     }
 
+    /**
+     * 我的作品收藏数
+     */
+    @GetMapping("/favoriteCount")
+    public R<Long> countFavorite() {
+        return R.ok(videoUserFavoritesService.count(new LambdaQueryWrapper<VideoUserFavorites>().eq(VideoUserFavorites::getUserId, UserContext.getUserId())));
+    }
 }
 
