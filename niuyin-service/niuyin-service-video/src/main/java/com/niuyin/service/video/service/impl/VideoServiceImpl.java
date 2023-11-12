@@ -249,7 +249,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         // 小于 createTime 的5条数据
         queryWrapper.select(Video::getVideoId);
-        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 3");
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 10");
         List<Video> videoList;
         try {
             videoList = this.list(queryWrapper);
@@ -257,7 +257,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
                 // 小于 LocalDateTime.now() 的5条数据
                 queryWrapper2.select(Video::getVideoId);
-                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 3");
+                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 10");
                 videoList = this.list(queryWrapper2);
             }
             // 浏览自增1存入redis
@@ -412,4 +412,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoMapper.selectAllLikeNumForUser(userId);
     }
 
+    /**
+     * 查询用户作品数量
+     *
+     * @return
+     */
+    @Override
+    public Long queryUserVideoCount() {
+        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId,UserContext.getUserId()));
+    }
 }

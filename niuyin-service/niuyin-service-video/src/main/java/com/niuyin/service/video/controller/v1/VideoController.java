@@ -157,4 +157,12 @@ public class VideoController {
         return R.ok(videoService.getVideoLikeAllNumByUserId(userId));
     }
 
+    /**
+     * 查询我的作品数量
+     */
+    @GetMapping("/videoCount")
+    public R<Long> getUserVideoNum() {
+        return R.ok(videoService.queryUserVideoCount());
+    }
+
 }

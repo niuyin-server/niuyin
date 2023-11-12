@@ -102,4 +102,11 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     Long getVideoLikeAllNumByUserId(Long userId);
+
+    /**
+     * 查询用户作品数量
+     *
+     * @return
+     */
+    Long queryUserVideoCount();
 }
