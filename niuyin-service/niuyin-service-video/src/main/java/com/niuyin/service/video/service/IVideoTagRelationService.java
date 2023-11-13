@@ -14,6 +14,14 @@ public interface IVideoTagRelationService extends IService<VideoTagRelation> {
     /**
      * 根据视频id和标签id数组批量插入
      */
-    boolean saveVideoTagRelationBatch(String videoId,Long[] tagIds);
+    boolean saveVideoTagRelationBatch(String videoId, Long[] tagIds);
+
+    /**
+     * 查询视频标签
+     *
+     * @param videoId 视频id
+     * @return String[]
+     */
+    String[] queryVideoTags(String videoId);
 
 }

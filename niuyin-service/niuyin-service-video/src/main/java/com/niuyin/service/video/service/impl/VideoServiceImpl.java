@@ -311,6 +311,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                // 封装标签返回
+                String[] tags = videoTagRelationService.queryVideoTags(videoVO.getVideoId());
+                videoVO.setTags(tags);
                 videoVOList.add(videoVO);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -419,6 +422,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public Long queryUserVideoCount() {
-        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId,UserContext.getUserId()));
+        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId, UserContext.getUserId()));
     }
 }

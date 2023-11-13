@@ -22,6 +22,8 @@ public class VideoVO extends Video {
     private boolean weatherFavorite;
     // 是否关注
     private boolean weatherFollow;
+    // 标签数组
+    private String[] tags;
 
     // 热力值
     private Double hotScore;
