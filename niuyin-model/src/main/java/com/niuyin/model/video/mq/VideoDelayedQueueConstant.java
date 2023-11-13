@@ -1,7 +1,7 @@
 package com.niuyin.model.video.mq;
 
 /**
- * VideoDelayedQueueConstant
+ * BehaveQueueConstant
  *
  * @AUTHOR: roydon
  * @DATE: 2023/10/31
