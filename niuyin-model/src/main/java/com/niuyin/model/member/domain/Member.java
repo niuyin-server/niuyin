@@ -87,6 +87,5 @@ public class Member implements Serializable {
      */
     private LocalDateTime updateTime;
 
-
 }
 
