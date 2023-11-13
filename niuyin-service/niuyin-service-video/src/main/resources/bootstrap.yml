@@ -5,15 +5,15 @@ spring:
   application:
     name: niuyin-video
   profiles:
-    active: dev
+    active: roydon
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
       config:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         file-extension: yml
         shared-configs:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
