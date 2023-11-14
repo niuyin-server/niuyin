@@ -6,8 +6,9 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.feign.video.RemoteVideoService;
+import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoUserLike;
+import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +85,13 @@ public class VideoUserLikeController {
         return R.ok(videoUserLikeService.count(queryWrapper) > 0);
     }
 
+    /**
+     * 我的喜欢数
+     */
+    @GetMapping("/likeCount")
+    public R<Long> countFavorite() {
+        return R.ok(videoUserLikeService.count(new LambdaQueryWrapper<VideoUserLike>().eq(VideoUserLike::getUserId, UserContext.getUserId())));
+    }
 
 }
 

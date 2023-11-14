@@ -12,9 +12,9 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
-import com.niuyin.model.video.domain.VideoUserComment;
-import com.niuyin.model.video.dto.VideoUserCommentPageDTO;
-import com.niuyin.model.video.vo.VideoUserCommentVO;
+import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
+import com.niuyin.model.behave.vo.VideoUserCommentVO;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
 import org.springframework.web.bind.annotation.*;
 

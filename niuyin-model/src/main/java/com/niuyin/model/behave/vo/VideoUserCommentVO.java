@@ -1,6 +1,6 @@
-package com.niuyin.model.video.vo;
+package com.niuyin.model.behave.vo;
 
-import com.niuyin.model.video.domain.VideoUserComment;
+import com.niuyin.model.behave.domain.VideoUserComment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

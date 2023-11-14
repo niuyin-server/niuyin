@@ -77,7 +77,7 @@ public interface IVideoService extends IService<Video> {
      *
      * @param videoId
      */
-    void deleteVideoByVideoIds(String videoId);
+    void deleteVideoByVideoId(String videoId);
 
     /**
      * 筛选大于ctime的视频数据
@@ -102,4 +102,11 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     Long getVideoLikeAllNumByUserId(Long userId);
+
+    /**
+     * 查询用户作品数量
+     *
+     * @return
+     */
+    Long queryUserVideoCount();
 }

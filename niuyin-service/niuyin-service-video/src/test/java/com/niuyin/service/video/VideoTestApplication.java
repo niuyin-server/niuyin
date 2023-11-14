@@ -15,7 +15,7 @@ import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoSensitive;
 import com.niuyin.model.video.dto.VideoPublishDto;
-import com.niuyin.model.video.vo.VideoUserLikeAndFavoriteVo;
+import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.mapper.VideoSensitiveMapper;

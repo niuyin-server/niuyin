@@ -78,7 +78,7 @@ public class VideoController {
     }
 
     /**
-     * 视频流接口 ,默认返回5条数据 todo 点赞数、评论数、收藏数单独封装
+     * 视频流接口,默认返回5条数据 todo 点赞数、评论数、收藏数单独封装
      */
     @PostMapping("/feed")
     public R<List<VideoVO>> feed(@RequestBody VideoFeedDTO videoFeedDTO) {
@@ -142,7 +142,7 @@ public class VideoController {
 
     @DeleteMapping("/{videoId}")
     public R<?> deleteVideoByVideoIds(@PathVariable("videoId") String videoId) {
-        videoService.deleteVideoByVideoIds(videoId);
+        videoService.deleteVideoByVideoId(videoId);
         return null;
     }
 
@@ -155,6 +155,14 @@ public class VideoController {
     @GetMapping("/likeNums/{userId}")
     public R<Long> getVideoLikeAllNumByUserId(@PathVariable("userId") Long userId) {
         return R.ok(videoService.getVideoLikeAllNumByUserId(userId));
+    }
+
+    /**
+     * 查询我的作品数量
+     */
+    @GetMapping("/videoCount")
+    public R<Long> getUserVideoNum() {
+        return R.ok(videoService.queryUserVideoCount());
     }
 
 }

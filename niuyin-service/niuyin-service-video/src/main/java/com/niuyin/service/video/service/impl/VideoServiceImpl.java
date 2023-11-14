@@ -12,10 +12,11 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoSensitive;
-import com.niuyin.model.video.domain.VideoUserComment;
+import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.video.domain.VideoTag;
+import com.niuyin.service.video.constants.VideoConstants;
 import com.niuyin.service.video.mapper.VideoMapper;
-import com.niuyin.service.video.service.IVideoCategoryRelationService;
-import com.niuyin.service.video.service.IVideoSensitiveService;
+import com.niuyin.service.video.service.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -34,10 +35,10 @@ import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
-import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -88,6 +89,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private RemoteSocialService remoteSocialService;
+
+    @Resource
+    private IVideoTagService videoTagService;
+
+    @Resource
+    private IVideoTagRelationService videoTagRelationService;
 
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
@@ -146,6 +153,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             videoCategoryRelation.setVideoId(video.getVideoId());
             // 再将videoCategoryRelation对象存入video_category_relation表中
             videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
+        }
+        // 视频标签处理
+        // 视频标签限制个数，五个
+        if (StringUtils.isNotNull(videoPublishDto.getVideoTags())) {
+            if (videoPublishDto.getVideoTags().length > VideoConstants.VIDEO_TAG_LIMIT) {
+                log.error("视频标签大于5个，不做处理");
+            } else {
+                videoTagRelationService.saveVideoTagRelationBatch(video.getVideoId(), videoPublishDto.getVideoTags());
+            }
         }
         // 将video对象存入video表中
         boolean save = this.save(video);
@@ -233,7 +249,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         // 小于 createTime 的5条数据
         queryWrapper.select(Video::getVideoId);
-        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 3");
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 10");
         List<Video> videoList;
         try {
             videoList = this.list(queryWrapper);
@@ -241,7 +257,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
                 // 小于 LocalDateTime.now() 的5条数据
                 queryWrapper2.select(Video::getVideoId);
-                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 3");
+                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 10");
                 videoList = this.list(queryWrapper2);
             }
             // 浏览自增1存入redis
@@ -303,7 +319,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoVOList;
     }
 
-    private void viewNumIncrement(String videoId) {
+    @Async
+    public void viewNumIncrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
     }
 
@@ -325,7 +342,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Transactional
     @Override
-    public void deleteVideoByVideoIds(String videoId) {
+    public void deleteVideoByVideoId(String videoId) {
         //从视频表删除视频（单条）
         videoMapper.deleteById(videoId);
         //从视频分类表关联表删除信息（单条）
@@ -395,4 +412,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoMapper.selectAllLikeNumForUser(userId);
     }
 
+    /**
+     * 查询用户作品数量
+     *
+     * @return
+     */
+    @Override
+    public Long queryUserVideoCount() {
+        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId,UserContext.getUserId()));
+    }
 }

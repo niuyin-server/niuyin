@@ -1,4 +1,4 @@
-package com.niuyin.model.video.domain;
+package com.niuyin.model.behave.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -11,32 +11,38 @@ import java.time.LocalDateTime;
 import java.io.Serializable;
 
 /**
- * 点赞表(VideoUserLike)实体类
+ * 视频收藏表(VideoUserFavorites)实体类
  *
  * @author lzq
- * @since 2023-10-30 14:32:59
+ * @since 2023-10-31 15:57:38
  */
 @Data
-@TableName("video_user_like")
-@ApiModel("视频点赞表")
-public class VideoUserLike implements Serializable {
-    private static final long serialVersionUID = 366516787359335038L;
+@TableName("video_user_favorites")
+@ApiModel("用户视频收藏表")
+public class VideoUserFavorites implements Serializable {
+    private static final long serialVersionUID = -50448230889868246L;
     /**
-     * 点赞表id，记录总数即为点赞总数
+     * 收藏表id，总数即为s
      */
-    @TableId(value = "id", type = IdType.AUTO)
-    @ApiModelProperty("点赞表id")
+    @ApiModelProperty("收藏表id")
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
+
+
     /**
      * 视频id
      */
     @ApiModelProperty("视频id")
     private String videoId;
+
+
     /**
      * 用户id
      */
     @ApiModelProperty("用户id")
     private Long userId;
+
+
     /**
      * 创建时间
      */

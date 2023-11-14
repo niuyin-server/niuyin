@@ -10,7 +10,7 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.social.UserFollow;
-import com.niuyin.model.video.vo.UserFollowsFansVo;
+import com.niuyin.model.behave.vo.UserFollowsFansVo;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.web.bind.annotation.*;
 

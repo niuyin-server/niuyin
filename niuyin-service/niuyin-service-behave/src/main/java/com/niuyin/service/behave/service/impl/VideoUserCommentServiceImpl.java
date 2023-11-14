@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
-import com.niuyin.model.video.domain.VideoUserComment;
-import com.niuyin.model.video.dto.VideoUserCommentPageDTO;
+import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
 import com.niuyin.service.behave.enums.VideoCommentStatus;
 import com.niuyin.service.behave.mapper.VideoUserCommentMapper;

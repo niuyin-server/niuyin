@@ -3,7 +3,6 @@ package com.niuyin.feign.social;
 import com.niuyin.feign.social.fallback.RemoteSocialServiceFallback;
 import com.niuyin.common.constant.ServiceNameConstants;
 import com.niuyin.common.domain.R;
-import com.niuyin.model.video.vo.UserFollowsFansVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

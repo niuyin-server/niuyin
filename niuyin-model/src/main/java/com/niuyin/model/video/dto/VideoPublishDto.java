@@ -13,6 +13,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class VideoPublishDto extends Video {
 
-    //分类名称
+    // 分类名称
     private Long categoryId;
+
+    // 视频标签
+    private Long[] videoTags;
 }

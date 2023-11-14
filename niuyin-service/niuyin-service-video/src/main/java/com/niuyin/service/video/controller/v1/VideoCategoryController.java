@@ -12,7 +12,7 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.behave.RemoteBehaveService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoUserComment;
+import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
 import com.niuyin.model.video.vo.VideoCategoryVo;
 import com.niuyin.model.video.vo.VideoVO;
