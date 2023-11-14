@@ -9,16 +9,10 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>niuyin-service</artifactId>
+    <artifactId>niuyin-tools</artifactId>
     <packaging>pom</packaging>
-
     <modules>
-        <module>niuyin-service-member</module>
-        <module>niuyin-service-video</module>
-        <module>niuyin-service-search</module>
-        <module>niuyin-service-social</module>
-        <module>niuyin-service-behave</module>
-        <module>niuyin-service-notice</module>
+        <module>niuyin-tools-es</module>
     </modules>
 
     <dependencies>
@@ -32,21 +26,9 @@
             <artifactId>niuyin-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.niuyin</groupId>
-            <artifactId>niuyin-feign</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
     </dependencies>
 

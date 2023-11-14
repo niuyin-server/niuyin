@@ -7,22 +7,25 @@
         FROM video
         WHERE video_id = #{videoId}
     </select>
+
     <select id="getUserLikesVideos" resultType="com.niuyin.model.video.domain.Video">
         SELECT v.video_title, v.video_desc, v.video_url, v.view_num, v.like_num, v.favorites_num
         FROM video v
                  JOIN video_user_like vul ON v.video_id = vul.video_id
         WHERE vul.user_id = #{userId}
         ORDER BY v.create_time DESC
-            LIMIT #{pageNum}, #{pageSize}
+        LIMIT #{pageNum}, #{pageSize}
     </select>
+
     <select id="getUserFavoritesVideos" resultType="com.niuyin.model.video.domain.Video">
         SELECT v.video_title, v.video_desc, v.video_url, v.view_num, v.like_num, v.favorites_num
         FROM video v
                  JOIN video_user_favorites vuf ON v.video_id = vuf.video_id
         WHERE vuf.user_id = #{userId}
         ORDER BY v.create_time DESC
-            LIMIT #{pageNum}, #{pageSize}
+        LIMIT #{pageNum}, #{pageSize}
     </select>
+
     <select id="selectAllLikeNumForUser" parameterType="Long" resultType="Long">
         select sum(like_num) from video v
         where v.user_id=#{userId}
