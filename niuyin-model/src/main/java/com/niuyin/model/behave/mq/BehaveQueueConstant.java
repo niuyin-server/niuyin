@@ -19,6 +19,6 @@ public class BehaveQueueConstant {
     /**
      * 绑定的routing key
      */
-    public static final String CREATE_ROUTING_KEY = "create";
+    public static final String CREATE_ROUTING_KEY = "favorite.create";
 
 }
