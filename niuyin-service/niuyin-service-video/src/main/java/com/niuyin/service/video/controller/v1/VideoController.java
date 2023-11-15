@@ -71,6 +71,7 @@ public class VideoController {
                 videoVO.setUserNickName(user.getNickName());
                 videoVO.setUserAvatar(user.getAvatar());
             }
+            // todo 是否关注
             videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
             videoVOList.add(videoVO);
         });
