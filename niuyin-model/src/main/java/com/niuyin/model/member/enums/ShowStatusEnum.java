@@ -16,7 +16,6 @@ public enum ShowStatusEnum {
     SHOW("0", "展示"),
     HIDE("1", "隐藏"),
     ;
-
     private final String code;
     private final String info;
 

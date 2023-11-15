@@ -5,5 +5,18 @@
     <select id="selectAllLikeNumForUser">
 
     </select>
+    <select id="selectPersonLikePage" resultType="com.niuyin.model.video.domain.Video">
+        SELECT v.*
+        FROM video v
+                 JOIN (SELECT video_id
+                       FROM video_user_like
+                       WHERE user_id = #{userId} LIMIT #{pageSize}
+                       OFFSET #{pageNum}) AS liked_videos
+                      ON v.video_id = liked_videos.video_id;
+    </select>
+    <select id="selectPersonLikeShowStatus" resultType="com.niuyin.model.member.domain.MemberInfo">
+        select mi.like_show_status  from member_info mi where mi.user_id = #{userId}
+    </select>
+
 </mapper>
 
