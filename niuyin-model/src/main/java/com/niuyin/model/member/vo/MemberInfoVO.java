@@ -1,5 +1,6 @@
 package com.niuyin.model.member.vo;
 
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,18 +16,9 @@ import java.time.LocalDateTime;
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MemberInfoVO extends MemberInfo {
+public class MemberInfoVO extends Member {
 
-    /**
-     * 用户昵称
-     */
-    private String nickName;
-
-    private String avatar;
-
-    private String gender;
-
-    // 加入时间
-    private LocalDateTime joinTime;
+    // 用户详情
+    private MemberInfo memberInfo;
 
 }

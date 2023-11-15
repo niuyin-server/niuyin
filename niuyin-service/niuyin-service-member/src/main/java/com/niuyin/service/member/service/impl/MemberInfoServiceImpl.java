@@ -30,23 +30,14 @@ public class MemberInfoServiceImpl extends ServiceImpl<MemberInfoMapper, MemberI
     private IMemberService memberService;
 
     /**
-     * 查询我的信息详情
+     * 通过userId查询用户详情
      *
+     * @param userId
      * @return
      */
     @Override
-    public MemberInfoVO queryMemberInfo() {
-        LambdaQueryWrapper<MemberInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(MemberInfo::getUserId, UserContext.getUserId());
-        MemberInfo memberInfo = getOne(queryWrapper);
-        MemberInfoVO memberInfoVO = BeanCopyUtils.copyBean(memberInfo, MemberInfoVO.class);
-        // 将用户信息封装
-        Member member = memberService.queryById(UserContext.getUserId());
-        memberInfoVO.setNickName(member.getNickName());
-        memberInfoVO.setAvatar(member.getAvatar());
-        memberInfoVO.setGender(member.getSex());
-        memberInfoVO.setJoinTime(member.getCreateTime());
-        return memberInfoVO;
+    public MemberInfo queryInfoByUserId(Long userId) {
+        return memberInfoMapper.selectInfoByUserId(userId);
     }
 
     /**

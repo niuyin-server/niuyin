@@ -7,11 +7,15 @@ import com.niuyin.common.domain.R;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.EmailUtils;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
+import com.niuyin.model.member.domain.MemberInfo;
+import com.niuyin.model.member.vo.MemberInfoVO;
 import com.niuyin.service.member.constants.QiniuUserOssConstants;
 import com.niuyin.service.member.constants.UserCacheConstants;
+import com.niuyin.service.member.service.IMemberInfoService;
 import com.niuyin.service.member.service.IMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.dto.LoginUserDTO;
@@ -47,6 +51,9 @@ public class MemberController {
 
     @Resource
     private FileStorageService fileStorageService;
+
+    @Resource
+    private IMemberInfoService memberInfoService;
 
     /**
      * 登录
@@ -116,7 +123,7 @@ public class MemberController {
      */
     @ApiOperation("获取用户信息")
     @GetMapping("/userinfo")
-    public R<Member> userInfo() {
+    public R<MemberInfoVO> userInfo() {
         Long userId = UserContext.getUser().getUserId();
         if (StringUtils.isNull(userId)) {
             R.fail(HttpCodeEnum.NEED_LOGIN.getCode(), "请先登录");
@@ -127,18 +134,24 @@ public class MemberController {
     /**
      * 从缓存获取用户详情
      */
-    private Member getUserFromCache(Long userId) {
+    private MemberInfoVO getUserFromCache(Long userId) {
         Member userCache = redisService.getCacheObject(UserCacheConstants.USER_INFO_PREFIX + userId);
+        // 用户详情
+        MemberInfo memberInfo = memberInfoService.queryInfoByUserId(userId);
         if (StringUtils.isNotNull(userCache)) {
-            return userCache;
+            MemberInfoVO memberInfoVO = BeanCopyUtils.copyBean(userCache, MemberInfoVO.class);
+            memberInfoVO.setMemberInfo(memberInfo);
+            return memberInfoVO;
         }
         Member user = memberService.queryById(userId);
         user.setPassword(null);
         user.setSalt(null);
+        MemberInfoVO memberInfoVO = BeanCopyUtils.copyBean(user, MemberInfoVO.class);
+        memberInfoVO.setMemberInfo(memberInfo);
         // 设置缓存
         redisService.setCacheObject(UserCacheConstants.USER_INFO_PREFIX + userId, user);
         redisService.expire(UserCacheConstants.USER_INFO_PREFIX + userId, UserCacheConstants.USER_INFO_EXPIRE_TIME, TimeUnit.SECONDS);
-        return user;
+        return memberInfoVO;
     }
 
     /**
@@ -149,7 +162,7 @@ public class MemberController {
      */
     @ApiOperation("修改密码")
     @PostMapping("/updatepass")
-    public R<?> updatePass(@RequestBody UpdatePasswordDTO dto) {
+    public R<Boolean> updatePass(@RequestBody UpdatePasswordDTO dto) {
         return R.ok(memberService.updatePass(dto));
     }
 
@@ -178,7 +191,6 @@ public class MemberController {
             throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
         }
     }
-
 
 
 }

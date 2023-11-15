@@ -91,7 +91,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             recordLoginUserInfo(dbUser.getUserId());
             return JwtUtil.getToken(dbUser.getUserId());
         } else {
-            throw new CustomException(USER_NOT_EXISTS);
+            throw new CustomException(PASSWORD_ERROR);
         }
     }
 

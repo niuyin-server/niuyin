@@ -11,6 +11,13 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2023-11-12 22:26:25
  */
 @Mapper
-public interface MemberInfoMapper extends BaseMapper<MemberInfo>{
+public interface MemberInfoMapper extends BaseMapper<MemberInfo> {
 
+    /**
+     * 根据userId查询
+     *
+     * @param userId
+     * @return
+     */
+    MemberInfo selectInfoByUserId(Long userId);
 }
