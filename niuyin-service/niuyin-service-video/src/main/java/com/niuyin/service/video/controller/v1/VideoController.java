@@ -165,4 +165,16 @@ public class VideoController {
         return R.ok(videoService.queryUserVideoCount());
     }
 
+    /**
+     * 查询用户的作品，点赞作品，和收藏作品
+     *
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("/personVideoPage")
+    public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
+        IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
+        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+    }
+
 }

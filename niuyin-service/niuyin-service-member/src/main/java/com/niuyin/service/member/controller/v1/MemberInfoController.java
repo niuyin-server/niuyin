@@ -36,6 +36,8 @@ public class MemberInfoController {
     public R<?> uploadBackImage(@RequestParam("file") MultipartFile file) {
         memberInfoService.uploadBackGround(file);
         return R.ok();
+
+
     }
 
 }

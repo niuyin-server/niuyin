@@ -109,4 +109,14 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     Long queryUserVideoCount();
+
+    /**
+     * 查询用户的作品，点赞作品，和收藏作品
+     *
+     * @param pageDto
+     * @return
+     */
+    IPage<Video> queryMemberVideoPage(VideoPageDto pageDto);
+
+
 }
