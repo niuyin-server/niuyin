@@ -24,6 +24,7 @@ import com.niuyin.service.member.constants.UserCacheConstants;
 import com.niuyin.service.member.mapper.MemberMapper;
 import com.niuyin.service.member.service.IUserSensitiveService;
 import com.niuyin.service.member.service.IMemberService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -35,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.niuyin.model.behave.mq.BehaveQueueConstant.BEHAVE_EXCHANGE;
+import static com.niuyin.model.behave.mq.BehaveQueueConstant.CREATE_ROUTING_KEY;
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 
 /**
@@ -59,6 +62,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Resource
     RemoteVideoService remoteVideoService;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 通过ID查询单条数据
@@ -138,7 +144,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         user.setSalt(fastUUID);
         user.setNickName(IdUtils.shortUUID());
         user.setCreateTime(LocalDateTime.now());
-        return this.save(user);
+        boolean save = this.save(user);
+        //如果保存成功，则向mq发送消息，发送内容为用户的id
+        if (save) {
+            String msg = user.getUserId().toString();
+            rabbitTemplate.convertAndSend(BEHAVE_EXCHANGE, CREATE_ROUTING_KEY, msg);
+            return save;
+        } else {
+            throw new CustomException(null);
+        }
     }
 
     private boolean userNameExist(String username) {

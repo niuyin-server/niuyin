@@ -425,4 +425,22 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public Long queryUserVideoCount() {
         return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId, UserContext.getUserId()));
     }
+
+    /**
+     * 查询用户的作品，点赞作品，和收藏作品
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public IPage<Video> queryMemberVideoPage(VideoPageDto pageDto) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId())
+                .eq(Video::getDelFlag, 0);
+        queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
+        queryWrapper.orderByDesc(Video::getCreateTime);
+        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    }
+
+
 }
