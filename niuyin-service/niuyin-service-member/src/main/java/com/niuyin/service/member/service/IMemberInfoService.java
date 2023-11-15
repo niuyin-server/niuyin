@@ -14,11 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 public interface IMemberInfoService extends IService<MemberInfo> {
 
     /**
-     * 查询我的信息详情
+     * 通过userId查询用户详情
      *
+     * @param userId
      * @return
      */
-    MemberInfoVO queryMemberInfo();
+    MemberInfo queryInfoByUserId(Long userId);
 
     /**
      * 上传背景图片

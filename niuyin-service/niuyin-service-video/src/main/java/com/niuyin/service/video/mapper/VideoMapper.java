@@ -15,13 +15,36 @@ import java.util.List;
 @Mapper
 public interface VideoMapper extends BaseMapper<Video> {
 
+    /**
+     *
+     * @param videoId
+     * @return
+     */
     String getVideoUrlByVideoId(String videoId);
 
+    /**
+     *
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     List<Video> getUserLikesVideos(Long userId, int pageNum, int pageSize);
 
+    /**
+     *
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     List<Video> getUserFavoritesVideos(Long userId, int pageNum, int pageSize);
 
-
+    /**
+     *
+     * @param userId
+     * @return
+     */
     Long selectAllLikeNumForUser(Long userId);
 
 }

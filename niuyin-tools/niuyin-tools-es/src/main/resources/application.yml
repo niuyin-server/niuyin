@@ -1,0 +1,39 @@
+server:
+  port: 10001
+
+spring:
+  application:
+    name: niuyin-tools-es
+  datasource:
+    url: jdbc:mysql://106.14.105.101:3306/niuyin_short_video_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: roydon
+    password: roydon#Mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: 8.132.211.245
+    port: 6379
+    password: roydon#Redis
+    database: 14
+  data:
+    mongodb:
+      host: 47.120.41.21
+      port: 27017
+      username: qiniu
+      password: qiniuMongo
+      database: qiniu-video
+
+# mybatis配置
+mybatis-plus:
+  type-aliases-package: com.niuyin.**.domain
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+elasticsearch:
+  host: 106.14.105.101
+  port: 9200
+
+logging:
+  level:
+    com.niuyin: debug
+    org.springframework: warn

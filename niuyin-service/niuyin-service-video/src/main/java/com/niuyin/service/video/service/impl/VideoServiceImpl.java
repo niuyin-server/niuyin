@@ -234,6 +234,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, pageDto.getUserId());
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
+        queryWrapper.orderByDesc(Video::getCreateTime);
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 
@@ -311,6 +312,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                // 封装标签返回
+                String[] tags = videoTagRelationService.queryVideoTags(videoVO.getVideoId());
+                videoVO.setTags(tags);
                 videoVOList.add(videoVO);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -419,6 +423,24 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public Long queryUserVideoCount() {
-        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId,UserContext.getUserId()));
+        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId, UserContext.getUserId()));
     }
+
+    /**
+     * 查询用户的作品
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public IPage<Video> queryMemberVideoPage(VideoPageDto pageDto) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId())
+                .eq(Video::getDelFlag, 0);
+        queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
+        queryWrapper.orderByDesc(Video::getCreateTime);
+        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    }
+
+
 }

@@ -22,6 +22,7 @@
         <module>niuyin-common</module>
         <module>niuyin-model</module>
         <module>niuyin-starter</module>
+        <module>niuyin-tools</module>
     </modules>
 
     <properties>

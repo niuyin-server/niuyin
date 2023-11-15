@@ -71,6 +71,7 @@ public class VideoController {
                 videoVO.setUserNickName(user.getNickName());
                 videoVO.setUserAvatar(user.getAvatar());
             }
+            // todo 是否关注
             videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
             videoVOList.add(videoVO);
         });
@@ -163,6 +164,18 @@ public class VideoController {
     @GetMapping("/videoCount")
     public R<Long> getUserVideoNum() {
         return R.ok(videoService.queryUserVideoCount());
+    }
+
+    /**
+     * todo 查询用户的作品，整到userpage 第126行
+     *
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("/personVideoPage")
+    public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
+        IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
+        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
     }
 
 }

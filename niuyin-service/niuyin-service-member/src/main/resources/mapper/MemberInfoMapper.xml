@@ -2,4 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.member.mapper.MemberInfoMapper">
 
+    <resultMap type="MemberInfo" id="MemberInfoResult">
+        <id property="infoId" column="info_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="backImage" column="back_image"/>
+        <result property="description" column="description"/>
+        <result property="birthday" column="birthday"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="region" column="region"/>
+        <result property="adcode" column="adcode"/>
+        <result property="campus" column="campus"/>
+        <result property="likeShowStatus" column="likeShowStatus"/>
+        <result property="favoriteShowStatus" column="favoriteShowStatus"/>
+    </resultMap>
+
+    <sql id="MemberInfoVo">
+        select m.info_id,
+               m.user_id,
+               m.back_image,
+               m.description,
+               m.birthday,
+               m.province,
+               m.city,
+               m.region,
+               m.adcode,
+               m.campus,
+               m.like_show_status,
+               m.favorite_show_status
+        from member_info m
+    </sql>
+
+    <select id="selectInfoByUserId" parameterType="long" resultType="MemberInfo">
+        <include refid="MemberInfoVo"/>
+        where 1
+        <if test="userId != null and userId != 0">
+            AND m.user_id = #{userId}
+        </if>
+    </select>
 </mapper>
