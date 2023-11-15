@@ -79,15 +79,5 @@ public class MemberInfo implements Serializable {
      */
     private String favoriteShowStatus;
 
-    /**
-     * 喜欢视频向外展示状态：0展示1隐藏
-     */
-    private String likeShowStatus;
-
-    /**
-     * 收藏视频向外展示状态：0展示1隐藏
-     */
-    private String favoriteShowStatus;
-
 }
 
