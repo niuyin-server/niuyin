@@ -8,6 +8,9 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserLike;
+import com.niuyin.model.member.domain.MemberInfo;
+import com.niuyin.model.member.enums.ShowStatusEnum;
+import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +36,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 
     @Resource
     private RedisService redisService;
+
+    @Resource
+    private VideoUserLikeMapper videoUserLikeMapper;
 
     /**
      * 向视频点赞表插入点赞信息
@@ -91,6 +98,32 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserLike::getUserId, UserContext.getUserId());
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    }
+
+    /**
+     * 查询用户的点赞列表
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public List<Video> queryPersonLikePage(VideoPageDto pageDto) {
+        //判断当查询的时否为登录用户自己的主页
+        List<Video> videos;
+        if (pageDto.getUserId().equals(UserContext.getUserId())) {
+            videos = videoUserLikeMapper.selectPersonLikePage(
+                    pageDto.getUserId(), pageDto.getPageSize(), (pageDto.getPageNum() - 1) * pageDto.getPageNum());
+        } else {
+            //判断该用户的点赞列表是否对外展示
+            MemberInfo memberInfo = videoUserLikeMapper.selectPersonLikeShowStatus(pageDto.getUserId());
+            if (memberInfo.getLikeShowStatus().equals(ShowStatusEnum.HIDE.getCode())) {
+                return new ArrayList<>();
+            } else {
+                videos = videoUserLikeMapper.selectPersonLikePage(
+                        pageDto.getUserId(), pageDto.getPageSize(), (pageDto.getPageNum() - 1) * pageDto.getPageNum());
+            }
+        }
+        return videos;
     }
 
 }

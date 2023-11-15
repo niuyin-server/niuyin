@@ -93,5 +93,17 @@ public class VideoUserLikeController {
         return R.ok(videoUserLikeService.count(new LambdaQueryWrapper<VideoUserLike>().eq(VideoUserLike::getUserId, UserContext.getUserId())));
     }
 
+    /**
+     * 查询用户的点赞列表
+     *
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("/personLikePage")
+    public PageDataInfo personLikePage(@RequestBody VideoPageDto pageDto) {
+        List<Video> likeIPage = videoUserLikeService.queryPersonLikePage(pageDto);
+        return PageDataInfo.genPageData(likeIPage, likeIPage.size());
+    }
+
 }
 
