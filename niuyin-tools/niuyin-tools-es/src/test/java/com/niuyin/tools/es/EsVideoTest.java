@@ -48,38 +48,38 @@ public class EsVideoTest {
     @DisplayName("所有视频同步到es")
     public void init() throws Exception {
 
-        List<Video> videos = videoMapper.selectList(null);
-        List<VideoSearchVO> searchVOS = new ArrayList<>();
-        videos.forEach(v -> {
-            VideoSearchVO videoSearchVO = new VideoSearchVO();
-            videoSearchVO.setVideoId(v.getVideoId());
-            videoSearchVO.setVideoTitle(v.getVideoTitle());
-            // localdatetime转换为date
-            videoSearchVO.setPublishTime(Date.from(v.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-            videoSearchVO.setCoverImage(v.getCoverImage());
-            videoSearchVO.setVideoUrl(v.getVideoUrl());
-            videoSearchVO.setUserId(v.getUserId());
-            // 获取用户信息
-            Member userCache = redisService.getCacheObject("member:userinfo:" + v.getUserId());
-            if (StringUtils.isNotNull(userCache)) {
-                videoSearchVO.setUserNickName(userCache.getNickName());
-                videoSearchVO.setUserAvatar(userCache.getAvatar());
-            } else {
-//                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-                videoSearchVO.setUserNickName("-");
-                videoSearchVO.setUserAvatar("-");
-            }
-            searchVOS.add(videoSearchVO);
-        });
-        //2.批量导入到es索引库
-        BulkRequest bulkRequest = new BulkRequest("search_video");
-
-        for (VideoSearchVO vo : searchVOS) {
-            IndexRequest indexRequest = new IndexRequest().id(vo.getVideoId()).source(JSON.toJSONString(vo), XContentType.JSON);
-            //批量添加数据
-            bulkRequest.add(indexRequest);
-        }
-        restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+//        List<Video> videos = videoMapper.selectList(null);
+//        List<VideoSearchVO> searchVOS = new ArrayList<>();
+//        videos.forEach(v -> {
+//            VideoSearchVO videoSearchVO = new VideoSearchVO();
+//            videoSearchVO.setVideoId(v.getVideoId());
+//            videoSearchVO.setVideoTitle(v.getVideoTitle());
+//            // localdatetime转换为date
+//            videoSearchVO.setPublishTime(Date.from(v.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+//            videoSearchVO.setCoverImage(v.getCoverImage());
+//            videoSearchVO.setVideoUrl(v.getVideoUrl());
+//            videoSearchVO.setUserId(v.getUserId());
+//            // 获取用户信息
+//            Member userCache = redisService.getCacheObject("member:userinfo:" + v.getUserId());
+//            if (StringUtils.isNotNull(userCache)) {
+//                videoSearchVO.setUserNickName(userCache.getNickName());
+//                videoSearchVO.setUserAvatar(userCache.getAvatar());
+//            } else {
+////                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
+//                videoSearchVO.setUserNickName("-");
+//                videoSearchVO.setUserAvatar("-");
+//            }
+//            searchVOS.add(videoSearchVO);
+//        });
+//        //2.批量导入到es索引库
+//        BulkRequest bulkRequest = new BulkRequest("search_video");
+//
+//        for (VideoSearchVO vo : searchVOS) {
+//            IndexRequest indexRequest = new IndexRequest().id(vo.getVideoId()).source(JSON.toJSONString(vo), XContentType.JSON);
+//            //批量添加数据
+//            bulkRequest.add(indexRequest);
+//        }
+//        restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
 
     }
 
