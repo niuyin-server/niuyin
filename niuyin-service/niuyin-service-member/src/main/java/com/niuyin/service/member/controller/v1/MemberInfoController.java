@@ -1,14 +1,11 @@
 package com.niuyin.service.member.controller.v1;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.MemberInfo;
-import com.niuyin.model.member.vo.MemberInfoVO;
 import com.niuyin.service.member.constants.QiniuUserOssConstants;
 import com.niuyin.service.member.service.IMemberInfoService;
 import com.niuyin.starter.file.service.FileStorageService;
