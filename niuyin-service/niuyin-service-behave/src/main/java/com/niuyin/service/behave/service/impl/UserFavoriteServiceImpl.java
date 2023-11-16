@@ -24,22 +24,21 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
     private UserFavoriteMapper userFavoriteMapper;
 
 
+
     /**
-     * 用户新家收藏夹
-     *
      * @param userFavorite
      * @return
      */
     @Override
     public boolean saveFavorite(UserFavorite userFavorite) {
-        //将传过来的参数copy到要在数据库存储的对象中
+
         UserFavorite userFavoriteDb = BeanCopyUtils.copyBean(userFavorite, UserFavorite.class);
-        //从枚举类中获取默认的删除标志参数
         userFavoriteDb.setDelFlag(UserFavoriteStatus.NORMAL.getCode());
-        //设置创建时间
         userFavoriteDb.setCreateTime(LocalDateTime.now());
         boolean save = this.save(userFavoriteDb);
-        //todo  新建收藏夹保存成功之后，将消息发送到mq
+//        if (save){
+//
+//        }
         return save;
     }
 }
