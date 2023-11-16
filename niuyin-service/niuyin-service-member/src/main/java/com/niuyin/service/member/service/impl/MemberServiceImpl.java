@@ -16,12 +16,14 @@ import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.domain.UserSensitive;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
 import com.niuyin.service.member.constants.UserCacheConstants;
 import com.niuyin.service.member.mapper.MemberMapper;
+import com.niuyin.service.member.service.IMemberInfoService;
 import com.niuyin.service.member.service.IUserSensitiveService;
 import com.niuyin.service.member.service.IMemberService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -62,6 +64,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Resource
     RemoteVideoService remoteVideoService;
+
+    @Resource
+    IMemberInfoService memberInfoService;
 
     @Resource
     private RabbitTemplate rabbitTemplate;
@@ -149,6 +154,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if (save) {
             String msg = user.getUserId().toString();
             rabbitTemplate.convertAndSend(BEHAVE_EXCHANGE, CREATE_ROUTING_KEY, msg);
+            // 创建用户详情表member_info
+            MemberInfo memberInfo = new MemberInfo();
+            memberInfo.setUserId(user.getUserId());
+            memberInfoService.save(memberInfo);
             return save;
         } else {
             throw new CustomException(null);

@@ -29,5 +29,12 @@ public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
     List<Video> selectPersonLikePage(Long userId, Integer pageSize, Integer pageNum);
 
     MemberInfo selectPersonLikeShowStatus(Long userId);
+
+    /**
+     * 通过videoId获取视频
+     * @param videoId
+     * @return
+     */
+    Video selectVideoByVideoId(String videoId);
 }
 

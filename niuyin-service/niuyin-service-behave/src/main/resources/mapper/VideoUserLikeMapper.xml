@@ -2,6 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.behave.mapper.VideoUserLikeMapper">
 
+    <resultMap type="Video" id="VideoResult">
+        <id property="videoId" column="video_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="videoTitle" column="video_title"/>
+        <result property="videoDesc" column="video_desc"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="viewNum" column="view_num"/>
+        <result property="likeNum" column="like_num"/>
+        <result property="favoritesNum" column="favorites_num"/>
+        <result property="createTime" column="create_time"/>
+        <result property="coverImage" column="cover_image"/>
+    </resultMap>
+
+    <sql id="VideoVo">
+        select v.video_id,
+               v.user_id,
+               v.video_title,
+               v.video_desc,
+               v.video_url,
+               v.view_num,
+               v.like_num,
+               v.favorites_num,
+               v.create_time,
+               v.cover_image
+        from video v
+    </sql>
+
     <select id="selectAllLikeNumForUser">
 
     </select>
@@ -10,12 +37,19 @@
         FROM video v
                  JOIN (SELECT video_id
                        FROM video_user_like
-                       WHERE user_id = #{userId} LIMIT #{pageSize}
-                       OFFSET #{pageNum}) AS liked_videos
+                       WHERE user_id = #{userId}
+                       LIMIT #{pageSize} OFFSET #{pageNum}) AS liked_videos
                       ON v.video_id = liked_videos.video_id;
     </select>
     <select id="selectPersonLikeShowStatus" resultType="com.niuyin.model.member.domain.MemberInfo">
-        select mi.like_show_status  from member_info mi where mi.user_id = #{userId}
+        select mi.like_show_status
+        from member_info mi
+        where mi.user_id = #{userId}
+    </select>
+    <!--    通过videoId获取视频-->
+    <select id="selectVideoByVideoId" resultType="com.niuyin.model.video.domain.Video">
+        <include refid="VideoVo"/>
+        where v.video_id = #{videoId}
     </select>
 
 </mapper>

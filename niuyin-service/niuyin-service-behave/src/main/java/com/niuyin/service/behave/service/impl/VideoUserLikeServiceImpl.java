@@ -1,5 +1,6 @@
 package com.niuyin.service.behave.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,14 +9,19 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserLike;
+import com.niuyin.model.common.enums.NoticeTypeEnum;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.enums.ShowStatusEnum;
+import com.niuyin.model.notice.domain.Notice;
+import com.niuyin.model.notice.enums.ReceiveFlag;
+import com.niuyin.model.notice.mq.NoticeDirectConstant;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +29,11 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
+import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
+import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
+import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;
 
 /**
  * 点赞表(VideoUserLike)表服务实现类
@@ -39,6 +50,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 
     @Resource
     private VideoUserLikeMapper videoUserLikeMapper;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 向视频点赞表插入点赞信息
@@ -59,12 +73,44 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             videoUserLike.setCreateTime(LocalDateTime.now());
             // 将本条点赞信息存储到redis
             likeNumIncrement(videoId);
+            // 发送消息，创建通知
+            sendNoticeWithLikeVideo(videoId, userId);
             return this.save(videoUserLike);
         } else {
             //将本条点赞信息从redis
             likeNumDecrement(videoId);
             return this.remove(queryWrapper);
         }
+    }
+
+    /**
+     * 发送用户点赞视频的消息
+     *
+     * @param videoId
+     * @param operateUserId
+     */
+    private void sendNoticeWithLikeVideo(String videoId, Long operateUserId) {
+        // 根据视频获取发布者id
+        Video video = videoUserLikeMapper.selectVideoByVideoId(videoId);
+        if (StringUtils.isNull(video)) {
+            return;
+        }
+        if(operateUserId.equals(video.getUserId())){
+            return;
+        }
+        // 封装notice实体
+        Notice notice = new Notice();
+        notice.setOperateUserId(operateUserId);
+        notice.setNoticeUserId(video.getUserId());
+        notice.setVideoId(videoId);
+        notice.setContent("视频被人点赞了");
+        notice.setNoticeType(NoticeTypeEnum.LIKE.getCode());
+        notice.setReceiveFlag(ReceiveFlag.WAIT.getCode());
+        notice.setCreateTime(LocalDateTime.now());
+        // notice消息转换为json
+        String msg = JSON.toJSONString(notice);
+        rabbitTemplate.convertAndSend(NOTICE_DIRECT_EXCHANGE, NOTICE_CREATE_ROUTING_KEY, msg);
+        log.debug(" ==> {} 发送了一条消息 ==> {}", NOTICE_DIRECT_EXCHANGE, msg);
     }
 
     /**

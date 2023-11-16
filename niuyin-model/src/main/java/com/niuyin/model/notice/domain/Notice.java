@@ -3,6 +3,7 @@ package com.niuyin.model.notice.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -29,12 +30,14 @@ public class Notice implements Serializable {
     private Long operateUserId;
     // 被通知的用户
     private Long noticeUserId;
+    private String videoId;
+    private Long commentId;
     /**
      * 内容
      */
     private String content;
     /**
-     * 通知类型(0：点赞，1：关注，2：收藏、3：回复评论、4：赞了评论)
+     * 通知类型(0：点赞，1：关注，2：收藏、3:视频被评论，4：回复评论、5：赞了评论)
      */
     private String noticeType;
     /**
@@ -44,6 +47,7 @@ public class Notice implements Serializable {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
 }
