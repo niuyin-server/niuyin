@@ -7,11 +7,12 @@ import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
-import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
 import com.niuyin.model.notice.vo.NoticeVO;
+import com.niuyin.model.video.domain.Video;
+import com.niuyin.service.notice.mapper.NoticeMapper;
 import com.niuyin.service.notice.service.INoticeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,9 @@ public class NoticeController {
     @Resource
     RemoteMemberService remoteMemberService;
 
+    @Resource
+    NoticeMapper noticeMapper;
+
     /**
      * 分页根据条件查询
      *
@@ -52,7 +56,7 @@ public class NoticeController {
         List<Notice> records = noticeIPage.getRecords();
         List<NoticeVO> voList = new ArrayList<>(10);
         if (records.isEmpty()) {
-            return new PageDataInfo();
+            return PageDataInfo.emptyPage();
         }
         // 封装vo
         records.forEach(n -> {
@@ -67,6 +71,17 @@ public class NoticeController {
                 if (StringUtils.isNotNull(member)) {
                     noticeVO.setNickName(member.getNickName());
                     noticeVO.setOperateAvatar(member.getAvatar());
+                }
+            }
+            // 封装视频封面
+            if (StringUtils.isNotNull(n.getVideoId())) {
+                Video videoCache = redisService.getCacheObject("video:videoinfo:" + n.getVideoId());
+                if (StringUtils.isNull(videoCache)) {
+                    //缓存为空
+                    Video video = noticeMapper.selectVideoById(n.getVideoId());
+                    noticeVO.setVideoCoverImage(video.getCoverImage());
+                } else {
+                    noticeVO.setVideoCoverImage(videoCache.getCoverImage());
                 }
             }
             voList.add(noticeVO);
