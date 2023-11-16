@@ -60,7 +60,7 @@ public class VideoCategoryController {
         IPage<Video> videoIPage = videoCategoryService.selectVideoByCategory(pageDTO);
         List<Video> records = videoIPage.getRecords();
         if (StringUtils.isNull(records)) {
-            return new PageDataInfo();
+            return PageDataInfo.emptyPage();
         }
         List<VideoVO> videoVOList = new ArrayList<>();
         records.forEach(v -> {

@@ -54,7 +54,7 @@ public class VideoUserFavoritesController {
         IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
         List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
         if (videoIds.isEmpty()) {
-            return PageDataInfo.genPageData(null, 0);
+            return PageDataInfo.emptyPage();
         }
         return PageDataInfo.genPageData(remoteVideoService.queryVideoByVideoIds(videoIds).getData(), favoritesPage.getTotal());
     }

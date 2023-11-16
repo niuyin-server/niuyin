@@ -123,7 +123,7 @@ public class VideoUserCommentController {
             appNewsCommentVO.setChildren(childrenVOS);
             voList.add(appNewsCommentVO);
         });
-        return new PageDataInfo(R.SUCCESS, "查询成功", voList, iPage.getTotal());
+        return PageDataInfo.genPageData(voList, iPage.getTotal());
     }
 
     /**
