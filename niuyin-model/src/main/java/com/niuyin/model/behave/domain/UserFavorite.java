@@ -1,9 +1,8 @@
-package com.niuyin.model.social;
+package com.niuyin.model.behave.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-
 import java.time.LocalDateTime;
 import java.io.Serializable;
 

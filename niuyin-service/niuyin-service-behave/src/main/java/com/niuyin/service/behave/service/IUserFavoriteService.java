@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.social.UserFavorite;
+import com.niuyin.model.behave.domain.UserFavorite;
 
 /**
  * (UserFavorite)表服务接口
@@ -12,4 +12,5 @@ import com.niuyin.model.social.UserFavorite;
 public interface IUserFavoriteService extends IService<UserFavorite> {
 
 
+    boolean saveFavorite(UserFavorite userFavorite);
 }

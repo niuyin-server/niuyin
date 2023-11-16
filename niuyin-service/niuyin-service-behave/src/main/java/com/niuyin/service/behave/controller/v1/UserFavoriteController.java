@@ -3,15 +3,11 @@ package com.niuyin.service.behave.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.domain.R;
-import com.niuyin.model.social.UserFavorite;
+import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.service.behave.service.IUserFavoriteService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * (UserFavorite)表控制层
@@ -31,6 +27,11 @@ public class UserFavoriteController {
         LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFavorite::getUserId, userId);
         return R.ok(userFavoriteService.list(queryWrapper));
+    }
+
+    @PostMapping("/newFavorite")
+    public R<?> newFavorite(@RequestBody UserFavorite userFavorite){
+        return R.ok(userFavoriteService.saveFavorite(userFavorite));
     }
 
 }
