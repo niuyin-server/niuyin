@@ -2,11 +2,12 @@ package com.niuyin.service.notice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
-import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.notice.domain.Notice;
+import com.niuyin.model.notice.dto.NoticePageDTO;
 import com.niuyin.service.notice.mapper.NoticeMapper;
 import com.niuyin.service.notice.service.INoticeService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +28,12 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     private NoticeMapper noticeMapper;
 
     @Override
-    public IPage<Notice> queryUserNoticePage(PageDTO pageDTO) {
+    public IPage<Notice> queryUserNoticePage(NoticePageDTO pageDTO) {
         Long userId = UserContext.getUserId();
         LambdaQueryWrapper<Notice> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Notice::getNoticeUserId, userId);
+        queryWrapper.eq(StringUtils.isNotEmpty(pageDTO.getNoticeType()), Notice::getNoticeType, pageDTO.getNoticeType());
+        queryWrapper.orderByDesc(Notice::getCreateTime);
         return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
     }
 }

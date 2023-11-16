@@ -36,6 +36,7 @@ public class Notice implements Serializable {
      * 内容
      */
     private String content;
+    private String remark;
     /**
      * 通知类型(0：点赞，1：关注，2：收藏、3:视频被评论，4：回复评论、5：赞了评论)
      */

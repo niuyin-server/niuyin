@@ -1,17 +1,26 @@
 package com.niuyin.service.behave.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
+import com.niuyin.model.notice.domain.Notice;
+import com.niuyin.model.notice.enums.NoticeType;
+import com.niuyin.model.notice.enums.ReceiveFlag;
+import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.behave.enums.VideoCommentStatus;
 import com.niuyin.service.behave.mapper.VideoUserCommentMapper;
+import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +28,26 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
+import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
+
 /**
  * (VideoUserComment)表服务实现类
  *
  * @author roydon
  * @since 2023-10-30 16:52:53
  */
+@Slf4j
 @Service("videoUserCommentService")
 public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMapper, VideoUserComment> implements IVideoUserCommentService {
     @Resource
     private VideoUserCommentMapper videoUserCommentMapper;
+
+    @Resource
+    private VideoUserLikeMapper videoUserLikeMapper;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 回复评论
@@ -43,7 +62,39 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         videoUserComment.setParentId(videoUserComment.getParentId());
         videoUserComment.setOriginId(videoUserComment.getOriginId());
         videoUserComment.setUserId(UserContext.getUser().getUserId());
+        sendNotice2MQ(videoUserComment.getVideoId(), videoUserComment.getContent(), UserContext.getUser().getUserId());
         return this.save(videoUserComment);
+    }
+
+    /**
+     * 用户评回复评论，通知mq
+     *
+     * @param videoId
+     * @param operateUserId
+     */
+    private void sendNotice2MQ(String videoId, String content, Long operateUserId) {
+        // 根据视频获取发布者id
+        Video video = videoUserLikeMapper.selectVideoByVideoId(videoId);
+        if (StringUtils.isNull(video)) {
+            return;
+        }
+        if (operateUserId.equals(video.getUserId())) {
+            return;
+        }
+        // 封装notice实体
+        Notice notice = new Notice();
+        notice.setOperateUserId(operateUserId);
+        notice.setNoticeUserId(video.getUserId());
+        notice.setVideoId(videoId);
+        notice.setContent(content);
+        notice.setRemark("回复了你的评论");
+        notice.setNoticeType(NoticeType.COMMENT_ADD.getCode());
+        notice.setReceiveFlag(ReceiveFlag.WAIT.getCode());
+        notice.setCreateTime(LocalDateTime.now());
+        // notice消息转换为json
+        String msg = JSON.toJSONString(notice);
+        rabbitTemplate.convertAndSend(NOTICE_DIRECT_EXCHANGE, NOTICE_CREATE_ROUTING_KEY, msg);
+        log.debug(" ==> {} 发送了一条消息 ==> {}", NOTICE_DIRECT_EXCHANGE, msg);
     }
 
     /**

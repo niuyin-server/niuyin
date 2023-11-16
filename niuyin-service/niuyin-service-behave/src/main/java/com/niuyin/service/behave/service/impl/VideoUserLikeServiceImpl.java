@@ -13,6 +13,7 @@ import com.niuyin.model.common.enums.NoticeTypeEnum;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.enums.ShowStatusEnum;
 import com.niuyin.model.notice.domain.Notice;
+import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.notice.mq.NoticeDirectConstant;
 import com.niuyin.model.video.domain.Video;
@@ -103,8 +104,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         notice.setOperateUserId(operateUserId);
         notice.setNoticeUserId(video.getUserId());
         notice.setVideoId(videoId);
-        notice.setContent("视频被人点赞了");
-        notice.setNoticeType(NoticeTypeEnum.LIKE.getCode());
+        notice.setContent("视频被人点赞了o.0");
+        notice.setNoticeType(NoticeType.LIKE.getCode());
         notice.setReceiveFlag(ReceiveFlag.WAIT.getCode());
         notice.setCreateTime(LocalDateTime.now());
         // notice消息转换为json

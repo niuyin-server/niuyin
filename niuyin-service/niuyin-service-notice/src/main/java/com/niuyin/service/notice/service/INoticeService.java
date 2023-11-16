@@ -2,10 +2,8 @@ package com.niuyin.service.notice.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.notice.domain.Notice;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.niuyin.model.notice.dto.NoticePageDTO;
 
 /**
  * 通知表(Notice)表服务接口
@@ -21,5 +19,5 @@ public interface INoticeService extends IService<Notice> {
      * @param pageDTO
      * @return
      */
-    IPage<Notice> queryUserNoticePage(PageDTO pageDTO);
+    IPage<Notice> queryUserNoticePage(NoticePageDTO pageDTO);
 }

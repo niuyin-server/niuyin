@@ -40,7 +40,6 @@ public class VideoUserFavoritesController {
      */
     @GetMapping("/{videoId}")
     public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
-
         return R.ok(videoUserFavoritesService.videoFavorites(videoId));
     }
 
