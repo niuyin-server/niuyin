@@ -12,5 +12,11 @@ import com.niuyin.model.behave.domain.UserFavorite;
 public interface IUserFavoriteService extends IService<UserFavorite> {
 
 
+    /**
+     * 用户新建收藏夹
+     *
+     * @param userFavorite
+     * @return
+     */
     boolean saveFavorite(UserFavorite userFavorite);
 }

@@ -18,19 +18,31 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/api/v1/userFavorite")
 public class UserFavoriteController {
-    
+
     @Resource
     private IUserFavoriteService userFavoriteService;
 
+    /**
+     * 查询用户收藏夹
+     *
+     * @param userId
+     * @return
+     */
     @GetMapping("/list/{userId}")
-    public R<?> getUserFavoriteList(@PathVariable("userId") Long userId){
+    public R<?> getUserFavoriteList(@PathVariable("userId") Long userId) {
         LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFavorite::getUserId, userId);
         return R.ok(userFavoriteService.list(queryWrapper));
     }
 
+    /**
+     * 用户新建收藏夹
+     *
+     * @param userFavorite
+     * @return
+     */
     @PostMapping("/newFavorite")
-    public R<?> newFavorite(@RequestBody UserFavorite userFavorite){
+    public R<?> newFavorite(@RequestBody UserFavorite userFavorite) {
         return R.ok(userFavoriteService.saveFavorite(userFavorite));
     }
 
