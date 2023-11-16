@@ -1,6 +1,8 @@
 package com.niuyin.service.notice.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
@@ -10,6 +12,7 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
+import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.notice.vo.NoticeVO;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.notice.mapper.NoticeMapper;
@@ -98,6 +101,19 @@ public class NoticeController {
     @DeleteMapping("/{noticeId}")
     public R<Boolean> delNotice(@PathVariable("noticeId") Long noticeId) {
         return R.ok(noticeService.removeById(noticeId));
+    }
+
+    /**
+     * 未读消息数量
+     *
+     * @return
+     */
+    @PostMapping("/count")
+    public R<Long> noticeCount(@RequestBody Notice notice) {
+        LambdaQueryWrapper<Notice> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Notice::getNoticeUserId, UserContext.getUserId());
+        queryWrapper.eq(StringUtils.isNotEmpty(notice.getReceiveFlag()), Notice::getReceiveFlag, notice.getReceiveFlag());
+        return R.ok(noticeService.count(queryWrapper));
     }
 
 }

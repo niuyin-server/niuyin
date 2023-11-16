@@ -27,12 +27,19 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     @Resource
     private NoticeMapper noticeMapper;
 
+    /**
+     * 分页未读消息
+     *
+     * @param pageDTO
+     * @return
+     */
     @Override
     public IPage<Notice> queryUserNoticePage(NoticePageDTO pageDTO) {
         Long userId = UserContext.getUserId();
         LambdaQueryWrapper<Notice> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Notice::getNoticeUserId, userId);
         queryWrapper.eq(StringUtils.isNotEmpty(pageDTO.getNoticeType()), Notice::getNoticeType, pageDTO.getNoticeType());
+        queryWrapper.eq(StringUtils.isNotEmpty(pageDTO.getReceiveFlag()), Notice::getReceiveFlag, pageDTO.getReceiveFlag());
         queryWrapper.orderByDesc(Notice::getCreateTime);
         return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
     }
