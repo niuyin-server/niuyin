@@ -1,5 +1,6 @@
 package com.niuyin.service.behave.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.exception.CustomException;
@@ -8,6 +9,7 @@ import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.service.behave.enums.UserFavoriteStatus;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUT
  * @author lzq
  * @since 2023-11-13 16:37:53
  */
+@Slf4j
 @Service("userFavoriteService")
 public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, UserFavorite> implements IUserFavoriteService {
     @Resource
@@ -33,8 +36,9 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
     @Resource
     private RabbitTemplate rabbitTemplate;
 
-
     /**
+     * 用户新建收藏夹
+     *
      * @param userFavorite
      * @return
      */
@@ -50,15 +54,15 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         userFavoriteDb.setCreateTime(LocalDateTime.now());
         boolean save = this.save(userFavoriteDb);
         //如果保存成功，就将文件夹实体作为消息发送到notice队列中
-        if (save) {
-            String msg = JSON.toJSONString(userFavoriteDb);
-            rabbitTemplate.convertAndSend(NOTICE_DIRECT_EXCHANGE, NOTICE_CREATE_ROUTING_KEY, msg);
-            System.out.println("向mq发送信息成功");
-            return true;
-            //保存失败，抛出异常
-        } else {
-            throw new CustomException(HAS_ERROR);
-        }
-
+//        if (save) {
+//            String msg = JSON.toJSONString(userFavoriteDb);
+//            rabbitTemplate.convertAndSend(NOTICE_DIRECT_EXCHANGE, NOTICE_CREATE_ROUTING_KEY, msg);
+//            log.debug(" ==> {} 发送了一条消息 ==> {}", NOTICE_DIRECT_EXCHANGE, msg);
+//            return true;
+//            //保存失败，抛出异常
+//        } else {
+//            throw new CustomException(HAS_ERROR);
+//        }
+        return save;
     }
 }
