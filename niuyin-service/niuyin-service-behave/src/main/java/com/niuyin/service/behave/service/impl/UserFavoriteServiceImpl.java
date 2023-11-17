@@ -50,19 +50,7 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         userFavoriteDb.setUserId(UserContext.getUserId());
         //从枚举类中获取默认的删除标志参数
         userFavoriteDb.setDelFlag(UserFavoriteStatus.NORMAL.getCode());
-        //设置创建时间
         userFavoriteDb.setCreateTime(LocalDateTime.now());
-        boolean save = this.save(userFavoriteDb);
-        //如果保存成功，就将文件夹实体作为消息发送到notice队列中
-//        if (save) {
-//            String msg = JSON.toJSONString(userFavoriteDb);
-//            rabbitTemplate.convertAndSend(NOTICE_DIRECT_EXCHANGE, NOTICE_CREATE_ROUTING_KEY, msg);
-//            log.debug(" ==> {} 发送了一条消息 ==> {}", NOTICE_DIRECT_EXCHANGE, msg);
-//            return true;
-//            //保存失败，抛出异常
-//        } else {
-//            throw new CustomException(HAS_ERROR);
-//        }
-        return save;
+        return this.save(userFavoriteDb);
     }
 }
