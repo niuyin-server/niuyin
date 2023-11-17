@@ -2,6 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 
@@ -13,7 +14,7 @@ import com.niuyin.model.video.dto.VideoPageDto;
  */
 public interface IVideoUserFavoritesService extends IService<VideoUserFavorites> {
 
-    boolean videoFavorites(String videoId);
+    boolean videoFavorites(UserFavoriteVideo userFavoriteVideo);
 
     IPage<VideoUserFavorites> queryFavoritePage(VideoPageDto pageDto);
 }
