@@ -2,6 +2,7 @@ package com.niuyin.service.behave.service.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
@@ -44,6 +45,8 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
     public boolean saveFavorite(UserFavorite userFavorite) {
         //将传过来的参数copy到要在数据库存储的对象中
         UserFavorite userFavoriteDb = BeanCopyUtils.copyBean(userFavorite, UserFavorite.class);
+        //从token中获取userId
+        userFavoriteDb.setUserId(UserContext.getUserId());
         //从枚举类中获取默认的删除标志参数
         userFavoriteDb.setDelFlag(UserFavoriteStatus.NORMAL.getCode());
         //设置创建时间
