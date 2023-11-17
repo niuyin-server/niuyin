@@ -22,7 +22,7 @@ public class MemberDirectMessageConfig {
     }
 
     /**
-     * 延时交换机
+     *
      * 交换机的类型为 x-delayed-message
      */
     @Bean
