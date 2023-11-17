@@ -2,6 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
+import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -14,4 +15,5 @@ import org.springframework.data.domain.PageRequest;
 public interface IUserFavoriteVideoService extends IService<UserFavoriteVideo> {
 
 
+    Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO);
 }

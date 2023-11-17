@@ -54,6 +54,8 @@ public enum HttpCodeEnum {
     BIND_CONTENT_DESC_FAIL(10004,"视频描述需在200字符以内"),
 
     VIDEO_TAG_NAME_FAIL(10010,"标签不得超过20字符"),
+
+    FAVORITE_FAIL(10011,"收藏失败"),
     ;
 
     int code;

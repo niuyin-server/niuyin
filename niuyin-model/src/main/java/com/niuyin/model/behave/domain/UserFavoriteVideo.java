@@ -12,17 +12,22 @@ import java.io.Serializable;
  * @since 2023-11-17 10:16:03
  */
 @Data
-@TableName("")
+@TableName("user_favorite_video")
 public class UserFavoriteVideo implements Serializable {
     private static final long serialVersionUID = -25561243481195565L;
-/**
+    /**
      * 收藏夹id
      */
     private Long favoriteId;
-/**
-     *  视频id
+    /**
+     * 视频id
      */
     private String videoId;
+
+    /**
+     * 用户id
+     */
+    private Long userId;
 
 
 }
