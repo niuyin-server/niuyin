@@ -114,10 +114,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public Video selectById(String id) {
-        Video video = videoMapper.selectById(id);
-        return video;
+        return videoMapper.selectById(id);
     }
 
+    /**
+     * 发布视频
+     *
+     * @param videoPublishDto
+     * @return
+     */
     @Transactional
     @Override
     public String videoPublish(VideoPublishDto videoPublishDto) {
@@ -287,30 +292,38 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
                 videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
                 videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
-                LambdaQueryWrapper<VideoUserComment> commentQW = new LambdaQueryWrapper<>();
-                commentQW.eq(VideoUserComment::getVideoId, v.getVideoId());
+                // 评论数
+                videoVO.setCommentNum(videoMapper.selectCommentCountByVideoId(v.getVideoId()));
+                Long loginUserId = null;
                 try {
-                    videoVO.setCommentNum(remoteBehaveService.getCommentCountByVideoId(videoVO.getVideoId()).getData());
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    loginUserId = UserContext.getUserId();
+                } catch (Exception ex) {
+                    log.debug("未登录");
+                }
+                if (StringUtils.isNotNull(loginUserId)) {
+                    // 是否关注、是否点赞、是否收藏
+                    try {
+                        videoVO.setWeatherLike(videoMapper.selectUserLikeVideo(v.getVideoId(), loginUserId) != 0);
+                        videoVO.setWeatherFavorite(remoteBehaveService.weatherFavorite(v.getVideoId()).getData());
+                        if (v.getUserId().equals(loginUserId)) {
+                            videoVO.setWeatherFollow(true);
+                        } else {
+                            Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
+                            videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 // 封装用户信息
-                Member publishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
-                videoVO.setUserNickName(StringUtils.isNull(publishUser) ? null : publishUser.getNickName());
-                videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
-                // 是否关注、是否点赞、是否收藏
-                try {
-                    Long loginUserId = UserContext.getUserId();
-                    videoVO.setWeatherLike(remoteBehaveService.weatherLike(v.getVideoId()).getData());
-                    videoVO.setWeatherFavorite(remoteBehaveService.weatherFavorite(v.getVideoId()).getData());
-                    if (StringUtils.isNotNull(loginUserId) && v.getUserId().equals(loginUserId)) {
-                        videoVO.setWeatherFollow(true);
-                    } else {
-                        Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
-                        videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                Member userCache = redisService.getCacheObject("member:userinfo:" + v.getUserId());
+                if (StringUtils.isNotNull(userCache)) {
+                    videoVO.setUserNickName(userCache.getNickName());
+                    videoVO.setUserAvatar(userCache.getAvatar());
+                } else {
+                    Member publishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
+                    videoVO.setUserNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
+                    videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
                 }
                 // 封装标签返回
                 String[] tags = videoTagRelationService.queryVideoTags(videoVO.getVideoId());

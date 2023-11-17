@@ -2,7 +2,9 @@ package com.niuyin.service.search.service.impl;
 
 import com.mongodb.client.result.DeleteResult;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.R;
 import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.service.search.domain.VideoSearchHistory;
@@ -15,7 +17,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -72,13 +78,17 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
      */
     @Override
     public List<VideoSearchHistory> findAllSearch() {
-        // 判断是否登录
-        Long userId = UserContext.getUser().getUserId();
-        if (StringUtils.isNull(userId)) {
-            throw new CustomException(HttpCodeEnum.NEED_LOGIN);
-        }
+        Long userId = UserContext.getUserId();
         // 根据用户id查询数据，按照时间倒序
         return mongoTemplate.find(Query.query(Criteria.where("userId").is(userId)).with(Sort.by(Sort.Direction.DESC, "createdTime")), VideoSearchHistory.class);
+    }
+
+    /**
+     * 查询当天的所有搜索记录
+     */
+    @Override
+    public List<VideoSearchHistory> findTodaySearchRecord() {
+        return mongoTemplate.find(Query.query(Criteria.where("createdTime").gte(DateUtils.getTodayStartLocalDateTime())), VideoSearchHistory.class);
     }
 
     /**
@@ -87,10 +97,7 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
     @Override
     public boolean delSearchHistory(String id) {
         // 判断是否登录
-        Long userId = UserContext.getUser().getUserId();
-        if (StringUtils.isNull(userId)) {
-            throw new CustomException(HttpCodeEnum.NEED_LOGIN);
-        }
+        Long userId = UserContext.getUserId();
         // 删除
         DeleteResult remove = mongoTemplate.remove(Query.query(Criteria.where("userId").is(userId).and("id").is(id)), VideoSearchHistory.class);
         return remove.getDeletedCount() > 0;

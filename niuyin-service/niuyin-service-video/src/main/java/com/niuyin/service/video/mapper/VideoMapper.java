@@ -3,6 +3,7 @@ package com.niuyin.service.video.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.niuyin.model.video.domain.Video;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,14 +17,12 @@ import java.util.List;
 public interface VideoMapper extends BaseMapper<Video> {
 
     /**
-     *
      * @param videoId
      * @return
      */
     String getVideoUrlByVideoId(String videoId);
 
     /**
-     *
      * @param userId
      * @param pageNum
      * @param pageSize
@@ -32,7 +31,6 @@ public interface VideoMapper extends BaseMapper<Video> {
     List<Video> getUserLikesVideos(Long userId, int pageNum, int pageSize);
 
     /**
-     *
      * @param userId
      * @param pageNum
      * @param pageSize
@@ -41,11 +39,23 @@ public interface VideoMapper extends BaseMapper<Video> {
     List<Video> getUserFavoritesVideos(Long userId, int pageNum, int pageSize);
 
     /**
-     *
      * @param userId
      * @return
      */
     Long selectAllLikeNumForUser(Long userId);
+
+    /**
+     * 查询视频评论数
+     *
+     * @param videoId
+     * @return
+     */
+    Long selectCommentCountByVideoId(String videoId);
+
+    /**
+     * 查询视频点赞表
+     */
+    Long selectUserLikeVideo(@Param("videoId") String videoId, @Param("userId") Long userId);
 
 }
 

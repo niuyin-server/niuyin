@@ -137,9 +137,7 @@ public class VideoTestApplication {
 
 
         LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(VideoSensitive::getId)
-                .like(VideoSensitive::getSensitives, s1)
-                .or(w -> w.like(VideoSensitive::getSensitives, s3));
+        queryWrapper.select(VideoSensitive::getId).like(VideoSensitive::getSensitives, s1).or(w -> w.like(VideoSensitive::getSensitives, s3));
         List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
         videoSensitives.size();
     }
@@ -166,9 +164,7 @@ public class VideoTestApplication {
         }
         //构建敏感词查询条件
         LambdaQueryWrapper<VideoSensitive> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(VideoSensitive::getId)
-                .like(VideoSensitive::getSensitives, videoPublishDto.getVideoTitle())
-                .or(w -> w.like(VideoSensitive::getSensitives, videoPublishDto.getVideoDesc()));
+        queryWrapper.select(VideoSensitive::getId).like(VideoSensitive::getSensitives, videoPublishDto.getVideoTitle()).or(w -> w.like(VideoSensitive::getSensitives, videoPublishDto.getVideoDesc()));
         List<VideoSensitive> videoSensitives = videoSensitiveMapper.selectList(queryWrapper);
         //如果结果不为空，证明有敏感词，提示异常
         if (!videoSensitives.isEmpty()) {
@@ -232,14 +228,19 @@ public class VideoTestApplication {
     }
 
     @Test
-    void test(){
-        char s1=97;
-        char s2='a';
+    void test() {
+        char s1 = 97;
+        char s2 = 'a';
 
         System.out.println(s1);
         System.out.println(s2);
 
+    }
 
+    @Test
+    void selVideoLike() {
+        Long l = videoMapper.selectUserLikeVideo("117393770688387481650cb56ac", 2L);
+        System.out.println("l = " + l);
     }
 
 }

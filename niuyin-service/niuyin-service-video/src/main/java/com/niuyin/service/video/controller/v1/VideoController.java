@@ -59,7 +59,7 @@ public class VideoController {
         Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
         List<VideoVO> videoVOList = new ArrayList<>();
         videoIds.forEach(vid -> {
-            Video video = videoService.selectById((String) vid);
+            Video video = videoService.getById((String) vid);
             VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
             Member user = new Member();
             try {

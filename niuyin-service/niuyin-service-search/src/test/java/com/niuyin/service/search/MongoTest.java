@@ -1,7 +1,9 @@
 package com.niuyin.service.search;
 
 import com.niuyin.service.search.domain.VideoSearchHistory;
+import com.niuyin.service.search.service.VideoSearchHistoryService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,6 +27,10 @@ public class MongoTest {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Resource
+    private VideoSearchHistoryService videoSearchHistoryService;
+
+    @DisplayName("获取今日所有搜索记录")
     @Test
     void testInsert() {
         VideoSearchHistory videoSearchHistory = new VideoSearchHistory();
@@ -41,7 +47,7 @@ public class MongoTest {
         all.forEach(System.out::println);
     }
 
-    //条件查询
+    @DisplayName("条件查询")
     @Test
     public void findUserList() {
         Query query = new Query(Criteria.where("userId").is(3L));
@@ -49,5 +55,11 @@ public class MongoTest {
         list.forEach(System.out::println);
     }
 
+    @DisplayName("获取今日所有搜索记录")
+    @Test
+    public void findTodaySearchRecord3() {
+        List<VideoSearchHistory> todaySearchRecord = videoSearchHistoryService.findTodaySearchRecord();
+        todaySearchRecord.forEach(System.out::println);
+    }
 
 }

@@ -23,6 +23,11 @@ public interface VideoSearchHistoryService {
     List<VideoSearchHistory> findAllSearch();
 
     /**
+     * 查询当天的所有搜索记录
+     */
+    List<VideoSearchHistory> findTodaySearchRecord();
+
+    /**
      * 删除历史记录
      */
     boolean delSearchHistory(String id);

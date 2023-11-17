@@ -51,8 +51,8 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
     @Override
     public boolean followUser(Long userId) {
-        Long loginUserId = UserContext.getUser().getUserId();
-        if (StringUtils.isNull(userId) || StringUtils.isNull(loginUserId)) {
+        Long loginUserId = UserContext.getUserId();
+        if (StringUtils.isNull(userId)) {
             return false;
         }
         if (loginUserId.equals(userId)) {
