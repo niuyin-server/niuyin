@@ -23,15 +23,26 @@ public class UserFavoriteController {
     @Resource
     private IUserFavoriteService userFavoriteService;
 
+    /**
+     * 我的收藏夹集合
+     *
+     * @return
+     */
     @GetMapping("/list")
-    public R<?> getUserFavoriteList(){
+    public R<?> getUserFavoriteList() {
         LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
         return R.ok(userFavoriteService.list(queryWrapper));
     }
 
+    /**
+     * 新建收藏夹
+     *
+     * @param userFavorite
+     * @return
+     */
     @PostMapping()
-    public R<?> newFavorite(@RequestBody UserFavorite userFavorite){
+    public R<?> newFavorite(@RequestBody UserFavorite userFavorite) {
         return R.ok(userFavoriteService.saveFavorite(userFavorite));
     }
 
