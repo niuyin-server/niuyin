@@ -1,13 +1,9 @@
 package com.niuyin.service.behave.service.impl;
 
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.common.enums.DelFlagEnum;
-import com.niuyin.service.behave.enums.UserFavoriteStatus;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +13,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-
-import static com.niuyin.model.common.enums.HttpCodeEnum.HAS_ERROR;
-import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
-import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 
 /**
  * (UserFavorite)表服务实现类
@@ -33,9 +25,6 @@ import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUT
 public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, UserFavorite> implements IUserFavoriteService {
     @Resource
     private UserFavoriteMapper userFavoriteMapper;
-
-    @Resource
-    private RabbitTemplate rabbitTemplate;
 
     /**
      * 用户新建收藏夹
