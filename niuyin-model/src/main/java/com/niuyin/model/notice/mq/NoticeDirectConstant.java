@@ -12,6 +12,7 @@ public class NoticeDirectConstant {
      * 队列
      */
     public static final String NOTICE_CREATE_QUEUE = "queue.notice.create";
+
     /**
      * 绑定的routing key
      */
