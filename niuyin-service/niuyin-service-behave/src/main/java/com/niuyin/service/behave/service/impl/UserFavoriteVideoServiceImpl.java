@@ -24,11 +24,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.*;
@@ -54,29 +59,59 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Resource
     private RabbitTemplate rabbitTemplate;
 
-
     /**
+     * 收藏视频到收藏夹
+     *
      * @param userFavoriteVideoDTO
      * @return
      */
+    @Transactional(rollbackFor = CustomException.class)
     @Override
     public Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO) {
-
         //从token中获取userid
         Long userId = UserContext.getUserId();
         //构建查询条件
         LambdaQueryWrapper<UserFavoriteVideo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserFavoriteVideo::getVideoId, userFavoriteVideoDTO.getVideoId())
-                .eq(UserFavoriteVideo::getUserId, userId);
+        queryWrapper.eq(UserFavoriteVideo::getVideoId, userFavoriteVideoDTO.getVideoId()).eq(UserFavoriteVideo::getUserId, userId);
         List<UserFavoriteVideo> list = this.list(queryWrapper);
-        //判断收藏夹关联表中是否有记录
-        if (list.isEmpty()) {
-            //没有记录则加入收藏
+
+        // 获取该用户所有包含该视频的收藏夹id集合
+        Long[] oldIds = list.stream().map(UserFavoriteVideo::getFavoriteId).toArray(Long[]::new);
+        Long[] newIds = userFavoriteVideoDTO.getFavorites();
+        // 合并新老收藏夹并去重
+        Long[] mergedIds = Stream.concat(Arrays.stream(oldIds), Arrays.stream(newIds)).distinct().toArray(Long[]::new);
+        // 筛选出不同的id集合
+//        Long[] differentValues =  Arrays.stream(mergedIds)
+//                .filter(m -> Arrays.stream(newIds).noneMatch(n -> n.equals(m)))
+//                .toArray(Long[]::new);
+        //筛选出合并后的数组中含有的元素，但是userFavoriteVideoDTO.getFavorites()中没有的元素
+        Long[] deleteResult = Arrays.stream(mergedIds)
+                .filter(id -> !Arrays.asList(newIds).contains(id))
+                .toArray(Long[]::new);
+        //过滤之后数组中含有的值，即为需要删除的元素----取消收藏
+        if(StringUtils.isNotEmpty(deleteResult)){
+            LambdaQueryWrapper<UserFavoriteVideo> qw = new LambdaQueryWrapper<>();
+            //查询出所有需要删除的对象
+            qw.in(UserFavoriteVideo::getFavoriteId,deleteResult);
+            //删除对象
+            boolean remove = this.remove(qw);
+            if(remove){
+                favoriteNumDecrease(userFavoriteVideoDTO.getVideoId());
+                return true;
+            }else {
+                throw new CustomException(FAVORITE_FAIL);
+            }
+        }
+        //筛选出userFavoriteVideoDTO.getFavorites()中含有的元素，但是mergedIds中没有的元素----收藏
+        Long[]  newResult=Arrays.stream(newIds)
+                .filter(id -> !Arrays.asList(oldIds).contains(id))
+                .toArray(Long[]::new);
+        if (StringUtils.isNotEmpty(newResult)){
             ArrayList<UserFavoriteVideo> userFavoriteVideos = new ArrayList<>();
-            UserFavoriteVideo userFavoriteVideo = new UserFavoriteVideo();
-            userFavoriteVideo.setUserId(userId);
-            userFavoriteVideo.setVideoId(userFavoriteVideoDTO.getVideoId());
-            for (int i = 0; i < userFavoriteVideoDTO.getFavorites().length; i++) {
+            for (int i = 0; i < newResult.length; i++) {
+                UserFavoriteVideo userFavoriteVideo = new UserFavoriteVideo();
+                userFavoriteVideo.setUserId(userId);
+                userFavoriteVideo.setVideoId(userFavoriteVideoDTO.getVideoId());
                 userFavoriteVideo.setFavoriteId(userFavoriteVideoDTO.getFavorites()[i]);
                 userFavoriteVideos.add(userFavoriteVideo);
             }
@@ -90,13 +125,8 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
             } else {
                 throw new CustomException(FAVORITE_FAIL);
             }
-
-        } else {
-            //有记录则取消收藏
-            //将本条点赞信息从redis移除
-            favoriteNumDecrease(userFavoriteVideoDTO.getVideoId());
-            return this.remove(queryWrapper);
         }
+        return true;
     }
 
     /**
@@ -105,7 +135,8 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
      * @param videoId
      * @param operateUserId
      */
-    private void sendNotice2MQ(String videoId, Long operateUserId) {
+    @Async
+    public void sendNotice2MQ(String videoId, Long operateUserId) {
         // 根据视频获取发布者id
         Video video = videoUserLikeMapper.selectVideoByVideoId(videoId);
         if (StringUtils.isNull(video)) {
