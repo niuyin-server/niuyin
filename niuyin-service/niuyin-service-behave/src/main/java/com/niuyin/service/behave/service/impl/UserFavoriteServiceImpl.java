@@ -44,13 +44,11 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
      */
     @Override
     public boolean saveFavorite(UserFavorite userFavorite) {
-        //将传过来的参数copy到要在数据库存储的对象中
-        UserFavorite userFavoriteDb = BeanCopyUtils.copyBean(userFavorite, UserFavorite.class);
         //从token中获取userId
-        userFavoriteDb.setUserId(UserContext.getUserId());
+        userFavorite.setUserId(UserContext.getUserId());
         //从枚举类中获取默认的删除标志参数
-        userFavoriteDb.setDelFlag(UserFavoriteStatus.NORMAL.getCode());
-        userFavoriteDb.setCreateTime(LocalDateTime.now());
-        return this.save(userFavoriteDb);
+        userFavorite.setDelFlag(UserFavoriteStatus.NORMAL.getCode());
+        userFavorite.setCreateTime(LocalDateTime.now());
+        return this.save(userFavorite);
     }
 }

@@ -1,8 +1,11 @@
 package com.niuyin.model.behave.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -19,6 +22,7 @@ public class UserFavorite implements Serializable {
     /**
      * 收藏夹id
      */
+    @TableId(value = "favorite_id", type = IdType.AUTO)
     private Long favoriteId;
     /**
      * 用户id
