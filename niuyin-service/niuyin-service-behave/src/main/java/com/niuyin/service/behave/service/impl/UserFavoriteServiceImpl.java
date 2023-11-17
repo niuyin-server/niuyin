@@ -6,6 +6,7 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
+import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.service.behave.enums.UserFavoriteStatus;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
@@ -47,7 +48,7 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         //从token中获取userId
         userFavorite.setUserId(UserContext.getUserId());
         //从枚举类中获取默认的删除标志参数
-        userFavorite.setDelFlag(UserFavoriteStatus.NORMAL.getCode());
+        userFavorite.setDelFlag(DelFlagEnum.EXIST.getCode());
         userFavorite.setCreateTime(LocalDateTime.now());
         return this.save(userFavorite);
     }
