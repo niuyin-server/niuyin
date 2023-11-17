@@ -6,6 +6,7 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.feign.video.RemoteVideoService;
+import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
@@ -35,12 +36,12 @@ public class VideoUserFavoritesController {
     /**
      * 用户收藏
      *
-     * @param videoId
+     * @param userFavoriteVideo
      * @return
      */
-    @GetMapping("/{videoId}")
-    public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
-        return R.ok(videoUserFavoritesService.videoFavorites(videoId));
+    @PostMapping()
+    public R<Boolean> getDetails(@RequestBody UserFavoriteVideo userFavoriteVideo) {
+        return R.ok(videoUserFavoritesService.videoFavorites(userFavoriteVideo));
     }
 
     /**

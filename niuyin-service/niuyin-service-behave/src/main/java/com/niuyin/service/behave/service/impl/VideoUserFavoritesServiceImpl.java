@@ -8,14 +8,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
-import com.niuyin.model.common.enums.NoticeTypeEnum;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
+import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
@@ -44,6 +45,8 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     private VideoUserFavoritesMapper videoUserFavoritesMapper;
 
     @Resource
+    private UserFavoriteVideoMapper userFavoriteVideoMapper;
+    @Resource
     private RedisService redisService;
 
     @Resource
@@ -55,30 +58,64 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     /**
      * 用户收藏
      *
-     * @param videoId
+     * @param userFavoriteVideo
      * @return
      */
     @Override
-    public boolean videoFavorites(String videoId) {
+    public boolean videoFavorites(UserFavoriteVideo userFavoriteVideo) {
+
+        //从token获取用户id
         Long userId = UserContext.getUser().getUserId();
-        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
-        List<VideoUserFavorites> list = this.list(queryWrapper);
-        if (StringUtils.isNull(list) || list.isEmpty()) {
-            VideoUserFavorites videoUserFavorites = new VideoUserFavorites();
-            videoUserFavorites.setVideoId(videoId);
-            videoUserFavorites.setUserId(userId);
-            videoUserFavorites.setCreateTime(LocalDateTime.now());
-            //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
-            favoriteNumIncrease(videoId);
-            // 发送消息到通知
-            sendNotice2MQ(videoId, userId);
-            return this.save(videoUserFavorites);
+        //判断收藏夹id是否为空，不为空则将视频和收藏夹进行关联
+        if (StringUtils.isNotNull(userFavoriteVideo.getFavoriteId())) {
+            //构建查询条件
+            LambdaQueryWrapper<UserFavoriteVideo> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserFavoriteVideo::getVideoId, userFavoriteVideo.getVideoId());
+            List<UserFavoriteVideo> userFavoriteVideos = userFavoriteVideoMapper.selectList(queryWrapper);
+            //判断收藏夹关联表中是否有记录
+            if (userFavoriteVideos.isEmpty()) {
+                //没有记录则加入收藏
+                int insert = userFavoriteVideoMapper.insert(userFavoriteVideo);
+                //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
+                favoriteNumIncrease(userFavoriteVideo.getVideoId());
+                // 发送消息到通知
+                sendNotice2MQ(userFavoriteVideo.getVideoId(), userId);
+                return insert != 0;
+            } else {
+                //有记录则取消收藏
+                //将本条点赞信息从redis移除
+                favoriteNumDecrease(userFavoriteVideo.getVideoId());
+                //删除成功delete不为0，删除失败delete为0
+                int delete = userFavoriteVideoMapper.delete(queryWrapper);
+                //如果为0，则delete！=0  的值为false；否则为true；
+                return delete != 0;
+            }
+
         } else {
-            //将本条点赞信息从redis
-            favoriteNumDecrease(videoId);
-            return this.remove(queryWrapper);
+            //构建查询条件
+            LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(VideoUserFavorites::getVideoId, userFavoriteVideo.getVideoId()).eq(VideoUserFavorites::getUserId, userId);
+            //判断当前表中有没有记录
+            List<VideoUserFavorites> list = this.list(queryWrapper);
+            if (StringUtils.isNull(list) || list.isEmpty()) {
+                //没有记录，则新建对象存入数据库
+                VideoUserFavorites videoUserFavorites = new VideoUserFavorites();
+                videoUserFavorites.setVideoId(userFavoriteVideo.getVideoId());
+                videoUserFavorites.setUserId(userId);
+                videoUserFavorites.setCreateTime(LocalDateTime.now());
+                //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
+                favoriteNumIncrease(userFavoriteVideo.getVideoId());
+                // 发送消息到通知
+                sendNotice2MQ(userFavoriteVideo.getVideoId(), userId);
+                return this.save(videoUserFavorites);
+            } else {
+                //将本条点赞信息从redis移除
+                favoriteNumDecrease(userFavoriteVideo.getVideoId());
+                return this.remove(queryWrapper);
+            }
         }
+
+
     }
 
     /**
