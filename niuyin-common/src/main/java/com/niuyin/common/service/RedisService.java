@@ -261,7 +261,7 @@ public class RedisService {
      * @param score
      * @param <T>
      */
-    public <T> void setCacheZSet(String key, T t, long score) {
+    public <T> void setCacheZSet(String key, T t, double score) {
         redisTemplate.opsForZSet().add(key, t, score);
     }
 

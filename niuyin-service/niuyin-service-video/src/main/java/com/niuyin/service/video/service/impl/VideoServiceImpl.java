@@ -45,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -403,19 +404,32 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     // 视频算分
-    private Long computeVideoScore(Video video) {
-        Long score = 0L;
+    private double computeVideoScore(Video video) {
+        double score = 0;
+        // 点赞
         if (video.getLikeNum() != null) {
             score += video.getLikeNum() * HotVideoConstants.WEIGHT_LIKE;
         }
+        // 观看
         if (video.getViewNum() != null) {
             //获取redis中的浏览量
             score += video.getViewNum() * HotVideoConstants.WEIGHT_VIEW;
         }
+        // 收藏
         if (video.getFavoritesNum() != null) {
             score += video.getFavoritesNum() * HotVideoConstants.WEIGHT_FAVORITE;
         }
-        return score;
+        // 创建时间
+        if (video.getCreateTime() != null) {
+            LocalDateTime createTime = video.getCreateTime();
+            Duration between = Duration.between(LocalDateTime.now(), createTime);
+            long hours = between.toHours();
+            // 计算的是五天的数据量，使用五天总的小时数减去这个差值
+            long totalHour = 5 * 24;
+            long realHour = totalHour - Math.abs(hours);
+            score += realHour * HotVideoConstants.WEIGHT_CREATE_TIME;
+        }
+        return score / 100;
     }
 
     /**

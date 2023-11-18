@@ -39,6 +39,10 @@ public class Video implements Serializable {
     private Long likeNum;
     private Long favoritesNum;
     /**
+     * 发布类型0视频，1图文。
+     */
+    private String publishType;
+    /**
      * 删除标志（0代表存在 1代表删除）
      */
     private String delFlag;

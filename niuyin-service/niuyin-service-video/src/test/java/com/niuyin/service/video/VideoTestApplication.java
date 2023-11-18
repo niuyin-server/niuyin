@@ -22,11 +22,13 @@ import com.niuyin.service.video.mapper.VideoSensitiveMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -241,6 +243,20 @@ public class VideoTestApplication {
     void selVideoLike() {
         Long l = videoMapper.selectUserLikeVideo("117393770688387481650cb56ac", 2L);
         System.out.println("l = " + l);
+    }
+
+    @DisplayName("测试依据创建时间算分")
+    @Test
+    void testCreateTimeScore(){
+        Video video = videoService.getById("1175158246101483520422e68d2");
+        LocalDateTime createTime = video.getCreateTime();
+        Duration between = Duration.between(LocalDateTime.now(), createTime);
+        long minutes = between.toMinutes(); //相差多少分钟
+        System.out.println("minutes = " + minutes);
+        long hours = between.toHours(); // 相差多少小时
+        System.out.println("hours = " + hours);
+//        int second = LocalDateTime.now().getMinute() - createTime.getMinute();
+//        System.out.println("second = " + second);
     }
 
 }
