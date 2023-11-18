@@ -15,5 +15,10 @@ import org.springframework.data.domain.PageRequest;
 public interface IUserFavoriteVideoService extends IService<UserFavoriteVideo> {
 
 
+    /**
+     * 用户收藏视频到收藏夹功能
+     * @param userFavoriteVideoDTO
+     * @return
+     */
     Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO);
 }
