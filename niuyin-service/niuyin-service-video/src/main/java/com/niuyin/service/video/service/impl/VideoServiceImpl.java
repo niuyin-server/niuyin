@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
+import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT5;
 
 /**
  * 视频表(Video)表服务实现类
@@ -425,10 +426,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             Duration between = Duration.between(LocalDateTime.now(), createTime);
             long hours = between.toHours();
             // 计算的是五天的数据量，使用五天总的小时数减去这个差值
-            long totalHour = 5 * 24;
+            long totalHour = VIDEO_BEFORE_DAT5 * 24;
             long realHour = totalHour - Math.abs(hours);
-            score += realHour * HotVideoConstants.WEIGHT_CREATE_TIME;
+            score += Math.abs(realHour) * HotVideoConstants.WEIGHT_CREATE_TIME;
         }
+        // 评论量
+        Long commentCount = videoMapper.selectCommentCountByVideoId(video.getVideoId());
+        score += commentCount * HotVideoConstants.WEIGHT_COMMENT;
         return score / 100;
     }
 

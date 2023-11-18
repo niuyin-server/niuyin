@@ -9,9 +9,14 @@ package com.niuyin.service.video.constants;
  **/
 public class HotVideoConstants {
 
+    // 筛选近5天的视频数据1
+    public static final int VIDEO_BEFORE_DAT5 = 5;
+
     // 视频热门算分规则，按照权重
     public static final Long WEIGHT_LIKE = 12L;
     public static final Long WEIGHT_FAVORITE = 20L;
     public static final Long WEIGHT_VIEW = 1L;
     public static final Long WEIGHT_CREATE_TIME = 8L;
+    public static final Long WEIGHT_COMMENT = 10L;
+    public static final Long WEIGHT_SHARE = 15L;
 }

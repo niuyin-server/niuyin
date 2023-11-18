@@ -15,6 +15,8 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT5;
+
 /**
  * HotVideoTask
  *
@@ -34,7 +36,7 @@ public class HotVideoTask {
     @Scheduled(fixedRate = 1000 * 60 * 5)
     public void computeHotVideo() {
         log.info("==> 开始计算热门视频，首先查询最近5天的视频记录");
-        List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(5));
+        List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(VIDEO_BEFORE_DAT5));
         log.info("==> 从redis获取视频点赞量，观看量，收藏量");
         List<HotVideoVO> hotVideoVOList = videoService.computeHotVideoScore(videoList);
         hotVideoVOList.forEach(h -> {
