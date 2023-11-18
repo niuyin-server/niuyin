@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -62,39 +63,38 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
      * @param videoId
      * @return
      */
+    @Transactional
     @Override
     public boolean videoFavorites(String videoId) {
 
-
-//        //判断收藏夹id是否为空，不为空则将视频和收藏夹进行关联
-//        if (StringUtils.isNotNull(userFavoriteVideoDTO.getFavorites())) {
-//
-//            }
-
-//        } else {
-            //从token获取用户id
-            Long userId = UserContext.getUser().getUserId();
-            //构建查询条件
-            LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
-            //判断当前表中有没有记录
-            List<VideoUserFavorites> list = this.list(queryWrapper);
-            if (StringUtils.isNull(list) || list.isEmpty()) {
-                //没有记录，则新建对象存入数据库
-                VideoUserFavorites videoUserFavorites = new VideoUserFavorites();
-                videoUserFavorites.setVideoId(videoId);
-                videoUserFavorites.setUserId(userId);
-                videoUserFavorites.setCreateTime(LocalDateTime.now());
-                //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
-                favoriteNumIncrease(videoId);
-                // 发送消息到通知
-                sendNotice2MQ(videoId, userId);
-                return this.save(videoUserFavorites);
-            } else {
-                //将本条点赞信息从redis移除
-                favoriteNumDecrease(videoId);
-                return this.remove(queryWrapper);
-            }
+        //从token获取用户id
+        Long userId = UserContext.getUser().getUserId();
+        //构建查询条件
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
+        //判断当前表中有没有记录
+        List<VideoUserFavorites> list = this.list(queryWrapper);
+        if (StringUtils.isNull(list) || list.isEmpty()) {
+            //没有记录，则新建对象存入数据库
+            VideoUserFavorites videoUserFavorites = new VideoUserFavorites();
+            videoUserFavorites.setVideoId(videoId);
+            videoUserFavorites.setUserId(userId);
+            videoUserFavorites.setCreateTime(LocalDateTime.now());
+            //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
+            favoriteNumIncrease(videoId);
+            // 发送消息到通知
+            sendNotice2MQ(videoId, userId);
+            return this.save(videoUserFavorites);
+        } else {
+            //将本条点赞信息从redis移除
+            favoriteNumDecrease(videoId);
+            //如果收藏夹中有此视频，同时移除
+            LambdaQueryWrapper<UserFavoriteVideo> qw = new LambdaQueryWrapper<>();
+            qw.eq(UserFavoriteVideo::getUserId, userId)
+                    .eq(UserFavoriteVideo::getVideoId, videoId);
+            userFavoriteVideoMapper.delete(qw);
+            return this.remove(queryWrapper);
+        }
 //        }
 
 

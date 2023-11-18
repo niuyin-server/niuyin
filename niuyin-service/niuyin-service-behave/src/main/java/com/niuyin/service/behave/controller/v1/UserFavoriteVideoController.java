@@ -22,8 +22,13 @@ public class UserFavoriteVideoController {
     @Resource
     private IUserFavoriteVideoService userFavoriteVideoService;
 
+    /**
+     * 用户收藏视频到收藏夹
+     * @param userFavoriteVideoDTO
+     * @return
+     */
     @PostMapping()
-    public R<Boolean> getDetails(@RequestBody UserFavoriteVideoDTO userFavoriteVideoDTO) {
+    public R<Boolean> addVideoToFavorite(@RequestBody UserFavoriteVideoDTO userFavoriteVideoDTO) {
         return R.ok(userFavoriteVideoService.videoFavorites(userFavoriteVideoDTO));
     }
 
