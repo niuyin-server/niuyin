@@ -78,18 +78,20 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
         //构建查询条件
         LambdaQueryWrapper<UserFavoriteVideo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFavoriteVideo::getVideoId, userFavoriteVideoDTO.getVideoId()).eq(UserFavoriteVideo::getUserId, userId);
-        List<UserFavoriteVideo> list = this.list(queryWrapper);
+        List<UserFavoriteVideo> dbList = this.list(queryWrapper);
         // 查询是否已经只收藏视频，若是则不增加redis收藏数
         LambdaQueryWrapper<VideoUserFavorites> vufQW = new LambdaQueryWrapper<>();
         vufQW.eq(VideoUserFavorites::getVideoId, userFavoriteVideoDTO.getVideoId())
                 .eq(VideoUserFavorites::getUserId, userId);
         List<VideoUserFavorites> videoUserFavorites = videoUserFavoritesService.list(vufQW);
-        if (list.isEmpty() && videoUserFavorites.isEmpty()) {
+        if (dbList.isEmpty() && videoUserFavorites.isEmpty()) {
             //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
             favoriteNumIncrease(userFavoriteVideoDTO.getVideoId());
+            // 发送消息到通知
+            sendNotice2MQ(userFavoriteVideoDTO.getVideoId(), userId);
         }
         // 获取该用户所有包含该视频的收藏夹id集合
-        Long[] oldIds = list.stream().map(UserFavoriteVideo::getFavoriteId).toArray(Long[]::new);
+        Long[] oldIds = dbList.stream().map(UserFavoriteVideo::getFavoriteId).toArray(Long[]::new);
         Long[] newIds = userFavoriteVideoDTO.getFavorites();
         if (StringUtils.isNull(newIds)) {
             favoriteNumDecrease(userFavoriteVideoDTO.getVideoId());
@@ -122,14 +124,7 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
                 userFavoriteVideo.setFavoriteId(aLong);
                 userFavoriteVideos.add(userFavoriteVideo);
             }
-            boolean b = this.saveBatch(userFavoriteVideos);
-            if (b) {
-                // 发送消息到通知
-                sendNotice2MQ(userFavoriteVideoDTO.getVideoId(), userId);
-            } else {
-                throw new CustomException(FAVORITE_FAIL);
-            }
-            return true;
+            return this.saveBatch(userFavoriteVideos);
         } else {
             return false;
         }
