@@ -104,13 +104,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
         String filePath = PathUtils.generateFilePath(originalFilename);
         VideoUploadVO videoUploadVO = new VideoUploadVO();
-        String uploadVideo = fileStorageService.uploadVideo(file);
-        videoUploadVO.setVideoUrl(QiniuVideoOssConstants.PREFIX_URL + uploadVideo);
-        String niuyin = uploadVideo.replace("niuyin", "");
-        String video = niuyin.replace("video", "");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
-        String datePath = sdf.format(new Date());
-        videoUploadVO.setVframe(QiniuVideoOssConstants.PREFIX_URL + datePath + video + "?vframe/jpg/offset/1");
+        String uploadVideo = fileStorageService.uploadVideo(file, filePath);
+        videoUploadVO.setOriginUrl(QiniuVideoOssConstants.VIDEO_ORIGIN_PREFIX_URL + uploadVideo);
+        videoUploadVO.setVideoUrl(QiniuVideoOssConstants.VIDEO_PREFIX_URL_2K + uploadVideo);
+        videoUploadVO.setVframe(QiniuVideoOssConstants.VIDEO_FRAME_PREFIX_URL + uploadVideo + QiniuVideoOssConstants.VIDEO_FRAME_1_END);
         return videoUploadVO;
     }
 

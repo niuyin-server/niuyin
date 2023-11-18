@@ -14,6 +14,6 @@ public interface FileStorageService {
      */
     String uploadImgFile(MultipartFile file, String prefix, String filePath);
 
-    String uploadVideo(MultipartFile file);
+    String uploadVideo(MultipartFile file, String filePath);
 
 }
