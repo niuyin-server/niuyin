@@ -1,2 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.niuyin.starter.file.service.impl.QiniuFileStorageService
+com.niuyin.starter.file.service.impl.QiniuFileStorageService,\
+com.niuyin.starter.file.service.impl.FfmpefVideoServiceImpl
+

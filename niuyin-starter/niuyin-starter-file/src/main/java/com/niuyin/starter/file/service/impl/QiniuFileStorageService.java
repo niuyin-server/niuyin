@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -88,9 +89,10 @@ public class QiniuFileStorageService implements FileStorageService {
                 // 视频转码
 //                QiniuUtils.transcoding(putRet.key, qiniuOssConfigProperties.getAccessKey(),
 //                        qiniuOssConfigProperties.getSecretKey(), qiniuOssConfigProperties.getBucket());
-                return "niuyin" + uuid + "video" + fileType;
+                return filePath;
             } catch (QiniuException ex) {
                 Response r = ex.response;
+                log.info("-------------------------------------------------");
                 System.err.println(r.toString());
                 try {
                     System.err.println(r.bodyString());
@@ -103,6 +105,49 @@ public class QiniuFileStorageService implements FileStorageService {
         }
         return "www";
     }
+
+    /**
+     * @param file
+     * @return
+     */
+//    @Override
+//    public String uploadTransForVideo(File file) {
+//        try {
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
+//            String datePath = sdf.format(new Date());
+//            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+//            //后缀和文件后缀一致
+//            int index = file.getOriginalFilename().lastIndexOf(".");
+//            // test.jpg -> .jpg
+//            String fileType = file.getOriginalFilename().substring(index);
+//            String filePath = datePath + uuid + fileType;
+//            InputStream inputStream = file.getInputStream();
+//            String upToken = Auth.create(qiniuOssConfigProperties.getAccessKey(), qiniuOssConfigProperties.getSecretKey())
+//                    .uploadToken(qiniuOssConfigProperties.getBucket());
+//            try {
+//                Response response = uploadManager.put(inputStream, filePath, upToken, null, null);
+//                //解析上传成功的结果
+//                DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+//                System.out.println(putRet.key);
+//                System.out.println(putRet.hash);
+//                // 视频转码
+////                QiniuUtils.transcoding(putRet.key, qiniuOssConfigProperties.getAccessKey(),
+////                        qiniuOssConfigProperties.getSecretKey(), qiniuOssConfigProperties.getBucket());
+//                return "niuyin" + uuid + "video" + fileType;
+//            } catch (QiniuException ex) {
+//                Response r = ex.response;
+//                System.err.println(r.toString());
+//                try {
+//                    System.err.println(r.bodyString());
+//                } catch (QiniuException ex2) {
+//                    //ignore
+//                }
+//            }
+//        } catch (Exception ex) {
+//            //ignore
+//        }
+//        return "www";
+//    }
 
 
 }
