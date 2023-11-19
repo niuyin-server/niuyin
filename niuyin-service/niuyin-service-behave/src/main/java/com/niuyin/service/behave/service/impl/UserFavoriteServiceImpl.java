@@ -1,8 +1,11 @@
 package com.niuyin.service.behave.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
+import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
 import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * (UserFavorite)表服务实现类
@@ -40,5 +44,28 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         userFavorite.setDelFlag(DelFlagEnum.EXIST.getCode());
         userFavorite.setCreateTime(LocalDateTime.now());
         return this.save(userFavorite);
+    }
+
+    /**
+     * 查询收藏集详情
+     *
+     * @return
+     */
+    @Override
+    public List<UserFavoriteInfoVO> queryCollectionInfoList() {
+        // 1、先获取用户收藏夹集合
+        LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
+        List<UserFavorite> collectionList = this.list(queryWrapper);
+        // 2、遍历获取收藏的视频总数与前六张封面
+        int limit = 6;
+        List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(collectionList, UserFavoriteInfoVO.class);
+        collectionInfoList.forEach(c -> {
+            // 2.1、获取视频总数
+            c.setVideoCount(userFavoriteMapper.selectVideoCountByFavoriteId(c.getFavoriteId()));
+            // 2.2、获取前六张封面
+            c.setVideoCoverList(userFavoriteMapper.selectFavoriteVideoCoverLimit(c.getFavoriteId(), limit));
+        });
+        return collectionInfoList;
     }
 }

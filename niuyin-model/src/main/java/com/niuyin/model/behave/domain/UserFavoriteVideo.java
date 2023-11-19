@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * (UserFavoriteVideo)实体类
@@ -28,6 +29,8 @@ public class UserFavoriteVideo implements Serializable {
      * 用户id
      */
     private Long userId;
+
+    private LocalDateTime createTime;
 
 
 }

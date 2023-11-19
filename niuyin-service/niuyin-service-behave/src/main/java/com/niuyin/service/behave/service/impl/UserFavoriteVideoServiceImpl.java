@@ -122,6 +122,7 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
                 userFavoriteVideo.setUserId(userId);
                 userFavoriteVideo.setVideoId(userFavoriteVideoDTO.getVideoId());
                 userFavoriteVideo.setFavoriteId(aLong);
+                userFavoriteVideo.setCreateTime(LocalDateTime.now());
                 userFavoriteVideos.add(userFavoriteVideo);
             }
             return this.saveBatch(userFavoriteVideos);

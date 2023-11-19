@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.model.behave.domain.UserFavorite;
+import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * (UserFavorite)表控制层
@@ -25,8 +27,6 @@ public class UserFavoriteController {
 
     /**
      * 我的收藏夹集合
-     *
-     * @return
      */
     @GetMapping("/list")
     public R<?> getUserFavoriteList() {
@@ -36,10 +36,15 @@ public class UserFavoriteController {
     }
 
     /**
+     * 我的收藏夹详情集合
+     */
+    @GetMapping("/infoList")
+    public R<List<UserFavoriteInfoVO>> userCollectionInfoList() {
+        return R.ok(userFavoriteService.queryCollectionInfoList());
+    }
+
+    /**
      * 新建收藏夹
-     *
-     * @param userFavorite
-     * @return
      */
     @PostMapping()
     public R<?> newFavorite(@RequestBody UserFavorite userFavorite) {

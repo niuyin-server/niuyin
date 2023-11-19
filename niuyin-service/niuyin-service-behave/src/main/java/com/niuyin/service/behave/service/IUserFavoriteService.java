@@ -2,6 +2,9 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.behave.domain.UserFavorite;
+import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
+
+import java.util.List;
 
 /**
  * (UserFavorite)表服务接口
@@ -17,4 +20,11 @@ public interface IUserFavoriteService extends IService<UserFavorite> {
      * @return
      */
     boolean saveFavorite(UserFavorite userFavorite);
+
+    /**
+     * 查询收藏集详情
+     * @return
+     */
+    List<UserFavoriteInfoVO> queryCollectionInfoList();
+
 }
