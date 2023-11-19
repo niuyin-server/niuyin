@@ -16,7 +16,7 @@ public class HotVideoConstants {
     public static final Long WEIGHT_LIKE = 12L;
     public static final Long WEIGHT_FAVORITE = 20L;
     public static final Long WEIGHT_VIEW = 1L;
-    public static final Long WEIGHT_CREATE_TIME = 8L;
+    public static final Long WEIGHT_CREATE_TIME = 3L;
     public static final Long WEIGHT_COMMENT = 10L;
     public static final Long WEIGHT_SHARE = 15L;
 }
