@@ -3,11 +3,9 @@ package com.niuyin.service.behave.controller.v1;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
-import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.service.behave.service.IUserFavoriteVideoService;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

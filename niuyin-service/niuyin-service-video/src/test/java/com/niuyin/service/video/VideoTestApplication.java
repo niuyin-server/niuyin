@@ -1,8 +1,8 @@
 package com.niuyin.service.video;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.niuyin.common.utils.video.FfmpegUtil;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
@@ -27,12 +27,9 @@ import com.niuyin.starter.file.service.FfmpefVideoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.Duration;
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;

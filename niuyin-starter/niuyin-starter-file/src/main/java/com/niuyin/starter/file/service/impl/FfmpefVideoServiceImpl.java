@@ -29,8 +29,6 @@ public class FfmpefVideoServiceImpl implements FfmpefVideoService {
     @Resource
     private FfmpegConfigProperties ffmpegConfigProperties;
 
-
-
     @Override
     public  boolean getTargetThumbnail(String localPath, String targetPath) {
         // FIXME: 2023/1/31  该方法基本可作为执行ffmpeg命令的模板方法，之后的几个方法与此类似
@@ -76,6 +74,7 @@ public class FfmpefVideoServiceImpl implements FfmpefVideoService {
             doNothing(line);
         }
     }
+
     /**
      * 打印日志
      *

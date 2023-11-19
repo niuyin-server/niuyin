@@ -1,6 +1,5 @@
 package com.niuyin.common.utils.video;
 
-
 import lombok.extern.slf4j.Slf4j;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncoderException;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-
 /**
  * 功能：
  * 作者：lzq
@@ -26,8 +24,6 @@ import java.net.URL;
  */
 @Slf4j
 public class FfmpegUtil {
-
-
 
     /**
      * 通过本地路径获取多媒体文件信息(宽，高，时长，编码等)
@@ -71,7 +67,7 @@ public class FfmpegUtil {
     /**
      * 音频格式化为wav,并设置单声道和采样率
      *
-     * @param url 需要转格式的音频
+     * @param url        需要转格式的音频
      * @param targetPath 格式化后要保存的目标路径
      */
     public static boolean formatAudio(String url, String targetPath) {
@@ -139,7 +135,7 @@ public class FfmpegUtil {
      *
      * <p>执行的ffmpeg 命令为： ffmpeg -i 你的视频文件路径 -ss 指定的秒数 生成文件的全路径地址
      *
-     * @param localPath 本地路径
+     * @param localPath  本地路径
      * @param targetPath 存放的目标路径
      * @return
      */
@@ -202,12 +198,11 @@ public class FfmpegUtil {
      *
      * @param originVideoPath 原视频地址
      * @param targetVideoPath 目标视频地址
-     * @param srtPath 固定格式的srt文件地址或存储位置，字母文件名： xxx.srt，样例看博客
+     * @param srtPath         固定格式的srt文件地址或存储位置，字母文件名： xxx.srt，样例看博客
      * @return
      * @throws Exception
      */
-    public static boolean addSubtitle(
-            String originVideoPath, String srtPath, String targetVideoPath) {
+    public static boolean addSubtitle(String originVideoPath, String srtPath, String targetVideoPath) {
         try {
             ProcessWrapper ffmpeg = new DefaultFFMPEGLocator().createExecutor();
             ffmpeg.addArgument("-i");
