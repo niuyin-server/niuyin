@@ -73,6 +73,7 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Transactional(rollbackFor = CustomException.class)
     @Override
     public Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO) {
+        // todo 收藏到收藏夹的同时收藏到仅收藏视频
         //从token中获取userid
         Long userId = UserContext.getUserId();
         //构建查询条件

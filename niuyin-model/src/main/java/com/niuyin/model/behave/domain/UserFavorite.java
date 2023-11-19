@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -32,7 +33,7 @@ public class UserFavorite implements Serializable {
     /**
      * 收藏夹名称
      */
-    @Length(max = 10, message = "标题长度不能超过10")
+    @Size(min = 1, max = 10, message = "标题长度需在1~10范围内")
     private String title;
     /**
      * 收藏夹描述

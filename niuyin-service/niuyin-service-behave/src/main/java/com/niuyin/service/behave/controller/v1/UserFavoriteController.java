@@ -51,5 +51,38 @@ public class UserFavoriteController {
         return R.ok(userFavoriteService.saveFavorite(userFavorite));
     }
 
+    /**
+     * 根据id获取
+     *
+     * @param favoriteId
+     * @return
+     */
+    @GetMapping("/{favoriteId}")
+    public R<UserFavorite> getInfoById(@PathVariable("favoriteId") Long favoriteId) {
+        LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
+        queryWrapper.eq(UserFavorite::getFavoriteId, favoriteId);
+        return R.ok(userFavoriteService.getOne(queryWrapper));
+    }
+
+    /**
+     * 更新收藏夹
+     */
+    @PutMapping()
+    public R<Boolean> updateFavorite(@RequestBody UserFavorite userFavorite) {
+        return R.ok(userFavoriteService.updateById(userFavorite));
+    }
+
+    /**
+     * 删除收藏夹
+     *
+     * @param favoriteId
+     * @return
+     */
+    @DeleteMapping("/{favoriteId}")
+    public R<Boolean> deleteFavorite(@PathVariable("favoriteId") Long favoriteId) {
+        return R.ok(userFavoriteService.removeById(favoriteId));
+    }
+
 }
 
