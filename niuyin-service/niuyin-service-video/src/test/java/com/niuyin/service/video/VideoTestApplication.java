@@ -23,12 +23,16 @@ import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoService;
 import org.junit.jupiter.api.DisplayName;
+import com.niuyin.starter.file.service.FfmpefVideoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.time.Duration;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -64,6 +68,9 @@ public class VideoTestApplication {
 
     @Resource
     private VideoMapper videoMapper;
+
+    @Resource
+    FfmpefVideoService ffmpefVideoService;
 
 //    void bindTest(){
 //        VideoBindDto videoBindDto = new VideoBindDto();
@@ -258,5 +265,52 @@ public class VideoTestApplication {
 //        int second = LocalDateTime.now().getMinute() - createTime.getMinute();
 //        System.out.println("second = " + second);
     }
+
+    @Test
+    void videoTrans() {
+
+//        URL url = new URL("http://s38bf8bdn.hb-bkt.clouddn.com/niuyin9161201e467d4889b247a3b7a106e8e4video.mp4");
+//        URLConnection urlConnection = url.openConnection();
+//        InputStream inputStream = urlConnection.getInputStream();
+//        File file =File.createTempFile("temp",".tmp");
+//        file.deleteOnExit();
+//        try(FileOutputStream outputStream = new FileOutputStream(file)) {
+//            byte[] buffer = new byte[1024];
+//            int bytesRead;
+//
+//            while ((bytesRead = inputStream.read(buffer)) != -1) {
+//                outputStream.write(buffer, 0, bytesRead);
+//            }
+//        }
+
+        String url = "http://s4bgg8hwg.hb-bkt.clouddn.com/2023/11/18/1234.avi";
+        String s = "D:\\haose\\Videos\\12\\12.mp4";
+        FfmpegUtil.formatToMp4(url, s);
+    }
+
+    /**
+     * 获取视频某一帧的截图
+     */
+    @Test
+    void videoPicture() {
+//        File file = new File("D:\\haose\\Videos\\1235.mp4");
+//        String s="D:\\haose\\Videos\\12\\12";
+//        FfmpegUtil.getVideoInfoAndGenerateThumbnail(file,s);
+        String url = "http://s4bgg8hwg.hb-bkt.clouddn.com/2023/11/18/1234.avi";
+        String s = "D:\\haose\\Videos\\12\\1234567.png";
+        FfmpegUtil.getTargetThumbnail(url, s);
+    }
+
+    @Test
+    void videoPictureTest() {
+//        File file = new File("D:\\haose\\Videos\\1235.mp4");
+//        String s="D:\\haose\\Videos\\12\\12";
+//        FfmpegUtil.getVideoInfoAndGenerateThumbnail(file,s);
+        String url = "http://s4bgg8hwg.hb-bkt.clouddn.com/2023/11/18/1234.avi";
+        String s = "D:\\haose\\Videos\\12\\1234567.png";
+
+        ffmpefVideoService.getTargetThumbnail(url, s);
+    }
+
 
 }

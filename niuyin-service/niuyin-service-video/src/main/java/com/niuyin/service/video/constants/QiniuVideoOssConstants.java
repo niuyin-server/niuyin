@@ -24,4 +24,7 @@ public class QiniuVideoOssConstants {
      * 视频首帧截图后缀
      */
     public static final String VIDEO_FRAME_1_END = "frame-jpg-offset-1";
+    public static final String PREFIX_URL = "http://s38bf8bdn.hb-bkt.clouddn.com/";
+
+    public static final String PREFIX_URL_TEST ="http://s4bgg8hwg.hb-bkt.clouddn.com/";
 }

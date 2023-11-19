@@ -2,6 +2,8 @@ package com.niuyin.starter.file.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+
 public interface FileStorageService {
 
     /**
@@ -16,4 +18,5 @@ public interface FileStorageService {
 
     String uploadVideo(MultipartFile file, String filePath);
 
+//    String uploadTransForVideo(File file);
 }
