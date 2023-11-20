@@ -138,6 +138,7 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     public IPage<VideoUserFavorites> queryFavoritePage(VideoPageDto pageDto) {
         LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserFavorites::getUserId, UserContext.getUserId());
+        queryWrapper.orderByDesc(VideoUserFavorites::getCreateTime);
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 
