@@ -142,11 +142,11 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @return
      */
     @Override
-    public IPage<VideoUserLike> queryMyLikeVideoPage(VideoPageDto pageDto) {
-        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getUserId, UserContext.getUserId());
-        queryWrapper.orderByDesc(VideoUserLike::getCreateTime);
-        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    public PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto) {
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        pageDto.setUserId(UserContext.getUserId());
+        List<Video> videos = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        return PageDataInfo.genPageData(videos, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
     /**
