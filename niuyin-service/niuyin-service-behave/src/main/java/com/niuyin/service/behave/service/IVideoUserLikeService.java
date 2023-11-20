@@ -2,6 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPageDto;
@@ -32,5 +33,5 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @param pageDto
      * @return
      */
-    List<Video> queryPersonLikePage(VideoPageDto pageDto);
+    PageDataInfo queryPersonLikePage(VideoPageDto pageDto);
 }

@@ -9,6 +9,7 @@ import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
+import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
@@ -19,6 +20,7 @@ import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IUserFavoriteVideoService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
+import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -64,6 +66,9 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
 
+    @Resource
+    private IVideoUserLikeService videoUserLikeService;
+
     /**
      * 收藏视频到收藏夹
      *
@@ -73,7 +78,12 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Transactional(rollbackFor = CustomException.class)
     @Override
     public Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO) {
-        // todo 收藏到收藏夹的同时收藏到仅收藏视频
+        // 收藏到收藏夹的同时收藏到仅收藏视频
+        VideoUserLike videoUserLike = new VideoUserLike();
+        videoUserLike.setVideoId(userFavoriteVideoDTO.getVideoId());
+        videoUserLike.setUserId(UserContext.getUserId());
+        videoUserLike.setCreateTime(LocalDateTime.now());
+        videoUserLikeService.save(videoUserLike);
         //从token中获取userid
         Long userId = UserContext.getUserId();
         //构建查询条件

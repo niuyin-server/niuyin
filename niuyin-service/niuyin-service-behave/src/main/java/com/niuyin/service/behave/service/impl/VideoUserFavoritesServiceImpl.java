@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
+import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
@@ -140,6 +142,21 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         queryWrapper.eq(VideoUserFavorites::getUserId, UserContext.getUserId());
         queryWrapper.orderByDesc(VideoUserFavorites::getCreateTime);
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    }
+
+    /**
+     * 分页查询用户收藏的视频
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto) {
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        pageDto.setUserId(UserContext.getUserId());
+        List<UserFavoriteVideoVO> videos = videoUserFavoritesMapper.selectUserFavoriteVideos(pageDto);
+        Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
+        return PageDataInfo.genPageData(videos, count);
     }
 
     @Async

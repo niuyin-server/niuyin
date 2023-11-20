@@ -33,7 +33,6 @@ public class VideoUserFavoritesController {
     @Resource
     private RemoteVideoService remoteVideoService;
 
-
     /**
      * 用户收藏
      *
@@ -51,14 +50,9 @@ public class VideoUserFavoritesController {
      * @param pageDto
      * @return
      */
-    @PostMapping("/myfavoritepage")
+    @PostMapping("/mypage")
     public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
-        IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
-        List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
-        if (videoIds.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        return PageDataInfo.genPageData(remoteVideoService.queryVideoByVideoIds(videoIds).getData(), favoritesPage.getTotal());
+        return videoUserFavoritesService.queryUserFavoriteVideoPage(pageDto);
     }
 
     @DeleteMapping("/{videoId}")

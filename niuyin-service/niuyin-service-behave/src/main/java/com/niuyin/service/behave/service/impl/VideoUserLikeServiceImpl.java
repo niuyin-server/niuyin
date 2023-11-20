@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserLike;
@@ -96,7 +97,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         if (StringUtils.isNull(video)) {
             return;
         }
-        if(operateUserId.equals(video.getUserId())){
+        if (operateUserId.equals(video.getUserId())) {
             return;
         }
         // 封装notice实体
@@ -155,23 +156,15 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @return
      */
     @Override
-    public List<Video> queryPersonLikePage(VideoPageDto pageDto) {
-        //判断当查询的时否为登录用户自己的主页
-        List<Video> videos;
-        if (pageDto.getUserId().equals(UserContext.getUserId())) {
-            videos = videoUserLikeMapper.selectPersonLikePage(
-                    pageDto.getUserId(), pageDto.getPageSize(), (pageDto.getPageNum() - 1) * pageDto.getPageNum());
-        } else {
-            //判断该用户的点赞列表是否对外展示
-            MemberInfo memberInfo = videoUserLikeMapper.selectPersonLikeShowStatus(pageDto.getUserId());
-            if (memberInfo.getLikeShowStatus().equals(ShowStatusEnum.HIDE.getCode())) {
-                return new ArrayList<>();
-            } else {
-                videos = videoUserLikeMapper.selectPersonLikePage(
-                        pageDto.getUserId(), pageDto.getPageSize(), (pageDto.getPageNum() - 1) * pageDto.getPageNum());
-            }
+    public PageDataInfo queryPersonLikePage(VideoPageDto pageDto) {
+        //判断该用户的点赞列表是否对外展示
+        MemberInfo memberInfo = videoUserLikeMapper.selectPersonLikeShowStatus(pageDto.getUserId());
+        if (memberInfo.getLikeShowStatus().equals(ShowStatusEnum.HIDE.getCode())) {
+            return PageDataInfo.emptyPage();
         }
-        return videos;
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        List<Video> videos = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        return PageDataInfo.genPageData(videos, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
 }

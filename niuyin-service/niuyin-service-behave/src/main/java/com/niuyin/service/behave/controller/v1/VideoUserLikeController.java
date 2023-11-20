@@ -94,15 +94,14 @@ public class VideoUserLikeController {
     }
 
     /**
-     * 查询用户的点赞列表
+     * 分页查询用户的点赞列表
      *
      * @param pageDto
      * @return
      */
     @PostMapping("/personLikePage")
     public PageDataInfo personLikePage(@RequestBody VideoPageDto pageDto) {
-        List<Video> likeIPage = videoUserLikeService.queryPersonLikePage(pageDto);
-        return PageDataInfo.genPageData(likeIPage, likeIPage.size());
+        return videoUserLikeService.queryPersonLikePage(pageDto);
     }
 
 }

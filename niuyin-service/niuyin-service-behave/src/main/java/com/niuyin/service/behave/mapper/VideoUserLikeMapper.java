@@ -20,13 +20,9 @@ import java.util.List;
 public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
     /**
      * 查询用户的点赞列表
-     *
-     * @param userId
-     * @param pageSize
-     * @param pageNum
-     * @return
      */
-    List<Video> selectPersonLikePage(Long userId, Integer pageSize, Integer pageNum);
+    List<Video> selectPersonLikePage(VideoPageDto videoPageDto);
+    Long selectPersonLikeCount(VideoPageDto videoPageDto);
 
     MemberInfo selectPersonLikeShowStatus(Long userId);
 

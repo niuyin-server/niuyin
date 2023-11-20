@@ -32,20 +32,34 @@
     <select id="selectAllLikeNumForUser">
 
     </select>
+
     <select id="selectPersonLikePage" resultType="com.niuyin.model.video.domain.Video">
         SELECT v.*
         FROM video v
-                 JOIN (SELECT video_id
-                       FROM video_user_like
-                       WHERE user_id = #{userId}
-                       LIMIT #{pageSize} OFFSET #{pageNum}) AS liked_videos
-                      ON v.video_id = liked_videos.video_id;
+        RIGHT JOIN (SELECT * FROM video_user_like WHERE user_id = #{userId}) vul
+        ON v.video_id = vul.video_id
+        WHERE 1
+        <if test="videoTitle != null">
+            AND v.video_title like concat ('%', #{videoTitle},'%')
+        </if>
+        ORDER BY vul.create_time DESC
+        LIMIT #{pageNum},#{pageSize}
+    </select>
+    <select id="selectPersonLikeCount" resultType="java.lang.Long">
+        SELECT count(1)
+        from video_user_like vul
+        right join video v on vul.video_id = v.video_id
+        where vul.user_id = #{userId}
+        <if test="videoTitle != null">
+            AND v.video_title like concat ('%', #{videoTitle},'%')
+        </if>
     </select>
     <select id="selectPersonLikeShowStatus" resultType="com.niuyin.model.member.domain.MemberInfo">
         select mi.like_show_status
         from member_info mi
         where mi.user_id = #{userId}
     </select>
+
     <!--    通过videoId获取视频-->
     <select id="selectVideoByVideoId" resultType="com.niuyin.model.video.domain.Video">
         <include refid="VideoVo"/>
