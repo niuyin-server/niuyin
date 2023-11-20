@@ -43,6 +43,7 @@ public class MemberInfoController {
         if (originalFilename.endsWith(".png")
                 || originalFilename.endsWith(".jpg")
                 || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".gif")
                 || originalFilename.endsWith(".webp")) {
             String filePath = PathUtils.generateFilePath(originalFilename);
             String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
