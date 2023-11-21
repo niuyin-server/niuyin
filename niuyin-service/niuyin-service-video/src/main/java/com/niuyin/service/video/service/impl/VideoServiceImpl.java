@@ -406,6 +406,17 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 // 封装标签返回
                 String[] tags = videoTagRelationService.queryVideoTags(videoVO.getVideoId());
                 videoVO.setTags(tags);
+                // 若是图文则封装图片集合
+                if (v.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                    List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                    String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                    videoVO.setImageList(imgs);
+                }
+                // 若是开启定位，封装定位
+                if (v.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                    VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                    videoVO.setPosition(videoPosition);
+                }
                 videoVOList.add(videoVO);
             } catch (Exception e) {
                 e.printStackTrace();

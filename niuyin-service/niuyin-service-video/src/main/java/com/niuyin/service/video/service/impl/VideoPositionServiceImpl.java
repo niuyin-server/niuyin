@@ -1,5 +1,6 @@
 package com.niuyin.service.video.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.service.video.mapper.VideoPositionMapper;
@@ -18,4 +19,17 @@ import javax.annotation.Resource;
 public class VideoPositionServiceImpl extends ServiceImpl<VideoPositionMapper, VideoPosition> implements IVideoPositionService {
     @Resource
     private VideoPositionMapper videoPositionMapper;
+
+    /**
+     * 通过视频id获取定位信息
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public VideoPosition queryPositionByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoPosition> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoPosition::getVideoId, videoId);
+        return this.getOne(queryWrapper);
+    }
 }

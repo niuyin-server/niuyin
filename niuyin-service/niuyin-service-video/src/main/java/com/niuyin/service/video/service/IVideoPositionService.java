@@ -11,4 +11,12 @@ import com.niuyin.model.video.domain.VideoPosition;
  */
 public interface IVideoPositionService extends IService<VideoPosition> {
 
+    /**
+     * 通过视频id获取定位信息
+     *
+     * @param videoId
+     * @return
+     */
+    VideoPosition queryPositionByVideoId(String videoId);
+
 }
