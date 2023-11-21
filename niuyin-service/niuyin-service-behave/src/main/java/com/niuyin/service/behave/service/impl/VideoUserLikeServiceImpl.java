@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -62,9 +63,10 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @param videoId
      * @return
      */
+    @Transactional
     @Override
     public boolean videoLike(String videoId) {
-        Long userId = UserContext.getUser().getUserId();
+        Long userId = UserContext.getUserId();
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
         List<VideoUserLike> list = this.list(queryWrapper);
@@ -79,6 +81,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             sendNoticeWithLikeVideo(videoId, userId);
             return this.save(videoUserLike);
         } else {
+            // 取消点赞
             //将本条点赞信息从redis
             likeNumDecrement(videoId);
             return this.remove(queryWrapper);
