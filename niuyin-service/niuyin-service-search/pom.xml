@@ -12,6 +12,14 @@
     <artifactId>niuyin-service-search</artifactId>
 
     <dependencies>
+        <!--分词器-->
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.7.6</version>
+        </dependency>
+
+
         <!--elasticsearch-->
         <dependency>
             <groupId>org.elasticsearch.client</groupId>

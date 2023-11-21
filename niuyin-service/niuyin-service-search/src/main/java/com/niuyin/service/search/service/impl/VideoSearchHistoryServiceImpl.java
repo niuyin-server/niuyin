@@ -1,12 +1,11 @@
 package com.niuyin.service.search.service.impl;
 
+import com.hankcs.hanlp.dictionary.CustomDictionary;
 import com.mongodb.client.result.DeleteResult;
 import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import org.springframework.data.domain.Sort;
@@ -15,14 +14,15 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import com.hankcs.hanlp.HanLP;
+import com.hankcs.hanlp.seg.common.Term;
 
 import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.io.StringReader;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * VideoSearchHistoryServiceImpl
@@ -102,4 +102,16 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
         DeleteResult remove = mongoTemplate.remove(Query.query(Criteria.where("userId").is(userId).and("id").is(id)), VideoSearchHistory.class);
         return remove.getDeletedCount() > 0;
     }
+
+    /**
+     * 热搜排行榜
+     *
+     * @return
+     */
+
+//    public PageDataInfo findSearchHot() {
+//
+//
+//        return PageDataInfo.genPageData(keyList, keyList.size());
+//    }
 }

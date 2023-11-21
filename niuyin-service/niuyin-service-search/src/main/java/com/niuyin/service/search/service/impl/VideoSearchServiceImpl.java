@@ -2,8 +2,11 @@ package com.niuyin.service.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.service.search.constant.ESIndexConstants;
+import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.service.VideoSearchService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.domain.VideoSearchVO;
@@ -30,10 +33,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * VideoSearchServiceImpl
@@ -50,6 +50,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     @Resource
     private VideoSearchHistoryService videoSearchHistoryService;
+
+    @Resource
+    private RedisService redisService;
 
     /**
      * 视频同步新增到es
@@ -170,5 +173,80 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         }
         result.forEach(System.out::println);
         return result;
+    }
+
+    /**
+     * @param dto
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<VideoSearchVO> searchAllVideoFromES(VideoSearchKeywordDTO dto) throws Exception {
+        //1.参数校验
+        if (StringUtils.isNull(dto) || StringUtils.isBlank(dto.getKeyword())) {
+            return null;
+        }
+        //2.设置查询条件
+        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        //布尔查询videoTitle或者userNickName
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        FuzzyQueryBuilder queryStringQueryBuilder = QueryBuilders.fuzzyQuery("videoTitle", dto.getKeyword());
+        boolQueryBuilder.must(queryStringQueryBuilder);
+        //查询小于mindate的数据
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("publishTime").lt(dto.getMinBehotTime() == null ? new Date().getTime() : dto.getMinBehotTime().getTime());
+        boolQueryBuilder.filter(rangeQueryBuilder);
+        //分页查询
+        searchSourceBuilder.from(dto.getPageNum());
+        searchSourceBuilder.size(dto.getPageSize());
+        //按照发布时间倒序查询
+        searchSourceBuilder.sort("publishTime", SortOrder.DESC);
+        //设置高亮  videoTitle
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field("videoTitle");
+        highlightBuilder.preTags("<font class='keyword-hint'>");
+        highlightBuilder.postTags("</font>");
+        searchSourceBuilder.highlighter(highlightBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        //3.结果封装返回
+        List<VideoSearchVO> result = new ArrayList<>();
+
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        String removeS1 = "<font class='keyword-hint'>";
+        String removeS2 = "</font>";
+        for (SearchHit hit : hits) {
+            String source = hit.getSourceAsString();
+            Map map = JSON.parseObject(source, Map.class);
+            //处理高亮
+            if (hit.getHighlightFields() != null && hit.getHighlightFields().size() > 0) {
+                Text[] titles = hit.getHighlightFields().get("videoTitle").getFragments();
+                String title = org.apache.commons.lang3.StringUtils.join(titles);
+                //高亮标题
+                map.put("videoTitle", title);
+            } else {
+                //原始标题
+                map.put("videoTitle", map.get("videoTitle"));
+            }
+            VideoSearchVO videoSearchVO = new VideoSearchVO();
+            BeanUtils.populate(videoSearchVO, map);
+            videoSearchVO.setVideoTitle(videoSearchVO.getVideoTitle().replace(removeS1, "").replace(removeS2, ""));
+            result.add(videoSearchVO);
+        }
+        result.forEach(System.out::println);
+        return result;
+    }
+
+    /**
+     * 从redis中获取热搜排行榜
+     *
+     * @return
+     */
+    @Override
+    public Set findSearchHot(PageDTO pageDTO) {
+        Set cacheZSetRange = redisService.getCacheZSetRange(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX,
+                (pageDTO.getPageNum() - 1) * pageDTO.getPageSize(), pageDTO.getPageSize());
+        return cacheZSetRange;
     }
 }
