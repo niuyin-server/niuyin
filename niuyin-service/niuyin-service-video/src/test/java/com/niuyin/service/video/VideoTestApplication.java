@@ -251,7 +251,7 @@ public class VideoTestApplication {
 
     @DisplayName("测试依据创建时间算分")
     @Test
-    void testCreateTimeScore(){
+    void testCreateTimeScore() {
         Video video = videoService.getById("1175158246101483520422e68d2");
         LocalDateTime createTime = video.getCreateTime();
         Duration between = Duration.between(LocalDateTime.now(), createTime);
@@ -307,6 +307,15 @@ public class VideoTestApplication {
         String s = "D:\\haose\\Videos\\12\\1234567.png";
 
         ffmpefVideoService.getTargetThumbnail(url, s);
+    }
+
+    @Test
+    @DisplayName("同步所有视频到redis")
+    void syncVideoToRedis() {
+        List<Video> videoList = videoService.list();
+        videoList.forEach(v->{
+            redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX+v.getVideoId(),v);
+        });
     }
 
 
