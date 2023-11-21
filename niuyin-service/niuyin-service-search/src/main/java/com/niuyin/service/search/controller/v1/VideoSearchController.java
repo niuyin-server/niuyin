@@ -3,6 +3,7 @@ package com.niuyin.service.search.controller.v1;
 import com.niuyin.common.domain.R;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.service.search.domain.VideoSearchVO;
@@ -57,5 +58,14 @@ public class VideoSearchController {
         return R.ok();
     }
 
-
+    /**
+     * 热搜标签展示
+     *
+     * @param pageDTO
+     * @return
+     */
+    @PostMapping("/search/hot")
+    public R<?> getSearchHot(@RequestBody PageDTO pageDTO) {
+        return R.ok(videoSearchService.findSearchHot(pageDTO));
+    }
 }
