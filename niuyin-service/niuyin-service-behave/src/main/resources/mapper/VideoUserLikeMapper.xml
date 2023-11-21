@@ -65,6 +65,16 @@
         <include refid="VideoVo"/>
         where v.video_id = #{videoId}
     </select>
+    <select id="selectImagesByVideoId" resultType="com.niuyin.model.video.domain.VideoImage">
+        select *
+        from video_image
+        where video_id = #{videoId}
+    </select>
+    <select id="selectPositionByVideoId" resultType="com.niuyin.model.video.domain.VideoPosition">
+        select *
+        from video_position
+        where video_id = #{videoId}
+    </select>
 
 </mapper>
 

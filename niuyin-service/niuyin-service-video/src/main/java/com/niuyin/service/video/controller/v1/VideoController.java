@@ -14,13 +14,19 @@ import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.service.IVideoImageService;
+import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +58,12 @@ public class VideoController {
 
     @Resource
     private FileStorageService fileStorageService;
+
+    @Resource
+    private IVideoImageService videoImageService;
+
+    @Resource
+    private IVideoPositionService videoPositionService;
 
     /**
      * 热门视频
@@ -144,7 +156,27 @@ public class VideoController {
     @PostMapping("/mypage")
     public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryMyVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
     /**
@@ -157,7 +189,27 @@ public class VideoController {
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
         // 封装vo
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
     /**
@@ -205,7 +257,27 @@ public class VideoController {
     @PostMapping("/personVideoPage")
     public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
 }

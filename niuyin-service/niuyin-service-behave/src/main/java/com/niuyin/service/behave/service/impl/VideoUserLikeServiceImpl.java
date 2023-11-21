@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.common.enums.NoticeTypeEnum;
@@ -18,7 +19,12 @@ import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.notice.mq.NoticeDirectConstant;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
@@ -148,8 +154,24 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     public PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto) {
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
-        List<Video> videos = videoUserLikeMapper.selectPersonLikePage(pageDto);
-        return PageDataInfo.genPageData(videos, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
     /**
@@ -166,8 +188,24 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             return PageDataInfo.emptyPage();
         }
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
-        List<Video> videos = videoUserLikeMapper.selectPersonLikePage(pageDto);
-        return PageDataInfo.genPageData(videos, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
 }
