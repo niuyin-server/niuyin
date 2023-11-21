@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
+import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPublishDto;
@@ -16,8 +19,10 @@ import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,6 +49,9 @@ public class VideoController {
 
     @Resource
     private RemoteMemberService remoteMemberService;
+
+    @Resource
+    private FileStorageService fileStorageService;
 
     /**
      * 热门视频
@@ -92,6 +100,28 @@ public class VideoController {
     @PostMapping("/upload")
     public R<VideoUploadVO> uploadVideo(@RequestParam("file") MultipartFile file) {
         return R.ok(videoService.uploadVideo(file));
+    }
+
+    /**
+     * 图片上传
+     */
+    @PostMapping("/upload/image")
+    public R<String> uploadImages(@RequestParam("file") MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isNull(originalFilename)) {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+        //对原始文件名进行判断
+        if (originalFilename.endsWith(".png")
+                || originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".webp")) {
+            String filePath = PathUtils.generateFilePath(originalFilename);
+            String url = fileStorageService.uploadImgFile(file, QiniuVideoOssConstants.VIDEO_ORIGIN_PREFIX_URL, filePath);
+            return R.ok(url);
+        } else {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
     }
 
     /**

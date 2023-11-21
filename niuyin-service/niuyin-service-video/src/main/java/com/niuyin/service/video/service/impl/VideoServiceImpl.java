@@ -9,11 +9,10 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
 import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.feign.member.RemoteMemberService;
-import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoCategoryRelation;
-import com.niuyin.model.video.domain.VideoSensitive;
+import com.niuyin.model.video.domain.*;
 import com.niuyin.model.behave.domain.VideoUserComment;
-import com.niuyin.model.video.domain.VideoTag;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.service.video.constants.VideoConstants;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.*;
@@ -98,6 +97,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private IVideoTagRelationService videoTagRelationService;
 
+    @Resource
+    private IVideoImageService videoImageService;
+
+    @Resource
+    private IVideoPositionService videoPositionService;
+
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -126,84 +131,158 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Override
     public String videoPublish(VideoPublishDto videoPublishDto) {
         Long userId = UserContext.getUser().getUserId();
-        //从数据库获得敏感信息
-        //判断传过来的数据是否符合数据库字段标准
-        if (videoPublishDto.getVideoTitle().length() > 100) {
-            throw new CustomException(BIND_CONTENT_TITLE_FAIL);
-        }
-        if (videoPublishDto.getVideoDesc().length() > 200) {
-            throw new CustomException(BIND_CONTENT_DESC_FAIL);
-        }
-        // 查出video敏感词表所有敏感词集合
+        // 数据库敏感词字典树过滤
         boolean b = sensitiveCheck(videoPublishDto.getVideoTitle() + videoPublishDto.getVideoDesc());
         if (b) {
             // 存在敏感词抛异常
             throw new CustomException(SENSITIVEWORD_ERROR);
         }
-        //将传过来的数据拷贝到要存储的对象中
-        Video video = BeanCopyUtils.copyBean(videoPublishDto, Video.class);
-        //生成id
-        String videoId = IdGenerator.generatorShortId();
-        //向新的对象中封装信息
-        video.setVideoId(videoId);
-        video.setUserId(userId);
-        video.setCreateTime(LocalDateTime.now());
-        video.setCreateBy(userId.toString());
-        video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ? video.getVideoUrl() + VideoCacheConstants.VIDEO_VIEW_COVER_IMAGE_KEY : videoPublishDto.getCoverImage());
-        //前端不传不用处理 将前端传递的分类拷贝到关联表对象
-        if (StringUtils.isNotNull(videoPublishDto.getCategoryId())) {
-            VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
-            // video_id存入VideoCategoryRelation（视频分类关联表）
-            videoCategoryRelation.setVideoId(video.getVideoId());
-            // 再将videoCategoryRelation对象存入video_category_relation表中
-            videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
-        }
-        // 视频标签处理
-        // 视频标签限制个数，五个
-        if (StringUtils.isNotNull(videoPublishDto.getVideoTags())) {
-            if (videoPublishDto.getVideoTags().length > VideoConstants.VIDEO_TAG_LIMIT) {
-                log.error("视频标签大于5个，不做处理");
-            } else {
-                videoTagRelationService.saveVideoTagRelationBatch(video.getVideoId(), videoPublishDto.getVideoTags());
+        // 判断发布类型 publicType 0视频1图文
+        if (videoPublishDto.getPublishType().equals(PublishType.VIDEO.getCode())) {
+            // 发布为视频
+            //将传过来的数据拷贝到要存储的对象中
+            Video video = BeanCopyUtils.copyBean(videoPublishDto, Video.class);
+            //生成id
+            String videoId = IdGenerator.generatorShortId();
+            //向新的对象中封装信息
+            video.setVideoId(videoId);
+            video.setUserId(userId);
+            video.setCreateTime(LocalDateTime.now());
+            video.setCreateBy(userId.toString());
+            video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ? video.getVideoUrl() + VideoCacheConstants.VIDEO_VIEW_COVER_IMAGE_KEY : videoPublishDto.getCoverImage());
+            //前端不传不用处理 将前端传递的分类拷贝到关联表对象
+            if (StringUtils.isNotNull(videoPublishDto.getCategoryId())) {
+                VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
+                // video_id存入VideoCategoryRelation（视频分类关联表）
+                videoCategoryRelation.setVideoId(video.getVideoId());
+                // 再将videoCategoryRelation对象存入video_category_relation表中
+                videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
             }
-        }
-        // 将video对象存入video表中
-        boolean save = this.save(video);
-        if (save) {
-            // 发布成功添加缓存
-            redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
-            // 1.发送整个video对象发送消息，
-            // 待添加视频封面
-            VideoSearchVO videoSearchVO = new VideoSearchVO();
-            videoSearchVO.setVideoId(video.getVideoId());
-            videoSearchVO.setVideoTitle(video.getVideoTitle());
-            // localdatetime转换为date
-            videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-            videoSearchVO.setCoverImage(video.getCoverImage());
-            videoSearchVO.setVideoUrl(video.getVideoUrl());
-            videoSearchVO.setUserId(userId);
-            // 获取用户信息
-            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-            if (StringUtils.isNotNull(userCache)) {
-                videoSearchVO.setUserNickName(userCache.getNickName());
-                videoSearchVO.setUserAvatar(userCache.getAvatar());
-            } else {
-                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-                videoSearchVO.setUserNickName(remoteUser.getNickName());
-                videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+            // 视频标签处理
+            // 视频标签限制个数，五个
+            if (StringUtils.isNotNull(videoPublishDto.getVideoTags())) {
+                if (videoPublishDto.getVideoTags().length > VideoConstants.VIDEO_TAG_LIMIT) {
+                    log.error("视频标签大于5个，不做处理");
+                } else {
+                    videoTagRelationService.saveVideoTagRelationBatch(video.getVideoId(), videoPublishDto.getVideoTags());
+                }
             }
-            String msg = JSON.toJSONString(videoSearchVO);
-            // 2.利用消息后置处理器添加消息头
-            rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
-                // 3.添加延迟消息属性，设置1分钟
-                message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
-                return message;
-            });
-            log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
-            return videoId;
+            // 将video对象存入video表中
+            boolean save = this.save(video);
+            if (save) {
+                // 发布成功添加缓存
+                redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
+                // 1.发送整个video对象发送消息，
+                // 待添加视频封面
+                VideoSearchVO videoSearchVO = new VideoSearchVO();
+                videoSearchVO.setVideoId(video.getVideoId());
+                videoSearchVO.setVideoTitle(video.getVideoTitle());
+                // localdatetime转换为date
+                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+                videoSearchVO.setCoverImage(video.getCoverImage());
+                videoSearchVO.setVideoUrl(video.getVideoUrl());
+                videoSearchVO.setUserId(userId);
+                // 获取用户信息
+                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
+                if (StringUtils.isNotNull(userCache)) {
+                    videoSearchVO.setUserNickName(userCache.getNickName());
+                    videoSearchVO.setUserAvatar(userCache.getAvatar());
+                } else {
+                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
+                    videoSearchVO.setUserNickName(remoteUser.getNickName());
+                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+                }
+                String msg = JSON.toJSONString(videoSearchVO);
+                // 2.利用消息后置处理器添加消息头
+                rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
+                    // 3.添加延迟消息属性，设置1分钟
+                    message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
+                    return message;
+                });
+                log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+                return videoId;
+            } else {
+                throw new CustomException(null);
+            }
+        } else if (videoPublishDto.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            // 发布为图文
+            Video video = BeanCopyUtils.copyBean(videoPublishDto, Video.class);
+            video.setVideoId(IdGenerator.generatorShortId());
+            video.setUserId(userId);
+            video.setCreateTime(LocalDateTime.now());
+            video.setCreateBy(userId.toString());
+            // 设置图文封面，若为空则使用图片集合的第一条
+            video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ? videoPublishDto.getImageFileList()[0] : videoPublishDto.getCoverImage());
+            // 前端不传不用处理 将前端传递的分类拷贝到关联表对象，图文类型暂不设置分类
+//            if (StringUtils.isNotNull(videoPublishDto.getCategoryId())) {
+//                VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
+//                // video_id存入VideoCategoryRelation（视频分类关联表）
+//                videoCategoryRelation.setVideoId(video.getVideoId());
+//                // 再将videoCategoryRelation对象存入video_category_relation表中
+//                videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
+//            }
+            // 视频标签处理
+            // 视频标签限制个数，五个
+            if (StringUtils.isNotNull(videoPublishDto.getVideoTags())) {
+                if (videoPublishDto.getVideoTags().length > VideoConstants.VIDEO_TAG_LIMIT) {
+                    log.error("视频标签大于5个，不做处理");
+                } else {
+                    videoTagRelationService.saveVideoTagRelationBatch(video.getVideoId(), videoPublishDto.getVideoTags());
+                }
+            }
+            // 将video对象存入video表中
+            boolean save = this.save(video);
+            if (save) {
+                // 发布成功添加缓存
+                redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
+                // 开始存储 video_image
+                List<VideoImage> videoImageList = new ArrayList<>();
+                for (String imgUrl : videoPublishDto.getImageFileList()) {
+                    VideoImage videoImage = new VideoImage();
+                    videoImage.setVideoId(video.getVideoId());
+                    videoImage.setImageUrl(imgUrl);
+                    videoImageList.add(videoImage);
+                }
+                boolean b1 = videoImageService.saveBatch(videoImageList);
+                // 开始存储视频发布位置
+                if (videoPublishDto.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                    VideoPosition videoPosition = BeanCopyUtils.copyBean(videoPublishDto.getPosition(), VideoPosition.class);
+                    videoPosition.setVideoId(video.getVideoId());
+                    boolean save1 = videoPositionService.save(videoPosition);
+                }
+                // 1.发送整个video对象发送消息
+                VideoSearchVO videoSearchVO = new VideoSearchVO();
+                videoSearchVO.setVideoId(video.getVideoId());
+                videoSearchVO.setVideoTitle(video.getVideoTitle());
+                // localdatetime转换为date
+                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+                videoSearchVO.setCoverImage(video.getCoverImage());
+                videoSearchVO.setVideoUrl(video.getVideoUrl());
+                videoSearchVO.setUserId(userId);
+                // 获取用户信息
+                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
+                if (StringUtils.isNotNull(userCache)) {
+                    videoSearchVO.setUserNickName(userCache.getNickName());
+                    videoSearchVO.setUserAvatar(userCache.getAvatar());
+                } else {
+                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
+                    videoSearchVO.setUserNickName(remoteUser.getNickName());
+                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+                }
+                String msg = JSON.toJSONString(videoSearchVO);
+                // 2.利用消息后置处理器添加消息头
+                rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
+                    // 3.添加延迟消息属性，设置1分钟
+                    message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
+                    return message;
+                });
+                log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+                return video.getVideoId();
+            }
         } else {
-            throw new CustomException(null);
+            return "";
         }
+        return "";
     }
 
     /**
