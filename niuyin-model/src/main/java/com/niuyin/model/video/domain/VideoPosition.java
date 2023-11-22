@@ -51,6 +51,10 @@ public class VideoPosition implements Serializable {
      */
     private String district;
     /**
+     * 街道
+     */
+    private String township;
+    /**
      * 邮编
      */
     private String adcode;

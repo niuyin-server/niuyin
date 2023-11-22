@@ -212,7 +212,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             video.setCreateTime(LocalDateTime.now());
             video.setCreateBy(userId.toString());
             // 设置图文封面，若为空则使用图片集合的第一条
-            video.setCoverImage(StringUtils.isNull(videoPublishDto.getCoverImage()) ? videoPublishDto.getImageFileList()[0] : videoPublishDto.getCoverImage());
+            video.setCoverImage(StringUtils.isEmpty(videoPublishDto.getCoverImage()) ? videoPublishDto.getImageFileList()[0] : videoPublishDto.getCoverImage());
             // 前端不传不用处理 将前端传递的分类拷贝到关联表对象，图文类型暂不设置分类
 //            if (StringUtils.isNotNull(videoPublishDto.getCategoryId())) {
 //                VideoCategoryRelation videoCategoryRelation = BeanCopyUtils.copyBean(videoPublishDto, VideoCategoryRelation.class);
