@@ -41,23 +41,19 @@ public class HotSearchSchedule {
 
     @Scheduled(fixedRate = 1000 * 60 * 5)
     public void computeHotSearch() throws Exception {
-        log.info("从mongodb中获取搜索字段");
-        CustomDictionary.add("抖音");
-        CustomDictionary.add("小猫咪");
-        CustomDictionary.add("二项");
-        CustomDictionary.add("热搜");
         ArrayList<String> list = new ArrayList<>();
         List<Term> termList;
-        NShortSegment nShortSegment = new NShortSegment();
+
         //将分词存入集合中
         for (VideoSearchHistory allSearch : videoSearchHistoryService.findTodaySearchRecord()) {
-            termList = nShortSegment.seg(allSearch.getKeyword());
+            termList =  HanLP.segment(allSearch.getKeyword());
             for (Term term : termList) {
                 if (term.word.length() != 1) {
                     list.add(term.word);
                 }
             }
         }
+
         //将集合中的而分词封装到map中，并且计数
         Map<String, Integer> map = new HashMap<>();
         for (String s : list) {
@@ -87,7 +83,6 @@ public class HotSearchSchedule {
                 break;
             }
         }
-        log.info("从es中获取信息完成");
         ArrayList<String> videoHotTitles = new ArrayList<>();
         for (VideoSearchVO videoSearchVO : videoSearchVOS) {
             videoHotTitles.add(videoSearchVO.getVideoTitle());
@@ -95,10 +90,9 @@ public class HotSearchSchedule {
         for (int j = 0; j < videoHotTitles.size(); j++) {
             Integer videoViewNum = redisService.getCacheMapValue(VideoHotTitleCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoSearchVOS.get(j).getVideoId());
             if (videoViewNum != null) {
-                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), videoViewNum);
+                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), videoViewNum/100);
             }
         }
-        log.info("将热词存入redis完成");
     }
 
 }
