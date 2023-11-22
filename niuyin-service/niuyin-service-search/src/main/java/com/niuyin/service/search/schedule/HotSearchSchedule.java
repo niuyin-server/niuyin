@@ -1,8 +1,6 @@
 package com.niuyin.service.search.schedule;
 
 import com.hankcs.hanlp.HanLP;
-import com.hankcs.hanlp.dictionary.CustomDictionary;
-import com.hankcs.hanlp.seg.NShort.NShortSegment;
 import com.hankcs.hanlp.seg.common.Term;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
@@ -46,7 +44,7 @@ public class HotSearchSchedule {
 
         //将分词存入集合中
         for (VideoSearchHistory allSearch : videoSearchHistoryService.findTodaySearchRecord()) {
-            termList =  HanLP.segment(allSearch.getKeyword());
+            termList = HanLP.segment(allSearch.getKeyword());
             for (Term term : termList) {
                 if (term.word.length() != 1) {
                     list.add(term.word);
@@ -90,7 +88,7 @@ public class HotSearchSchedule {
         for (int j = 0; j < videoHotTitles.size(); j++) {
             Integer videoViewNum = redisService.getCacheMapValue(VideoHotTitleCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoSearchVOS.get(j).getVideoId());
             if (videoViewNum != null) {
-                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), videoViewNum/100);
+                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), videoViewNum / 100);
             }
         }
     }
