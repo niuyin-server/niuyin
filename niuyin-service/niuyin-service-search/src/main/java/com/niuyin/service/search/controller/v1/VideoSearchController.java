@@ -1,14 +1,15 @@
 package com.niuyin.service.search.controller.v1;
 
 import com.niuyin.common.domain.R;
-import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.feign.member.RemoteMemberService;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -65,6 +66,7 @@ public class VideoSearchController {
      * @return
      */
     @PostMapping("/search/hot")
+    @Cacheable(value = "hotSearchs", key = " 'hotSearchs' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public R<?> getSearchHot(@RequestBody PageDTO pageDTO) {
         return R.ok(videoSearchService.findSearchHot(pageDTO));
     }
