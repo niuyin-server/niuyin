@@ -47,7 +47,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
@@ -248,15 +247,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             if (save) {
                 // 发布成功添加缓存
                 redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
-                // 开始存储 video_image
-                List<VideoImage> videoImageList = new ArrayList<>();
-                for (String imgUrl : videoPublishDto.getImageFileList()) {
-                    VideoImage videoImage = new VideoImage();
-                    videoImage.setVideoId(video.getVideoId());
-                    videoImage.setImageUrl(imgUrl);
-                    videoImageList.add(videoImage);
-                }
-                boolean b1 = videoImageService.saveBatch(videoImageList);
+                // 异步批量保存图片集合到mysql
+                CompletableFuture<Void> allFutures = CompletableFuture.allOf(Arrays.stream(videoPublishDto.getImageFileList())
+                        .map(url -> asyncSaveVideoImagesToDB(video.getVideoId(), url)).toArray(CompletableFuture[]::new));
+                allFutures.join();
                 // 开始存储视频发布位置
                 if (videoPublishDto.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
                     VideoPosition videoPosition = BeanCopyUtils.copyBean(videoPublishDto.getPosition(), VideoPosition.class);
@@ -296,6 +290,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             return "";
         }
         return "";
+    }
+
+    /**
+     * 异步执行同步数据操作
+     *
+     * @param videoId
+     * @return
+     */
+    @Async
+    public CompletableFuture<Void> asyncSaveVideoImagesToDB(String videoId, String imageUrl) {
+        VideoImage videoImage = new VideoImage();
+        videoImage.setVideoId(videoId);
+        videoImage.setImageUrl(imageUrl);
+        return CompletableFuture.runAsync(() -> videoImageService.save(videoImage));
     }
 
     /**
