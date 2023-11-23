@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
@@ -17,7 +18,12 @@ import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
@@ -31,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
@@ -155,6 +162,14 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
         List<UserFavoriteVideoVO> videos = videoUserFavoritesMapper.selectUserFavoriteVideos(pageDto);
+        videos.forEach(r -> {
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(r.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                r.setImageList(imgs);
+            }
+        });
         Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
         return PageDataInfo.genPageData(videos, count);
     }

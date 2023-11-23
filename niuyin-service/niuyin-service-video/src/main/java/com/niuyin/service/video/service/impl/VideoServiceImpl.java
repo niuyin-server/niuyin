@@ -10,7 +10,6 @@ import com.niuyin.common.utils.uniqueid.IdGenerator;
 import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.video.domain.*;
-import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.service.video.constants.VideoConstants;
@@ -43,11 +42,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
@@ -102,6 +102,19 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private IVideoPositionService videoPositionService;
+
+    /**
+     * 解决异步线程无法访问五线程的ThreadLocal
+     */
+    private static final ThreadLocal<Long> userIdThreadLocal = new InheritableThreadLocal<>();
+
+    public static void setUserId(Long userId) {
+        userIdThreadLocal.set(userId);
+    }
+
+    public static Long getUserId() {
+        return userIdThreadLocal.get();
+    }
 
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
@@ -331,103 +344,211 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public List<VideoVO> feedVideo(VideoFeedDTO videoFeedDTO) {
         LocalDateTime createTime = videoFeedDTO.getCreateTime();
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
-        // 小于 createTime 的5条数据
-        queryWrapper.select(Video::getVideoId);
-        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime).orderByDesc(Video::getCreateTime).last("limit 10");
-        List<Video> videoList;
-        try {
-            videoList = this.list(queryWrapper);
-            if (StringUtils.isNull(videoList) || videoList.isEmpty()) {
-                LambdaQueryWrapper<Video> queryWrapper2 = new LambdaQueryWrapper<>();
-                // 小于 LocalDateTime.now() 的5条数据
-                queryWrapper2.select(Video::getVideoId);
-                queryWrapper2.lt(Video::getCreateTime, LocalDateTime.now()).orderByDesc(Video::getCreateTime).last("limit 10");
-                videoList = this.list(queryWrapper2);
-            }
-            // 浏览自增1存入redis
-            videoList.forEach(v -> {
-                viewNumIncrement(v.getVideoId());
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        List<VideoVO> videoVOList = new ArrayList<>();
+        log.debug("mp开始feed");
+        // 小于 createTime 的数据
+        queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime)
+                .orderByDesc(Video::getCreateTime)
+                .last("limit 10");
+        List<Video> videoList = this.list(queryWrapper);
+        log.debug("mp结束feed");
+        List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
         // 封装VideoVO
-        videoList.forEach(v -> {
-            try {
-                Video cacheObject = redisService.getCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId());
-                if (StringUtils.isNull(cacheObject)) {
-                    v = this.getById(v.getVideoId());
-                } else {
-                    v = cacheObject;
-                }
-                VideoVO videoVO = BeanCopyUtils.copyBean(v, VideoVO.class);
-                // 封装点赞数，观看量，评论量
-                Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, v.getVideoId());
-                Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
-                Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, v.getVideoId());
-                videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
-                videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-                videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
-                // 评论数
-                videoVO.setCommentNum(videoMapper.selectCommentCountByVideoId(v.getVideoId()));
-                Long loginUserId = null;
-                try {
-                    loginUserId = UserContext.getUserId();
-                } catch (Exception ex) {
-                    log.debug("未登录");
-                }
-                if (StringUtils.isNotNull(loginUserId)) {
-                    // 是否关注、是否点赞、是否收藏
-                    try {
-                        videoVO.setWeatherLike(videoMapper.selectUserLikeVideo(v.getVideoId(), loginUserId) != 0);
-                        videoVO.setWeatherFavorite(remoteBehaveService.weatherFavorite(v.getVideoId()).getData());
-                        if (v.getUserId().equals(loginUserId)) {
-                            videoVO.setWeatherFollow(true);
-                        } else {
-                            Boolean weatherFollow = remoteSocialService.weatherfollow(v.getUserId()).getData();
-                            videoVO.setWeatherFollow(!StringUtils.isNull(weatherFollow) && weatherFollow);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                // 封装用户信息
-                Member userCache = redisService.getCacheObject("member:userinfo:" + v.getUserId());
-                if (StringUtils.isNotNull(userCache)) {
-                    videoVO.setUserNickName(userCache.getNickName());
-                    videoVO.setUserAvatar(userCache.getAvatar());
-                } else {
-                    Member publishUser = remoteMemberService.userInfoById(v.getUserId()).getData();
-                    videoVO.setUserNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
-                    videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
-                }
-                // 封装标签返回
-                String[] tags = videoTagRelationService.queryVideoTags(videoVO.getVideoId());
-                videoVO.setTags(tags);
-                // 若是图文则封装图片集合
-                if (v.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                    List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
-                    String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                    videoVO.setImageList(imgs);
-                }
-                // 若是开启定位，封装定位
-                if (v.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-                    VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
-                    videoVO.setPosition(videoPosition);
-                }
-                videoVOList.add(videoVO);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+//        videoVOList.forEach(this::packageVideoVO);
+        List<CompletableFuture<Void>> futures = videoVOList.stream()
+                .map(vo -> packageVideoVOAsync(vo, UserContext.getUserId()))
+                .collect(Collectors.toList());
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allFutures.join();
         return videoVOList;
     }
 
     @Async
+    public CompletableFuture<Void> packageVideoVOAsync(VideoVO videoVO, Long loginUserId) {
+        return CompletableFuture.runAsync(() -> packageVideoVO(videoVO, loginUserId));
+    }
+
+    @Async
+    public void packageVideoVO(VideoVO videoVO, Long loginUserId) {
+        log.debug("packageVideoVO开始");
+        CompletableFuture<Void> viewNumFuture = viewNumIncrementAsync(videoVO.getVideoId());
+        CompletableFuture<Void> behaveDataFuture = packageVideoBehaveDataAsync(videoVO);
+        CompletableFuture<Void> socialDataFuture = packageVideoSocialDataAsync(videoVO, loginUserId);
+        CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
+        CompletableFuture<Void> tagDataFuture = packageVideoTagDataAsync(videoVO);
+        CompletableFuture<Void> imageDataFuture = packageVideoImageDataAsync(videoVO);
+        CompletableFuture<Void> positionDataFuture = packageVideoPositionDataAsync(videoVO);
+        CompletableFuture.allOf(
+                viewNumFuture,
+                behaveDataFuture,
+                socialDataFuture,
+                memberDataFuture,
+                tagDataFuture,
+                imageDataFuture,
+                positionDataFuture
+        ).join();
+        log.debug("packageVideoVO结束");
+    }
+
+    @Async
+    public CompletableFuture<Void> viewNumIncrementAsync(String videoId) {
+        return CompletableFuture.runAsync(() -> viewNumIncrement(videoId));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoBehaveDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoBehaveData(videoVO));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoSocialDataAsync(VideoVO videoVO, Long loginUserId) {
+        return CompletableFuture.runAsync(() -> packageVideoSocialData(videoVO, loginUserId));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageMemberDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageMemberData(videoVO));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoTagDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoTagData(videoVO));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoImageDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoImageData(videoVO));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoPositionDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoPositionData(videoVO));
+    }
+
+    /**
+     * 浏览量自增1存入redis
+     *
+     * @param videoId
+     */
+    @Async
     public void viewNumIncrement(String videoId) {
+        log.debug("viewNumIncrement开始");
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
+        log.debug("viewNumIncrement结束");
+    }
+
+    /**
+     * 封装视频行为数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoBehaveData(VideoVO videoVO) {
+        log.debug("packageVideoBehaveData开始");
+        // 封装点赞数，观看量，评论量
+        Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoVO.getVideoId());
+        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
+        Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoVO.getVideoId());
+        videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
+        videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
+        // 评论数
+        videoVO.setCommentNum(videoMapper.selectCommentCountByVideoId(videoVO.getVideoId()));
+        log.debug("packageVideoBehaveData结束");
+    }
+
+    /**
+     * 封装用户数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageMemberData(VideoVO videoVO) {
+        log.debug("packageMemberData开始");
+        // 封装用户信息
+        Member userCache = redisService.getCacheObject("member:userinfo:" + videoVO.getUserId());
+        if (StringUtils.isNotNull(userCache)) {
+            videoVO.setUserNickName(userCache.getNickName());
+            videoVO.setUserAvatar(userCache.getAvatar());
+        } else {
+            Member publishUser = videoMapper.selectVideoAuthor(videoVO.getUserId());
+            videoVO.setUserNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
+            videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
+        }
+        log.debug("packageMemberData结束");
+    }
+
+    /**
+     * 封装视频社交数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoSocialData(VideoVO videoVO, Long loginUserId) {
+        log.debug("packageVideoSocialData开始" + getUserId());
+//        Long loginUserId = null;
+//        try {
+//            loginUserId = getUserId();
+//        } catch (Exception ex) {
+//            log.debug("未登录");
+//        }
+        if (StringUtils.isNotNull(loginUserId)) {
+            // 是否关注、是否点赞、是否收藏
+            videoVO.setWeatherLike(videoMapper.selectUserLikeVideo(videoVO.getVideoId(), loginUserId) > 0);
+            videoVO.setWeatherFavorite(videoMapper.userWeatherFavoriteVideo(videoVO.getVideoId(), loginUserId) > 0);
+            if (videoVO.getUserId().equals(loginUserId)) {
+                videoVO.setWeatherFollow(true);
+            } else {
+//                    Boolean weatherFollow = remoteSocialService.weatherfollow(videoVO.getUserId()).getData();
+                videoVO.setWeatherFollow(videoMapper.userWeatherAuthor(loginUserId, videoVO.getUserId()) > 0);
+            }
+        }
+        log.debug("packageVideoSocialData结束");
+    }
+
+    /**
+     * 封装视频标签数据
+     */
+    @Async
+    public void packageVideoTagData(VideoVO videoVO) {
+        log.debug("packageVideoTagData开始");
+        // 封装标签返回
+        String[] tags = videoTagRelationService.queryVideoTags(videoVO.getVideoId());
+        videoVO.setTags(tags);
+        log.debug("packageVideoTagData结束");
+    }
+
+    /**
+     * 封装图文数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoImageData(VideoVO videoVO) {
+        log.debug("packageVideoImageData开始");
+        // 若是图文则封装图片集合
+        if (videoVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+            String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+            videoVO.setImageList(imgs);
+        }
+        log.debug("packageVideoImageData结束");
+    }
+
+    /**
+     * 封装视频定位数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoPositionData(VideoVO videoVO) {
+        log.debug("packageVideoPositionData开始");
+        // 若是开启定位，封装定位
+        if (videoVO.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+            VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+            videoVO.setPosition(videoPosition);
+        }
+        log.debug("packageVideoPositionData结束");
     }
 
     /**

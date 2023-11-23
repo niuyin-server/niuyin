@@ -1,6 +1,7 @@
 package com.niuyin.service.video.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -56,6 +57,24 @@ public interface VideoMapper extends BaseMapper<Video> {
      * 查询视频点赞表
      */
     Long selectUserLikeVideo(@Param("videoId") String videoId, @Param("userId") Long userId);
+
+    /**
+     * 用户是否收藏视频
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    Long userWeatherFavoriteVideo(@Param("videoId") String videoId, @Param("userId") Long userId);
+
+    Long userWeatherAuthor(@Param("userId") Long userId,@Param("userFollowId") Long userFollowId);
+
+    /**
+     * 查询视频作者
+     *
+     * @param userId
+     * @return
+     */
+    Member selectVideoAuthor(Long userId);
 
 }
 
