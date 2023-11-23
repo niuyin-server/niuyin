@@ -22,6 +22,9 @@ public class UserFavoriteVideoVO {
     private String videoUrl;
     private Long likeNum;
     private String publishType;
+
+    private String[] imageList;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 

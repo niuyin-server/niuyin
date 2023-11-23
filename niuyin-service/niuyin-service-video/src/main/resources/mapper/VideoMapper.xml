@@ -50,6 +50,24 @@
         where video_id = #{videoId}
           and user_id = #{userId};
     </select>
+    <select id="selectVideoAuthor" resultType="com.niuyin.model.member.domain.Member">
+        select *
+        from member
+        where user_id = #{userId};
+    </select>
 
+    <select id="userWeatherFavoriteVideo" resultType="java.lang.Long">
+        select count(1) as count
+        from video_user_like
+        where video_id = #{videoId}
+          and user_id = #{userId}
+    </select>
+
+    <select id="userWeatherAuthor" resultType="java.lang.Long">
+        select count(1) as count
+        from user_follow
+        where user_id = #{userId}
+          and user_follow_id = #{userFollowId};
+    </select>
 </mapper>
 
