@@ -1,11 +1,14 @@
 package com.niuyin.service.behave.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
+import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
@@ -47,6 +50,20 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
     }
 
     /**
+     * 分页查询用户收藏夹
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public IPage<UserFavorite> queryCollectionPage(PageDTO pageDTO) {
+        LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
+        queryWrapper.orderByDesc(UserFavorite::getCreateTime);
+        return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
+    }
+
+    /**
      * 查询收藏集详情
      *
      * @return
@@ -68,4 +85,5 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         });
         return collectionInfoList;
     }
+
 }

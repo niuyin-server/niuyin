@@ -49,13 +49,7 @@ public class VideoUserLikeController {
      */
     @PostMapping("/mylikepage")
     public PageDataInfo myLikePage(@RequestBody VideoPageDto pageDto) {
-        IPage<VideoUserLike> likeIPage = videoUserLikeService.queryMyLikeVideoPage(pageDto);
-        List<String> videoIds = likeIPage.getRecords().stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
-        if (videoIds.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        List<Video> videos = remoteVideoService.queryVideoByVideoIds(videoIds).getData();
-        return PageDataInfo.genPageData(videos, likeIPage.getTotal());
+        return videoUserLikeService.queryMyLikeVideoPage(pageDto);
     }
 
     /**
@@ -94,15 +88,14 @@ public class VideoUserLikeController {
     }
 
     /**
-     * 查询用户的点赞列表
+     * 分页查询用户的点赞列表
      *
      * @param pageDto
      * @return
      */
     @PostMapping("/personLikePage")
     public PageDataInfo personLikePage(@RequestBody VideoPageDto pageDto) {
-        List<Video> likeIPage = videoUserLikeService.queryPersonLikePage(pageDto);
-        return PageDataInfo.genPageData(likeIPage, likeIPage.size());
+        return videoUserLikeService.queryPersonLikePage(pageDto);
     }
 
 }

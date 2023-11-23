@@ -1,6 +1,7 @@
 package com.niuyin.model.video.dto;
 
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoPosition;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,4 +19,11 @@ public class VideoPublishDto extends Video {
 
     // 视频标签
     private Long[] videoTags;
+
+    // 图文的图片集合
+    private String[] imageFileList;
+
+    // 视频定位
+    private VideoPosition position;
+
 }

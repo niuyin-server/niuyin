@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.common.enums.NoticeTypeEnum;
@@ -17,7 +19,12 @@ import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.notice.mq.NoticeDirectConstant;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
@@ -25,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -61,9 +69,10 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @param videoId
      * @return
      */
+    @Transactional
     @Override
     public boolean videoLike(String videoId) {
-        Long userId = UserContext.getUser().getUserId();
+        Long userId = UserContext.getUserId();
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
         List<VideoUserLike> list = this.list(queryWrapper);
@@ -78,6 +87,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             sendNoticeWithLikeVideo(videoId, userId);
             return this.save(videoUserLike);
         } else {
+            // 取消点赞
             //将本条点赞信息从redis
             likeNumDecrement(videoId);
             return this.remove(queryWrapper);
@@ -96,7 +106,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         if (StringUtils.isNull(video)) {
             return;
         }
-        if(operateUserId.equals(video.getUserId())){
+        if (operateUserId.equals(video.getUserId())) {
             return;
         }
         // 封装notice实体
@@ -141,11 +151,27 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @return
      */
     @Override
-    public IPage<VideoUserLike> queryMyLikeVideoPage(VideoPageDto pageDto) {
-        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoUserLike::getUserId, UserContext.getUserId());
-        queryWrapper.orderByDesc(VideoUserLike::getCreateTime);
-        return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+    public PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto) {
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        pageDto.setUserId(UserContext.getUserId());
+        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
     /**
@@ -155,23 +181,31 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @return
      */
     @Override
-    public List<Video> queryPersonLikePage(VideoPageDto pageDto) {
-        //判断当查询的时否为登录用户自己的主页
-        List<Video> videos;
-        if (pageDto.getUserId().equals(UserContext.getUserId())) {
-            videos = videoUserLikeMapper.selectPersonLikePage(
-                    pageDto.getUserId(), pageDto.getPageSize(), (pageDto.getPageNum() - 1) * pageDto.getPageNum());
-        } else {
-            //判断该用户的点赞列表是否对外展示
-            MemberInfo memberInfo = videoUserLikeMapper.selectPersonLikeShowStatus(pageDto.getUserId());
-            if (memberInfo.getLikeShowStatus().equals(ShowStatusEnum.HIDE.getCode())) {
-                return new ArrayList<>();
-            } else {
-                videos = videoUserLikeMapper.selectPersonLikePage(
-                        pageDto.getUserId(), pageDto.getPageSize(), (pageDto.getPageNum() - 1) * pageDto.getPageNum());
-            }
+    public PageDataInfo queryPersonLikePage(VideoPageDto pageDto) {
+        //判断该用户的点赞列表是否对外展示
+        MemberInfo memberInfo = videoUserLikeMapper.selectPersonLikeShowStatus(pageDto.getUserId());
+        if (memberInfo.getLikeShowStatus().equals(ShowStatusEnum.HIDE.getCode())) {
+            return PageDataInfo.emptyPage();
         }
-        return videos;
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
 }

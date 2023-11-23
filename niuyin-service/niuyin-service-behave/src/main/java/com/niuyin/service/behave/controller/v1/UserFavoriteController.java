@@ -2,10 +2,15 @@ package com.niuyin.service.behave.controller.v1;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
+import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
+import com.niuyin.model.common.dto.PageDTO;
+import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,14 +30,26 @@ public class UserFavoriteController {
     @Resource
     private IUserFavoriteService userFavoriteService;
 
+    @Resource
+    private UserFavoriteMapper userFavoriteMapper;
+
     /**
      * 我的收藏夹集合
      */
     @GetMapping("/list")
-    public R<?> getUserFavoriteList() {
+    public R<?> userFavoriteList() {
         LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
         return R.ok(userFavoriteService.list(queryWrapper));
+    }
+
+    /**
+     * 我的收藏夹集合分页查询
+     */
+    @PostMapping("/page")
+    public PageDataInfo userFavoritePage(@RequestBody PageDTO pageDTO) {
+        IPage<UserFavorite> userFavoriteIPage = userFavoriteService.queryCollectionPage(pageDTO);
+        return PageDataInfo.genPageData(userFavoriteIPage.getRecords(), userFavoriteIPage.getTotal());
     }
 
     /**
@@ -41,6 +58,27 @@ public class UserFavoriteController {
     @GetMapping("/infoList")
     public R<List<UserFavoriteInfoVO>> userCollectionInfoList() {
         return R.ok(userFavoriteService.queryCollectionInfoList());
+    }
+
+    /**
+     * 我的收藏夹集合详情分页查询
+     */
+    @PostMapping("/infoPage")
+    public PageDataInfo userCollectionInfoPage(@RequestBody PageDTO pageDTO) {
+        IPage<UserFavorite> userFavoriteIPage = userFavoriteService.queryCollectionPage(pageDTO);
+        List<UserFavorite> records = userFavoriteIPage.getRecords();
+        if(records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        int limit = 6;
+        List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(records, UserFavoriteInfoVO.class);
+        collectionInfoList.forEach(c -> {
+            // 1、获取视频总数
+            c.setVideoCount(userFavoriteMapper.selectVideoCountByFavoriteId(c.getFavoriteId()));
+            // 2、获取前六张封面
+            c.setVideoCoverList(userFavoriteMapper.selectFavoriteVideoCoverLimit(c.getFavoriteId(), limit));
+        });
+        return PageDataInfo.genPageData(collectionInfoList, userFavoriteIPage.getTotal());
     }
 
     /**

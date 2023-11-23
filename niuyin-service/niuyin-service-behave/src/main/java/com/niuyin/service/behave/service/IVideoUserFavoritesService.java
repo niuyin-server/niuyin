@@ -2,9 +2,8 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.behave.domain.UserFavoriteVideo;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
-import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 
 /**
@@ -18,4 +17,12 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
     boolean videoFavorites(String video);
 
     IPage<VideoUserFavorites> queryFavoritePage(VideoPageDto pageDto);
+
+    /**
+     * 分页查询用户收藏的视频
+     *
+     * @param pageDto
+     * @return
+     */
+    PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
 }

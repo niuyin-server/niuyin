@@ -4,20 +4,31 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
+import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.service.IVideoImageService;
+import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,6 +55,15 @@ public class VideoController {
 
     @Resource
     private RemoteMemberService remoteMemberService;
+
+    @Resource
+    private FileStorageService fileStorageService;
+
+    @Resource
+    private IVideoImageService videoImageService;
+
+    @Resource
+    private IVideoPositionService videoPositionService;
 
     /**
      * 热门视频
@@ -95,6 +115,28 @@ public class VideoController {
     }
 
     /**
+     * 图片上传
+     */
+    @PostMapping("/upload/image")
+    public R<String> uploadImages(@RequestParam("file") MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isNull(originalFilename)) {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+        //对原始文件名进行判断
+        if (originalFilename.endsWith(".png")
+                || originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".webp")) {
+            String filePath = PathUtils.generateFilePath(originalFilename);
+            String url = fileStorageService.uploadImgFile(file, QiniuVideoOssConstants.VIDEO_ORIGIN_PREFIX_URL, filePath);
+            return R.ok(url);
+        } else {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+    }
+
+    /**
      * 将用户上传的视频和用户信息绑定到一起
      *
      * @param videoPublishDto
@@ -114,7 +156,27 @@ public class VideoController {
     @PostMapping("/mypage")
     public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryMyVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
     /**
@@ -127,7 +189,27 @@ public class VideoController {
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
         // 封装vo
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
     /**
@@ -175,7 +257,27 @@ public class VideoController {
     @PostMapping("/personVideoPage")
     public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
         IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = new ArrayList<>();
+        records.forEach(r -> {
+            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+            // 若是图文则封装图片集合
+            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+            }
+            // 若是开启定位，封装定位
+            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+                videoVO.setPosition(videoPosition);
+            }
+            videoVOList.add(videoVO);
+        });
+        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
 }
