@@ -157,28 +157,7 @@ public class VideoController {
      */
     @PostMapping("/mypage")
     public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.queryMyVideoPage(pageDto);
-        List<Video> records = videoIPage.getRecords();
-        if (StringUtils.isNull(records) || records.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        List<VideoVO> videoVOList = new ArrayList<>();
-        records.forEach(r -> {
-            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
-            // 若是图文则封装图片集合
-            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
-                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                videoVO.setImageList(imgs);
-            }
-            // 若是开启定位，封装定位
-            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
-                videoVO.setPosition(videoPosition);
-            }
-            videoVOList.add(videoVO);
-        });
-        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
+        return videoService.queryMyVideoPage(pageDto);
     }
 
     /**
@@ -189,29 +168,7 @@ public class VideoController {
      */
     @PostMapping("/userpage")
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
-        // 封装vo
-        List<Video> records = videoIPage.getRecords();
-        if (StringUtils.isNull(records) || records.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        List<VideoVO> videoVOList = new ArrayList<>();
-        records.forEach(r -> {
-            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
-            // 若是图文则封装图片集合
-            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
-                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                videoVO.setImageList(imgs);
-            }
-            // 若是开启定位，封装定位
-            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
-                videoVO.setPosition(videoPosition);
-            }
-            videoVOList.add(videoVO);
-        });
-        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
+        return  videoService.queryUserVideoPage(pageDto);
     }
 
     /**

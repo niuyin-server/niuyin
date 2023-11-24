@@ -1,30 +1,42 @@
 package com.niuyin.service.video.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.video.domain.VideoCategoryRelation;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategory;
-import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
 import com.niuyin.model.video.vo.VideoCategoryVo;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.mapper.VideoCategoryMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
+import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
  * (VideoCategory)表服务实现类
@@ -38,14 +50,20 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     @Resource
     private VideoCategoryMapper videoCategoryMapper;
 
-    @Autowired
-    RedisService redisService;
+    @Resource
+    private RedisService redisService;
 
     @Resource
     private IVideoCategoryRelationService videoCategoryRelationService;
 
     @Resource
     private IVideoService videoService;
+
+    @Resource
+    private VideoMapper videoMapper;
+
+    @Resource
+    private IVideoImageService videoImageService;
 
     @Override
     public List<VideoCategory> saveVideoCategoriesToRedis() {
@@ -68,8 +86,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         if (cacheList.isEmpty()) {
             cacheList = saveVideoCategoriesToRedis();
         }
-        List<VideoCategoryVo> videoCategoryVos = BeanCopyUtils.copyBeanList(cacheList, VideoCategoryVo.class);
-        return videoCategoryVos;
+        return BeanCopyUtils.copyBeanList(cacheList, VideoCategoryVo.class);
     }
 
     /**
@@ -79,19 +96,128 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      * @return
      */
     @Override
-    public IPage<Video> selectVideoByCategory(VideoCategoryPageDTO pageDTO) {
+    public PageDataInfo selectVideoByCategory(VideoCategoryPageDTO pageDTO) {
         if (StringUtils.isNull(pageDTO.getCategoryId())) {
-            return new Page<>();
+            return PageDataInfo.emptyPage();
         }
-        LambdaQueryWrapper<VideoCategoryRelation> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(VideoCategoryRelation::getVideoId);
-        queryWrapper.eq(VideoCategoryRelation::getCategoryId, pageDTO.getCategoryId());
-        List<VideoCategoryRelation> list = videoCategoryRelationService.list(queryWrapper);
-        if (StringUtils.isNull(list) || list.isEmpty()) {
-            return new Page<>();
-        }
-        LambdaQueryWrapper<Video> videoLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        videoLambdaQueryWrapper.in(Video::getVideoId, list.stream().map(VideoCategoryRelation::getVideoId).collect(Collectors.toList()));
-        return videoService.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), videoLambdaQueryWrapper);
+        pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
+        List<Video> videoList = videoCategoryMapper.selectVideoByCategoryId(pageDTO);
+        List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
+        videoVOList.forEach(v -> {
+            System.out.println("v.getVideoId() = " + v.getVideoId());
+        });
+        Long videoCount = videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getCategoryId());
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
+                .stream()
+                .map(this::packageUserVideoVOAsync)
+                .toArray(CompletableFuture[]::new));
+        allFutures.join();
+        return PageDataInfo.genPageData(videoList, videoCount);
     }
+
+    @Async
+    public CompletableFuture<Void> packageUserVideoVOAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageUserVideoVO(videoVO));
+    }
+
+    @Async
+    public void packageUserVideoVO(VideoVO videoVO) {
+        CompletableFuture<Void> behaveDataFuture = packageVideoBehaveDataAsync(videoVO);
+        CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
+        CompletableFuture<Void> imageDataFuture = packageVideoImageDataAsync(videoVO);
+//        CompletableFuture<Void> positionDataFuture = packageVideoPositionDataAsync(videoVO);
+        CompletableFuture.allOf(
+                behaveDataFuture,
+                memberDataFuture,
+                imageDataFuture
+        ).join();
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoBehaveDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoBehaveData(videoVO));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageMemberDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageMemberData(videoVO));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoImageDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoImageData(videoVO));
+    }
+
+    /**
+     * 封装视频行为数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoBehaveData(VideoVO videoVO) {
+        log.debug("packageVideoBehaveData开始");
+        // 封装点赞数，观看量，评论量
+        Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoVO.getVideoId());
+        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
+        Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoVO.getVideoId());
+        videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
+        videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
+        // 评论数
+        videoVO.setCommentNum(videoMapper.selectCommentCountByVideoId(videoVO.getVideoId()));
+        log.debug("packageVideoBehaveData结束");
+    }
+
+    /**
+     * 封装用户数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageMemberData(VideoVO videoVO) {
+        log.debug("packageMemberData开始");
+        // 封装用户信息
+        Member userCache = redisService.getCacheObject("member:userinfo:" + videoVO.getUserId());
+        if (StringUtils.isNotNull(userCache)) {
+            videoVO.setUserNickName(userCache.getNickName());
+            videoVO.setUserAvatar(userCache.getAvatar());
+        } else {
+            Member publishUser = videoMapper.selectVideoAuthor(videoVO.getUserId());
+            videoVO.setUserNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
+            videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
+        }
+        log.debug("packageMemberData结束");
+    }
+
+    /**
+     * 封装图文数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoImageData(VideoVO videoVO) {
+        log.debug("packageVideoImageData开始");
+        // 若是图文则封装图片集合
+        if (videoVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            Object imgsCacheObject = redisService.getCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId());
+            if (StringUtils.isNotNull(imgsCacheObject)) {
+                if (imgsCacheObject instanceof JSONArray) {
+                    JSONArray jsonArray = (JSONArray) imgsCacheObject;
+                    videoVO.setImageList(jsonArray.toArray(new String[0]));
+                } else if (imgsCacheObject instanceof String) {
+                    String jsonString = (String) imgsCacheObject;
+                    videoVO.setImageList(JSON.parseObject(jsonString, String[].class));
+                }
+            } else {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoVO.setImageList(imgs);
+                // 重建缓存
+                redisService.setCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId(), imgs);
+                redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId(), 1, TimeUnit.DAYS);
+            }
+        }
+        log.debug("packageVideoImageData结束");
+    }
+
 }

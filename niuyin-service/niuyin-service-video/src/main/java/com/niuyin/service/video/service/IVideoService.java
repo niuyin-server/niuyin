@@ -2,6 +2,7 @@ package com.niuyin.service.video.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
@@ -46,7 +47,7 @@ public interface IVideoService extends IService<Video> {
      * @param pageDto
      * @return
      */
-    IPage<Video> queryMyVideoPage(VideoPageDto pageDto);
+    PageDataInfo queryMyVideoPage(VideoPageDto pageDto);
 
     /**
      * 分页用户视频
@@ -54,7 +55,7 @@ public interface IVideoService extends IService<Video> {
      * @param pageDto
      * @return
      */
-    IPage<Video> queryUserVideoPage(VideoPageDto pageDto);
+    PageDataInfo queryUserVideoPage(VideoPageDto pageDto);
 
     /**
      * 视频feed接口
