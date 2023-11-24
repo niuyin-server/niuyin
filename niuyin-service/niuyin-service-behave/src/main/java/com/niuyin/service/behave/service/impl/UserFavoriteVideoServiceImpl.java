@@ -79,15 +79,16 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Override
     public Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO) {
         // 收藏到收藏夹的同时收藏到仅收藏视频
-        VideoUserLike videoUserLike = new VideoUserLike();
-        videoUserLike.setVideoId(userFavoriteVideoDTO.getVideoId());
-        videoUserLike.setUserId(UserContext.getUserId());
-        videoUserLike.setCreateTime(LocalDateTime.now());
-        videoUserLikeService.save(videoUserLike);
+        VideoUserFavorites videoUserFavorite = new VideoUserFavorites();
+        videoUserFavorite.setVideoId(userFavoriteVideoDTO.getVideoId());
+        videoUserFavorite.setUserId(UserContext.getUserId());
+        videoUserFavorite.setCreateTime(LocalDateTime.now());
+        videoUserFavoritesService.save(videoUserFavorite);
         //从token中获取userid
         Long userId = UserContext.getUserId();
         //构建查询条件
         LambdaQueryWrapper<UserFavoriteVideo> queryWrapper = new LambdaQueryWrapper<>();
+        //查询是否再收藏夹中收藏该视频
         queryWrapper.eq(UserFavoriteVideo::getVideoId, userFavoriteVideoDTO.getVideoId()).eq(UserFavoriteVideo::getUserId, userId);
         List<UserFavoriteVideo> dbList = this.list(queryWrapper);
         // 查询是否已经只收藏视频，若是则不增加redis收藏数
@@ -96,7 +97,7 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
                 .eq(VideoUserFavorites::getUserId, userId);
         List<VideoUserFavorites> videoUserFavorites = videoUserFavoritesService.list(vufQW);
         if (dbList.isEmpty() && videoUserFavorites.isEmpty()) {
-            //将本条点赞信息存储到redis（key为videoId,value为videoUrl）
+            //将本条收藏信息存储到redis（key为videoId,value为videoUrl）
             favoriteNumIncrease(userFavoriteVideoDTO.getVideoId());
             // 发送消息到通知
             sendNotice2MQ(userFavoriteVideoDTO.getVideoId(), userId);

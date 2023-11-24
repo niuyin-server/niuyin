@@ -1,6 +1,5 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
@@ -16,9 +15,9 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.domain.VideoPosition;
-import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.VideoUploadVO;
@@ -29,6 +28,7 @@ import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.starter.file.service.FileStorageService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -71,7 +71,9 @@ public class VideoController {
      * @param pageDTO
      * @return
      */
+
     @PostMapping("/hot")
+    @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
