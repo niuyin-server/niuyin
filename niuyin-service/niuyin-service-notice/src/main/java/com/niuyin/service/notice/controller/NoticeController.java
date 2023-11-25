@@ -12,7 +12,6 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
-import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.notice.vo.NoticeVO;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.notice.mapper.NoticeMapper;
@@ -21,8 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * 通知表(Notice)表控制层
@@ -57,38 +58,80 @@ public class NoticeController {
     public PageDataInfo userNoticePage(@RequestBody NoticePageDTO pageDTO) {
         IPage<Notice> noticeIPage = noticeService.queryUserNoticePage(pageDTO);
         List<Notice> records = noticeIPage.getRecords();
-        List<NoticeVO> voList = new ArrayList<>(10);
         if (records.isEmpty()) {
             return PageDataInfo.emptyPage();
         }
-        // 封装vo
-        records.forEach(n -> {
-            NoticeVO noticeVO = BeanCopyUtils.copyBean(n, NoticeVO.class);
-            // 先走redis，有就直接返回
-            Member userCache = redisService.getCacheObject("member:userinfo:" + n.getOperateUserId());
-            if (StringUtils.isNotNull(userCache)) {
-                noticeVO.setNickName(userCache.getNickName());
-                noticeVO.setOperateAvatar(userCache.getAvatar());
-            } else {
-                Member member = remoteMemberService.userInfoById(n.getOperateUserId()).getData();
-                if (StringUtils.isNotNull(member)) {
-                    noticeVO.setNickName(member.getNickName());
-                    noticeVO.setOperateAvatar(member.getAvatar());
-                }
-            }
-            // 封装视频封面
-            if (StringUtils.isNotNull(n.getVideoId())) {
-                Video videoCache = redisService.getCacheObject("video:videoinfo:" + n.getVideoId());
-                if (StringUtils.isNull(videoCache)) {
-                    //缓存为空
-                    Video video = noticeMapper.selectVideoById(n.getVideoId());
-                    noticeVO.setVideoCoverImage(video.getCoverImage());
-                } else {
-                    noticeVO.setVideoCoverImage(videoCache.getCoverImage());
-                }
-            }
-            voList.add(noticeVO);
-        });
+//        List<NoticeVO> voList = new ArrayList<>(10);
+//        //封装vo
+//        records.forEach(n -> {
+//            NoticeVO noticeVO = BeanCopyUtils.copyBean(n, NoticeVO.class);
+//            // 先走redis，有就直接返回
+//            Member userCache = redisService.getCacheObject("member:userinfo:" + n.getOperateUserId());
+//            if (StringUtils.isNotNull(userCache)) {
+//                noticeVO.setNickName(userCache.getNickName());
+//                noticeVO.setOperateAvatar(userCache.getAvatar());
+//            } else {
+//                Member user = new Member();
+//                List<Member> members = noticeMapper.batchSelectVideoAuthor(Collections.singletonList(n.getOperateUserId()));
+//                if (!members.isEmpty()) {
+//                    user = members.get(0);
+//                }
+//                if (StringUtils.isNotNull(user)) {
+//                    noticeVO.setNickName(user.getNickName());
+//                    noticeVO.setOperateAvatar(user.getAvatar());
+//                }
+//            }
+//            // 封装视频封面
+//            if (StringUtils.isNotNull(n.getVideoId())) {
+//                Video videoCache = redisService.getCacheObject("video:videoinfo:" + n.getVideoId());
+//                if (StringUtils.isNull(videoCache)) {
+//                    //缓存为空
+//                    Video video = noticeMapper.selectVideoById(n.getVideoId());
+//                    noticeVO.setVideoCoverImage(video.getCoverImage());
+//                } else {
+//                    noticeVO.setVideoCoverImage(videoCache.getCoverImage());
+//                }
+//            }
+//            voList.add(noticeVO);
+//        });
+        List<CompletableFuture<NoticeVO>> futures = records.stream()
+                .map(n -> CompletableFuture.supplyAsync(() -> {
+                    NoticeVO noticeVO = BeanCopyUtils.copyBean(n, NoticeVO.class);
+                    Member user = new Member();
+                    // 获取用户信息
+                    Member userCache = redisService.getCacheObject("member:userinfo:" + n.getOperateUserId());
+                    if (StringUtils.isNotNull(userCache)) {
+                        noticeVO.setNickName(userCache.getNickName());
+                        noticeVO.setOperateAvatar(userCache.getAvatar());
+                    } else {
+                        List<Member> members = noticeMapper.batchSelectVideoAuthor(Collections.singletonList(n.getOperateUserId()));
+                        if (!members.isEmpty()) {
+                            user = members.get(0);
+                        }
+                        if (StringUtils.isNotNull(user)) {
+                            noticeVO.setNickName(user.getNickName());
+                            noticeVO.setOperateAvatar(user.getAvatar());
+                        }
+                    }
+                    // 获取视频封面
+                    if (StringUtils.isNotNull(n.getVideoId())) {
+                        Video videoCache = redisService.getCacheObject("video:videoinfo:" + n.getVideoId());
+                        if (StringUtils.isNull(videoCache)) {
+                            // 缓存为空
+                            Video video = noticeMapper.selectVideoById(n.getVideoId());
+                            noticeVO.setVideoCoverImage(video.getCoverImage());
+                        } else {
+                            noticeVO.setVideoCoverImage(videoCache.getCoverImage());
+                        }
+                    }
+                    return noticeVO;
+                }))
+                .collect(Collectors.toList());
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        List<NoticeVO> voList = allFutures.thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList()))
+                .join();
         return PageDataInfo.genPageData(voList, noticeIPage.getTotal());
     }
 
