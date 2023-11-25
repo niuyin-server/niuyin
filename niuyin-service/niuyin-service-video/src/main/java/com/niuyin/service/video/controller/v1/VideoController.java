@@ -11,7 +11,6 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.domain.VideoPosition;
@@ -23,7 +22,6 @@ import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
-import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
@@ -35,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 视频表(Video)表控制层
@@ -75,29 +72,7 @@ public class VideoController {
     @PostMapping("/hot")
     @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
-        int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
-        int endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
-        Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
-        List<VideoVO> videoVOList = new ArrayList<>();
-        videoIds.forEach(vid -> {
-            Video video = videoService.getById((String) vid);
-            VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
-            Member user = new Member();
-            try {
-                user = remoteMemberService.userInfoById(video.getUserId()).getData();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (StringUtils.isNotNull(user)) {
-                videoVO.setUserNickName(user.getNickName());
-                videoVO.setUserAvatar(user.getAvatar());
-            }
-            // todo 是否关注
-            videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
-            videoVOList.add(videoVO);
-        });
-        return PageDataInfo.genPageData(videoVOList, hotCount);
+        return videoService.getHotvideos(pageDTO);
     }
 
     /**
@@ -163,6 +138,7 @@ public class VideoController {
             return PageDataInfo.emptyPage();
         }
         List<VideoVO> videoVOList = new ArrayList<>();
+
         records.forEach(r -> {
             VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
             // 若是图文则封装图片集合

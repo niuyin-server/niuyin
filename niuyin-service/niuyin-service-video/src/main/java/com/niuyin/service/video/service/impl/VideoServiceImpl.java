@@ -1,38 +1,40 @@
 package com.niuyin.service.video.service.impl;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.audit.SensitiveWordUtil;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.file.PathUtils;
-import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.common.utils.uniqueid.IdGenerator;
-import com.niuyin.feign.social.RemoteSocialService;
-import com.niuyin.feign.member.RemoteMemberService;
-import com.niuyin.model.video.domain.*;
-import com.niuyin.model.video.enums.PositionFlag;
-import com.niuyin.model.video.enums.PublishType;
-import com.niuyin.service.video.constants.VideoConstants;
-import com.niuyin.service.video.mapper.VideoMapper;
-import com.niuyin.service.video.service.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.audit.SensitiveWordUtil;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.file.PathUtils;
+import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.utils.uniqueid.IdGenerator;
 import com.niuyin.feign.behave.RemoteBehaveService;
-import com.niuyin.model.search.vo.VideoSearchVO;
+import com.niuyin.feign.member.RemoteMemberService;
+import com.niuyin.feign.social.RemoteSocialService;
+import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.search.vo.VideoSearchVO;
+import com.niuyin.model.video.domain.*;
 import com.niuyin.model.video.dto.VideoFeedDTO;
-import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.dto.VideoPublishDto;
+import com.niuyin.model.video.enums.PositionFlag;
+import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.HotVideoVO;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.constants.VideoConstants;
+import com.niuyin.service.video.mapper.VideoMapper;
+import com.niuyin.service.video.service.*;
 import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -47,10 +49,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static com.niuyin.model.common.enums.HttpCodeEnum.*;
+import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT5;
 
@@ -682,5 +683,44 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
     }
 
+    /**
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo getHotvideos(PageDTO pageDTO) {
+        int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
+        int endIndex = startIndex + pageDTO.getPageSize() - 1;
+        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
+        Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
+        List<VideoVO> videoVOList = new ArrayList<>();
+        //使用parallelStream并行流相较于stream流，性能更高
+        List<CompletableFuture<Void>> futures = (List<CompletableFuture<Void>>) videoIds.parallelStream()
+                .map(vid -> CompletableFuture.supplyAsync(() -> {
+                    Video video = this.getById((String) vid);
+                    Member user = new Member();
+                    try {
+                        //作者信息批量查询，相较于单条查询性能更高
+                        List<Member> authors = videoMapper.batchSelectVideoAuthor(Collections.singletonList(video.getUserId()));
+                        if (!authors.isEmpty()) {
+                            user = authors.get(0);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
+                    if (StringUtils.isNotNull(user)) {
+                        videoVO.setUserNickName(user.getNickName());
+                        videoVO.setUserAvatar(user.getAvatar());
+                    }
+                    // todo 是否关注
+                    videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
+                    videoVOList.add(videoVO);
+                    return videoVO;
+                })).collect(Collectors.toList());
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allFutures.join();
+        return PageDataInfo.genPageData(videoVOList, hotCount);
+    }
 
 }

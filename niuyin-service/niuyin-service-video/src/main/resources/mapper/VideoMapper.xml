@@ -69,5 +69,12 @@
         where user_id = #{userId}
           and user_follow_id = #{userFollowId};
     </select>
+    <select id="batchSelectVideoAuthor" parameterType="java.util.List"  resultType="com.niuyin.model.member.domain.Member">
+
+        SELECT m.nick_name,m.avatar FROM member m WHERE m.user_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>;
+    </select>
 </mapper>
 

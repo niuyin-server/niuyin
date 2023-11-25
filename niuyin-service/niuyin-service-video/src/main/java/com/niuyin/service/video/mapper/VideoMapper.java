@@ -76,5 +76,8 @@ public interface VideoMapper extends BaseMapper<Video> {
      */
     Member selectVideoAuthor(Long userId);
 
+    List<Member> batchSelectVideoAuthor(List<Long> userId);
+
+//    Member selcetMemberInfoById(Long userId);
 }
 
