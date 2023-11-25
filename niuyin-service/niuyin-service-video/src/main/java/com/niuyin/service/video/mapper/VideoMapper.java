@@ -76,8 +76,12 @@ public interface VideoMapper extends BaseMapper<Video> {
      */
     Member selectVideoAuthor(Long userId);
 
+    /**
+     * 批量查询作者信息
+     * @param userId
+     * @return
+     */
     List<Member> batchSelectVideoAuthor(List<Long> userId);
 
-//    Member selcetMemberInfoById(Long userId);
 }
 

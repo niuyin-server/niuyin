@@ -122,7 +122,11 @@ public interface IVideoService extends IService<Video> {
      */
     IPage<Video> queryMemberVideoPage(VideoPageDto pageDto);
 
-//    Member userInfoById(Long userId);
 
+    /**
+     * 热门视频查询
+     * @param pageDTO
+     * @return
+     */
     PageDataInfo getHotvideos(PageDTO pageDTO);
 }
