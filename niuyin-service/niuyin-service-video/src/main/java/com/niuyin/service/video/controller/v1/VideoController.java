@@ -226,36 +226,36 @@ public class VideoController {
         return R.ok(videoService.queryUserVideoCount());
     }
 
-    /**
-     * todo 查询用户的作品，整到userpage 第126行
-     *
-     * @param pageDto
-     * @return
-     */
-    @PostMapping("/personVideoPage")
-    public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
-        List<Video> records = videoIPage.getRecords();
-        if (StringUtils.isNull(records) || records.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        List<VideoVO> videoVOList = new ArrayList<>();
-        records.forEach(r -> {
-            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
-            // 若是图文则封装图片集合
-            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
-                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                videoVO.setImageList(imgs);
-            }
-            // 若是开启定位，封装定位
-            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
-                videoVO.setPosition(videoPosition);
-            }
-            videoVOList.add(videoVO);
-        });
-        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
-    }
+//    /**
+//     * todo 查询用户的作品，整到userpage 第126行
+//     *
+//     * @param pageDto
+//     * @return
+//     */
+//    @PostMapping("/personVideoPage")
+//    public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
+//        IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
+//        List<Video> records = videoIPage.getRecords();
+//        if (StringUtils.isNull(records) || records.isEmpty()) {
+//            return PageDataInfo.emptyPage();
+//        }
+//        List<VideoVO> videoVOList = new ArrayList<>();
+//        records.forEach(r -> {
+//            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
+//            // 若是图文则封装图片集合
+//            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+//                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+//                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+//                videoVO.setImageList(imgs);
+//            }
+//            // 若是开启定位，封装定位
+//            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+//                VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoVO.getVideoId());
+//                videoVO.setPosition(videoPosition);
+//            }
+//            videoVOList.add(videoVO);
+//        });
+//        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
+//    }
 
 }
