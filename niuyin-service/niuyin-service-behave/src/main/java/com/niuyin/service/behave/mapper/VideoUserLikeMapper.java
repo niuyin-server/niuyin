@@ -49,5 +49,7 @@ public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
      * @return
      */
     VideoPosition selectPositionByVideoId(String videoId);
+
+    List<VideoImage> selectImagesByVideoIds(List<String> imageVideoIds);
 }
 

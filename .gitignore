@@ -39,4 +39,5 @@ build/
 .DS_Store
 
 ### hanlp ###
-.bin
+**/.bin/**
+

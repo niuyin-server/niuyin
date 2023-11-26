@@ -16,16 +16,15 @@
         v.create_time,
         vuf.create_time as favoriteTime
         FROM video v
-        RIGHT JOIN
-        (SELECT * FROM video_user_favorites WHERE user_id = #{userId}) vuf
-        ON v.video_id = vuf.video_id
+        INNER JOIN video_user_favorites vuf ON v.video_id = vuf.video_id
         LEFT JOIN member m ON m.user_id = v.user_id
-        WHERE 1
+        WHERE vuf.user_id = #{userId}
         <if test="videoTitle != null">
-            AND video_title like concat ('%', #{videoTitle},'%')
+            AND v.video_title LIKE CONCAT('%', #{videoTitle}, '%')
         </if>
         ORDER BY vuf.create_time DESC
         LIMIT #{pageNum}, #{pageSize}
+
     </select>
 
     <select id="selectUserFavoriteVideosCount" resultType="java.lang.Long">

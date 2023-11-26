@@ -8,22 +8,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
-import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
-import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoPageDto;
-import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
-import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
@@ -37,8 +32,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -159,17 +158,48 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
      */
     @Override
     public PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto) {
+//        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+//        pageDto.setUserId(UserContext.getUserId());
+//        List<UserFavoriteVideoVO> videos = videoUserFavoritesMapper.selectUserFavoriteVideos(pageDto);
+//        videos.forEach(r -> {
+//            // 若是图文则封装图片集合
+//            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+//                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(r.getVideoId());
+//                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+//                r.setImageList(imgs);
+//            }
+//        });
+//        Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
+//        return PageDataInfo.genPageData(videos, count);
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
+        // 查询用户收藏的视频列表（包含分页）
         List<UserFavoriteVideoVO> videos = videoUserFavoritesMapper.selectUserFavoriteVideos(pageDto);
-        videos.forEach(r -> {
-            // 若是图文则封装图片集合
-            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(r.getVideoId());
-                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                r.setImageList(imgs);
-            }
+        // 收集图文视频的视频ID
+        List<String> imageVideoIds = videos.stream()
+                .filter(r -> r.getPublishType().equals(PublishType.IMAGE.getCode()))
+                .map(UserFavoriteVideoVO::getVideoId)
+                .collect(Collectors.toList());
+        // 批量查询图文视频对应的图片集合（异步）
+        CompletableFuture<List<VideoImage>> videoImagesFuture = CompletableFuture.supplyAsync(() ->
+                videoUserLikeMapper.selectImagesByVideoIds(imageVideoIds));
+        // 更新视频对象的图片集合
+        CompletableFuture<Void> updateVideosFuture = videoImagesFuture.thenAcceptAsync(videoImages -> {
+            Map<String, List<VideoImage>> videoImageMap = videoImages.stream()
+                    .collect(Collectors.groupingBy(VideoImage::getVideoId));
+            videos.forEach(r -> {
+                if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                    List<VideoImage> videoImageList = videoImageMap.getOrDefault(r.getVideoId(), Collections.emptyList());
+                    String[] imgs = videoImageList.stream()
+                            .map(VideoImage::getImageUrl)
+                            .toArray(String[]::new);
+                    r.setImageList(imgs);
+                }
+            });
         });
+        // 等待异步操作完成
+        CompletableFuture.allOf(videoImagesFuture, updateVideosFuture).join();
+        // 查询用户收藏的视频总数
         Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
         return PageDataInfo.genPageData(videos, count);
     }

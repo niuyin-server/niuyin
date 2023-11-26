@@ -15,6 +15,12 @@
         <result property="coverImage" column="cover_image"/>
     </resultMap>
 
+    <resultMap id="videoImageResultMap" type="com.niuyin.model.video.domain.VideoImage">
+        <id property="id" column="id"/>
+        <result property="videoId" column="video_id"/>
+        <result property="imageUrl" column="image_url"/>
+    </resultMap>
+
     <sql id="VideoVo">
         select v.video_id,
                v.user_id,
@@ -74,6 +80,15 @@
         select *
         from video_position
         where video_id = #{videoId}
+    </select>
+    <select id="selectImagesByVideoIds" parameterType="java.util.List" resultType="com.niuyin.model.video.domain.VideoImage">
+            SELECT *
+            FROM video_image
+            WHERE video_id IN
+            <foreach collection="list" item="videoId" open="(" separator="," close=")">
+                #{videoId}
+            </foreach>
+
     </select>
 
 </mapper>
