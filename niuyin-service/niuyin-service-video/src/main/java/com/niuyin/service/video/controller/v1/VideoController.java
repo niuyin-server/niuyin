@@ -59,7 +59,7 @@ public class VideoController {
     @Resource
     private IVideoPositionService videoPositionService;
 
-    @DubboReference
+    @DubboReference(version = "1.0.1", loadbalance = "random")
     private DubboMemberService dubboMemberService;
 
     @GetMapping("/test-dubbo")
@@ -149,7 +149,7 @@ public class VideoController {
      */
     @PostMapping("/userpage")
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
-        return  videoService.queryUserVideoPage(pageDto);
+        return videoService.queryUserVideoPage(pageDto);
     }
 
     /**
