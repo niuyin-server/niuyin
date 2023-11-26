@@ -23,6 +23,7 @@
         <module>niuyin-model</module>
         <module>niuyin-starter</module>
         <module>niuyin-tools</module>
+        <module>niuyin-dubbo</module>
     </modules>
 
     <properties>

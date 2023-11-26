@@ -1,14 +1,17 @@
 package com.niuyin.service.video.controller.v1;
 
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
@@ -20,6 +23,7 @@ import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.starter.file.service.FileStorageService;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,13 +59,22 @@ public class VideoController {
     @Resource
     private IVideoPositionService videoPositionService;
 
+    @DubboReference
+    private DubboMemberService dubboMemberService;
+
+    @GetMapping("/test-dubbo")
+    public R<?> testDubbo() {
+        Member member = dubboMemberService.apiGetById(UserContext.getUserId());
+//        Member member = remoteMemberService.userInfoById(UserContext.getUserId()).getData();
+        return R.ok(member);
+    }
+
     /**
      * 热门视频
      *
      * @param pageDTO
      * @return
      */
-
     @PostMapping("/hot")
     @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
