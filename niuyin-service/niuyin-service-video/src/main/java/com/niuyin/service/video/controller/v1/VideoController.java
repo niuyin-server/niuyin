@@ -1,24 +1,18 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoImage;
-import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.dto.VideoPublishDto;
-import com.niuyin.model.video.enums.PositionFlag;
-import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
@@ -31,9 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 视频表(Video)表控制层
