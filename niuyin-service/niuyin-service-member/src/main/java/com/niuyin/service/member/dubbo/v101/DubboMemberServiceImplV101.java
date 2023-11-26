@@ -15,7 +15,7 @@ import javax.annotation.Resource;
  * 超时与重试，预防网络抖动，version灰度发布，默认负载均衡random，可指定weight
  */
 @DubboService(timeout = 2000, retries = 4, version = "1.0.1", weight = 10)
-public class DubboMemberServiceImpl implements DubboMemberService {
+public class DubboMemberServiceImplV101 implements DubboMemberService {
 
     @Resource
     private IMemberService memberService;
