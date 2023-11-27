@@ -65,20 +65,7 @@ public class UserFavoriteController {
      */
     @PostMapping("/infoPage")
     public PageDataInfo userCollectionInfoPage(@RequestBody PageDTO pageDTO) {
-        IPage<UserFavorite> userFavoriteIPage = userFavoriteService.queryCollectionPage(pageDTO);
-        List<UserFavorite> records = userFavoriteIPage.getRecords();
-        if(records.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        int limit = 6;
-        List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(records, UserFavoriteInfoVO.class);
-        collectionInfoList.forEach(c -> {
-            // 1、获取视频总数
-            c.setVideoCount(userFavoriteMapper.selectVideoCountByFavoriteId(c.getFavoriteId()));
-            // 2、获取前六张封面
-            c.setVideoCoverList(userFavoriteMapper.selectFavoriteVideoCoverLimit(c.getFavoriteId(), limit));
-        });
-        return PageDataInfo.genPageData(collectionInfoList, userFavoriteIPage.getTotal());
+        return userFavoriteService.queryMyCollectionInfoPage(pageDTO);
     }
 
     /**
