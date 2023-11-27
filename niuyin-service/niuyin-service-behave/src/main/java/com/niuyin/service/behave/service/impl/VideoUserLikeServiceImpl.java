@@ -151,22 +151,6 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
         List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
-//        List<VideoVO> videoVOList = new ArrayList<>();
-//        records.forEach(r -> {
-//            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
-//            // 若是图文则封装图片集合
-//            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-//                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
-//                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-//                videoVO.setImageList(imgs);
-//            }
-//            // 若是开启定位，封装定位
-//            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-//                VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
-//                videoVO.setPosition(videoPosition);
-//            }
-//            videoVOList.add(videoVO);
-//        });
         List<VideoVO> videoVOList = new ArrayList<>();
         List<CompletableFuture<Void>> futures = records.stream()
                 .map(r -> CompletableFuture.runAsync(() -> {
