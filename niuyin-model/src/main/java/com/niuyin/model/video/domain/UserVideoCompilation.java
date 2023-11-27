@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -31,10 +33,13 @@ public class UserVideoCompilation implements Serializable {
     /**
      * 合集标题
      */
+    @NotBlank(message = "标题不能为空")
+    @Size(min = 1, max = 20, message = "标题需在20字符以内")
     private String title;
     /**
      * 描述
      */
+    @Size(min = 1, max = 200, message = "描述需在200字符以内")
     private String description;
     /**
      * 合集封面(5M)

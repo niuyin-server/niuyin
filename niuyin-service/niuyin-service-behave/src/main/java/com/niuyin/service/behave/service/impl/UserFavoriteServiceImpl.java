@@ -15,14 +15,12 @@ import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import com.niuyin.service.behave.util.PackageCollectionInfoPageProcessor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * (UserFavorite)表服务实现类

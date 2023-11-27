@@ -23,18 +23,24 @@
         from user_video_compilation uvc
     </sql>
 
-    <!--查询指定行数据-->
-    <select id="queryAllByLimit" resultMap="UserVideoCompilationMap">
-        <include refid="UserVideoCompilationVo"/>
-        <where>
-            <if test="userId != null">
-                and uvc.user_id = #{userId}
-            </if>
-            <if test="title != null and title != ''">
-                and uvc.title like concat ('%', #{title},'%')
-            </if>
-        </where>
-        limit #{pageNum}, #{pageSize}
+    <select id="selectCompilationViewCount" resultType="java.lang.Long">
+        select sum(v.view_num) as count
+        from user_video_compilation_relation uvcr
+                 left join video v on uvcr.video_id = v.video_id
+        where uvcr.compilation_id = #{compilationId};
+    </select>
+
+    <select id="selectCompilationLikeCount" resultType="java.lang.Long">
+        select sum(v.like_num) as count
+        from user_video_compilation_relation uvcr
+                 left join video v on uvcr.video_id = v.video_id
+        where uvcr.compilation_id = #{compilationId};
+    </select>
+
+    <select id="selectCompilationVideoCount" resultType="java.lang.Long">
+        select count(1) as count
+        from user_video_compilation_relation
+        where compilation_id = 1;
     </select>
 
 </mapper>
