@@ -161,11 +161,11 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
                         String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
                         videoVO.setImageList(imgs);
                     }
-                    // 若是开启定位，封装定位
-                    if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-                        VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
-                        videoVO.setPosition(videoPosition);
-                    }
+//                    // 若是开启定位，封装定位
+//                    if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+//                        VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
+//                        videoVO.setPosition(videoPosition);
+//                    }
                     videoVOList.add(videoVO);
                 })).collect(Collectors.toList());
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
