@@ -11,12 +11,11 @@ import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
-import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.common.enums.NoticeTypeEnum;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 import com.niuyin.model.behave.vo.VideoUserCommentVO;
+import com.niuyin.model.common.enums.HttpCodeEnum;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
@@ -31,6 +30,8 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -73,56 +74,115 @@ public class VideoUserCommentController {
 //        videoUserCommentService.generatorVideoCommentPageTree(VideoUserCommentPageDTO pageDTO);
         IPage<VideoUserComment> iPage = this.videoUserCommentService.getRootListByVideoId(pageDTO);
         List<VideoUserComment> rootRecords = iPage.getRecords();
+//        List<VideoUserCommentVO> voList = new ArrayList<>();
+//        rootRecords.forEach(r -> {
+//            // 获取用户详情
+//            VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
+//            Long userId = r.getUserId();
+//            // 先走redis，有就直接返回
+//            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
+//            if (StringUtils.isNotNull(userCache)) {
+//                appNewsCommentVO.setNickName(userCache.getNickName());
+//                appNewsCommentVO.setAvatar(userCache.getAvatar());
+//            } else {
+//                Member user = remoteMemberService.userInfoById(userId).getData();
+//                if (StringUtils.isNotNull(user)) {
+//                    appNewsCommentVO.setNickName(user.getNickName());
+//                    appNewsCommentVO.setAvatar(user.getAvatar());
+//                }
+//            }
+//            Long commentId = r.getCommentId();
+//            List<VideoUserComment> children = this.videoUserCommentService.getChildren(commentId);
+//            List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
+//            childrenVOS.forEach(c -> {
+//                Member userCache2 = redisService.getCacheObject("member:userinfo:" + c.getUserId());
+//                if (StringUtils.isNotNull(userCache2)) {
+//                    c.setNickName(userCache2.getNickName());
+//                    c.setAvatar(userCache2.getAvatar());
+//                } else {
+//                    Member cUser = remoteMemberService.userInfoById(c.getUserId()).getData();
+//                    if (StringUtils.isNotNull(cUser)) {
+//                        c.setNickName(cUser.getNickName());
+//                        c.setAvatar(cUser.getAvatar());
+//                    }
+//                }
+//                if (!c.getParentId().equals(commentId)) {
+//                    // 回复了回复
+//                    VideoUserComment byId = this.videoUserCommentService.getById(c.getParentId());
+//                    c.setReplayUserId(byId.getUserId());
+//                    Member userCache3 = redisService.getCacheObject("member:userinfo:" + byId.getUserId());
+//                    if (StringUtils.isNotNull(userCache2)) {
+//                        c.setReplayUserNickName(userCache3.getNickName());
+//                    } else {
+//                        Member byUser = remoteMemberService.userInfoById(byId.getUserId()).getData();
+//                        if (StringUtils.isNotNull(byUser)) {
+//                            c.setReplayUserNickName(byUser.getNickName());
+//                        }
+//                    }
+//                }
+//            });
+//            appNewsCommentVO.setChildren(childrenVOS);
+//            voList.add(appNewsCommentVO);
+//        });
+
+
         List<VideoUserCommentVO> voList = new ArrayList<>();
-        rootRecords.forEach(r -> {
-            // 获取用户详情
-            VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
-            Long userId = r.getUserId();
-            // 先走redis，有就直接返回
-            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-            if (StringUtils.isNotNull(userCache)) {
-                appNewsCommentVO.setNickName(userCache.getNickName());
-                appNewsCommentVO.setAvatar(userCache.getAvatar());
-            } else {
-                Member user = remoteMemberService.userInfoById(userId).getData();
-                if (StringUtils.isNotNull(user)) {
-                    appNewsCommentVO.setNickName(user.getNickName());
-                    appNewsCommentVO.setAvatar(user.getAvatar());
-                }
-            }
-            Long commentId = r.getCommentId();
-            List<VideoUserComment> children = this.videoUserCommentService.getChildren(commentId);
-            List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
-            childrenVOS.forEach(c -> {
-                Member userCache2 = redisService.getCacheObject("member:userinfo:" + c.getUserId());
-                if (StringUtils.isNotNull(userCache2)) {
-                    c.setNickName(userCache2.getNickName());
-                    c.setAvatar(userCache2.getAvatar());
-                } else {
-                    Member cUser = remoteMemberService.userInfoById(c.getUserId()).getData();
-                    if (StringUtils.isNotNull(cUser)) {
-                        c.setNickName(cUser.getNickName());
-                        c.setAvatar(cUser.getAvatar());
-                    }
-                }
-                if (!c.getParentId().equals(commentId)) {
-                    // 回复了回复
-                    VideoUserComment byId = this.videoUserCommentService.getById(c.getParentId());
-                    c.setReplayUserId(byId.getUserId());
-                    Member userCache3 = redisService.getCacheObject("member:userinfo:" + byId.getUserId());
-                    if (StringUtils.isNotNull(userCache2)) {
-                        c.setReplayUserNickName(userCache3.getNickName());
+        List<CompletableFuture<Void>> futures = rootRecords.stream()
+                .map(r -> CompletableFuture.runAsync(() -> {
+                    // 获取用户详情
+                    VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
+                    Long userId = r.getUserId();
+                    // 先走redis，有就直接返回
+                    Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
+                    if (StringUtils.isNotNull(userCache)) {
+                        appNewsCommentVO.setNickName(userCache.getNickName());
+                        appNewsCommentVO.setAvatar(userCache.getAvatar());
                     } else {
-                        Member byUser = remoteMemberService.userInfoById(byId.getUserId()).getData();
-                        if (StringUtils.isNotNull(byUser)) {
-                            c.setReplayUserNickName(byUser.getNickName());
+                        Member user = remoteMemberService.userInfoById(userId).getData();
+                        if (StringUtils.isNotNull(user)) {
+                            appNewsCommentVO.setNickName(user.getNickName());
+                            appNewsCommentVO.setAvatar(user.getAvatar());
                         }
                     }
-                }
-            });
-            appNewsCommentVO.setChildren(childrenVOS);
-            voList.add(appNewsCommentVO);
-        });
+                    Long commentId = r.getCommentId();
+                    List<VideoUserComment> children = this.videoUserCommentService.getChildren(commentId);
+                    List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
+                    List<CompletableFuture<Void>> futures1 = childrenVOS.stream()
+                            .map(c -> CompletableFuture.runAsync(() -> {
+                                Member userCache2 = redisService.getCacheObject("member:userinfo:" + c.getUserId());
+                                if (StringUtils.isNotNull(userCache2)) {
+                                    c.setNickName(userCache2.getNickName());
+                                    c.setAvatar(userCache2.getAvatar());
+                                } else {
+                                    Member cUser = remoteMemberService.userInfoById(c.getUserId()).getData();
+                                    if (StringUtils.isNotNull(cUser)) {
+                                        c.setNickName(cUser.getNickName());
+                                        c.setAvatar(cUser.getAvatar());
+                                    }
+                                }
+                                if (!c.getParentId().equals(commentId)) {
+                                    // 回复了回复
+                                    VideoUserComment byId = this.videoUserCommentService.getById(c.getParentId());
+                                    c.setReplayUserId(byId.getUserId());
+                                    Member userCache3 = redisService.getCacheObject("member:userinfo:" + byId.getUserId());
+                                    if (StringUtils.isNotNull(userCache2)) {
+                                        c.setReplayUserNickName(userCache3.getNickName());
+                                    } else {
+                                        Member byUser = remoteMemberService.userInfoById(byId.getUserId()).getData();
+                                        if (StringUtils.isNotNull(byUser)) {
+                                            c.setReplayUserNickName(byUser.getNickName());
+                                        }
+                                    }
+                                }
+                            })).collect(Collectors.toList());
+                    CompletableFuture.allOf(futures1.toArray(new CompletableFuture[0])).join();
+
+                    appNewsCommentVO.setChildren(childrenVOS);
+                    voList.add(appNewsCommentVO);
+                })).collect(Collectors.toList());
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+
         return PageDataInfo.genPageData(voList, iPage.getTotal());
     }
 
