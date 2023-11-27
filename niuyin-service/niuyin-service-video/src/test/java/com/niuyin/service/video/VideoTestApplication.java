@@ -13,6 +13,7 @@ import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
+import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.domain.VideoSensitive;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
@@ -21,6 +22,7 @@ import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.mapper.VideoSensitiveMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoCategoryService;
+import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
 import org.junit.jupiter.api.DisplayName;
 import com.niuyin.starter.file.service.FfmpefVideoService;
@@ -34,8 +36,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
+import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
  * 功能：
@@ -153,7 +157,7 @@ public class VideoTestApplication {
         Long userId = 3L;
         String videoTitle = "御姐";
         String videoDesc = "甜心大姐姐";
-        String videoUrl = "http://s38bf8bdn.hb-bkt.clouddn.com/2023/11/02/d1e511dd3e754c3fa23e872f608dd914.mp4";
+        String videoUrl = "http://s4pw9v9pl.hb-bkt.clouddn.com/2023/11/02/d1e511dd3e754c3fa23e872f608dd914.mp4";
         Long categoryId = 1L;
         String coverImage = "头像路径测试";
         VideoPublishDto videoPublishDto = new VideoPublishDto();
@@ -266,7 +270,7 @@ public class VideoTestApplication {
     @Test
     void videoTrans() {
 
-//        URL url = new URL("http://s38bf8bdn.hb-bkt.clouddn.com/niuyin9161201e467d4889b247a3b7a106e8e4video.mp4");
+//        URL url = new URL("http://s4pw9v9pl.hb-bkt.clouddn.com/niuyin9161201e467d4889b247a3b7a106e8e4video.mp4");
 //        URLConnection urlConnection = url.openConnection();
 //        InputStream inputStream = urlConnection.getInputStream();
 //        File file =File.createTempFile("temp",".tmp");
@@ -313,9 +317,23 @@ public class VideoTestApplication {
     @DisplayName("同步所有视频到redis")
     void syncVideoToRedis() {
         List<Video> videoList = videoService.list();
-        videoList.forEach(v->{
-            redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX+v.getVideoId(),v);
+        videoList.forEach(v -> {
+            redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + v.getVideoId(), v);
         });
+    }
+
+    @Resource
+    IVideoImageService videoImageService;
+
+    @Test
+    @DisplayName("建立视频缓存")
+    void testRedis() {
+        String videoId = "117685379035194982434524946";
+        List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoId);
+        String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+        // 重建缓存
+        redisService.setCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoId, imgs);
+        redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoId, 1, TimeUnit.DAYS);
     }
 
 

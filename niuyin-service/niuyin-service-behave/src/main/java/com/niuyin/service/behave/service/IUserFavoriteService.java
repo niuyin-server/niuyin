@@ -2,6 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
 import com.niuyin.model.common.dto.PageDTO;
@@ -38,4 +39,12 @@ public interface IUserFavoriteService extends IService<UserFavorite> {
      * @return
      */
     IPage<UserFavorite> queryCollectionPage(PageDTO pageDTO);
+
+    /**
+     * 我的收藏夹集合详情分页查询
+     *
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo queryMyCollectionInfoPage(PageDTO pageDTO);
 }

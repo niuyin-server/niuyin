@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * (UserFavorite)表控制层
@@ -67,26 +65,7 @@ public class UserFavoriteController {
      */
     @PostMapping("/infoPage")
     public PageDataInfo userCollectionInfoPage(@RequestBody PageDTO pageDTO) {
-        IPage<UserFavorite> userFavoriteIPage = userFavoriteService.queryCollectionPage(pageDTO);
-        List<UserFavorite> records = userFavoriteIPage.getRecords();
-        if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
-        }
-        int limit = 6;
-        List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(records, UserFavoriteInfoVO.class);
-        List<CompletableFuture<Void>> futures = collectionInfoList.stream()
-                .map(c -> CompletableFuture.runAsync(() -> {
-                    // 异步获取视频总数
-                    Long videoCount = userFavoriteMapper.selectVideoCountByFavoriteId(c.getFavoriteId());
-                    c.setVideoCount(videoCount);
-                    // 异步获取前六张封面
-                    String[] videoCoverList = userFavoriteMapper.selectFavoriteVideoCoverLimit(c.getFavoriteId(), limit);
-                    c.setVideoCoverList(videoCoverList);
-                }))
-                .collect(Collectors.toList());
-        // 等待所有异步操作完成
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        return PageDataInfo.genPageData(collectionInfoList, userFavoriteIPage.getTotal());
+        return userFavoriteService.queryMyCollectionInfoPage(pageDTO);
     }
 
     /**

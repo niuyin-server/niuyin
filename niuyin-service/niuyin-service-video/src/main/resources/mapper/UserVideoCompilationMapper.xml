@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niuyin.service.video.mapper.UserVideoCompilationMapper">
+
+    <resultMap type="com.niuyin.model.video.domain.UserVideoCompilation" id="UserVideoCompilationMap">
+        <result property="compilationId" column="compilation_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="UserVideoCompilationVo">
+        select uvc.compilation_id,
+               uvc.user_id,
+               uvc.title,
+               uvc.description,
+               uvc.cover_image,
+               uvc.create_time,
+               uvc.update_time
+        from user_video_compilation uvc
+    </sql>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="UserVideoCompilationMap">
+        <include refid="UserVideoCompilationVo"/>
+        <where>
+            <if test="userId != null">
+                and uvc.user_id = #{userId}
+            </if>
+            <if test="title != null and title != ''">
+                and uvc.title like concat ('%', #{title},'%')
+            </if>
+        </where>
+        limit #{pageNum}, #{pageSize}
+    </select>
+
+</mapper>
+

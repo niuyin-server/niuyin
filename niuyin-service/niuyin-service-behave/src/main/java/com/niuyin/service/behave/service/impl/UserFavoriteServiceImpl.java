@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
@@ -12,14 +13,16 @@ import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
+import com.niuyin.service.behave.util.PackageCollectionInfoPageProcessor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * (UserFavorite)表服务实现类
@@ -32,6 +35,9 @@ import java.util.List;
 public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, UserFavorite> implements IUserFavoriteService {
     @Resource
     private UserFavoriteMapper userFavoriteMapper;
+
+    @Resource
+    PackageCollectionInfoPageProcessor packageCollectionInfoPageProcessor;
 
     /**
      * 用户新建收藏夹
@@ -64,9 +70,29 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
     }
 
     /**
-     * 查询收藏集详情
+     * 我的收藏夹集合详情分页查询
      *
+     * @param pageDTO
      * @return
+     */
+    @Override
+    public PageDataInfo queryMyCollectionInfoPage(PageDTO pageDTO) {
+        LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
+        queryWrapper.orderByDesc(UserFavorite::getCreateTime);
+        IPage<UserFavorite> userFavoriteIPage = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
+        List<UserFavorite> records = userFavoriteIPage.getRecords();
+        if (records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(records, UserFavoriteInfoVO.class);
+        // 封装VO
+        packageCollectionInfoPageProcessor.processUserFavoriteInfoList(collectionInfoList);
+        return PageDataInfo.genPageData(collectionInfoList, userFavoriteIPage.getTotal());
+    }
+
+    /**
+     * 查询收藏集详情
      */
     @Override
     public List<UserFavoriteInfoVO> queryCollectionInfoList() {
@@ -75,13 +101,12 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
         List<UserFavorite> collectionList = this.list(queryWrapper);
         // 2、遍历获取收藏的视频总数与前六张封面
-        int limit = 6;
         List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(collectionList, UserFavoriteInfoVO.class);
         collectionInfoList.forEach(c -> {
             // 2.1、获取视频总数
             c.setVideoCount(userFavoriteMapper.selectVideoCountByFavoriteId(c.getFavoriteId()));
             // 2.2、获取前六张封面
-            c.setVideoCoverList(userFavoriteMapper.selectFavoriteVideoCoverLimit(c.getFavoriteId(), limit));
+            c.setVideoCoverList(userFavoriteMapper.selectFavoriteVideoCoverLimit(c.getFavoriteId(), 6));
         });
         return collectionInfoList;
     }

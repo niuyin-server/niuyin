@@ -42,6 +42,17 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
+        <!-- spring cloud alibaba dubbo -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-dubbo</artifactId>
+        </dependency>
+        <!--        dubbo api-->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-dubbo</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -23,5 +23,9 @@ public class VideoCacheConstants {
 
     // 热门视频
     public static final String VIDEO_HOT = "video:hot";
+    // 图文图片连接
+    public static final String VIDEO_IMAGES_PREFIX_KEY = "video:images:";
+    // 视频定位缓存
+    public static final String VIDEO_POSITION_PREFIX_KEY = "video:position:";
 
 }

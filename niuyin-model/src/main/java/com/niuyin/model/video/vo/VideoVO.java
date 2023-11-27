@@ -2,8 +2,7 @@ package com.niuyin.model.video.vo;
 
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoPosition;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * VideoVO
@@ -14,6 +13,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VideoVO extends Video {
+
     private Long commentNum;
     private String userNickName;
     private String userAvatar;
@@ -32,4 +32,5 @@ public class VideoVO extends Video {
 
     // 热力值
     private Double hotScore;
+
 }
