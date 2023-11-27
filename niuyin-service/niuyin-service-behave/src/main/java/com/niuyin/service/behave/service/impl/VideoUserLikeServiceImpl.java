@@ -38,6 +38,8 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -189,22 +191,24 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         }
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
-        List<VideoVO> videoVOList = new ArrayList<>();
-        records.forEach(r -> {
-            VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
-            // 若是图文则封装图片集合
-            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
-                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                videoVO.setImageList(imgs);
-            }
-            // 若是开启定位，封装定位
-            if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-                VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
-                videoVO.setPosition(videoPosition);
-            }
-            videoVOList.add(videoVO);
-        });
+        ArrayList<VideoVO> videoVOList = new ArrayList<>();
+        List<CompletableFuture<Void>> futures=records.stream()
+                .map(r -> CompletableFuture.runAsync(() ->{
+                    VideoVO videoVO=BeanCopyUtils.copyBean(r,VideoVO.class);
+                    //若是图文，则封装图片集合
+                    if(r.getPublishType().equals(PublishType.IMAGE.getCode())){
+                        List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+                        String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                        videoVO.setImageList(imgs);
+                    }
+                    //若是开启定位，则封装定位
+                    if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())){
+                        VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
+                        videoVO.setPosition(videoPosition);
+                    }
+                    videoVOList.add(videoVO);
+                })).collect(Collectors.toList());
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
