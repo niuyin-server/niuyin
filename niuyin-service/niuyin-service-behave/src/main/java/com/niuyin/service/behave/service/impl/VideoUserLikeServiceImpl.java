@@ -35,6 +35,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
@@ -171,6 +174,32 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
+//    public PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto) {
+//        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+//        pageDto.setUserId(UserContext.getUserId());
+//        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
+//        List<VideoVO> videoVOList = new ArrayList<>();
+//        ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
+//        for (Video record : records) {
+//            executorService.submit(() -> { // 提交任务到线程池
+//                VideoVO videoVO = BeanCopyUtils.copyBean(record, VideoVO.class);
+//                // 若是图文则封装图片集合
+//                if (record.getPublishType().equals(PublishType.IMAGE.getCode())) {
+//                    List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+//                    String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+//                    videoVO.setImageList(imgs);
+//                }
+//                videoVOList.add(videoVO); // 直接修改原始数据，避免数据复制
+//            });
+//        }
+//        executorService.shutdown(); // 关闭线程池
+//        try {
+//            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); // 等待所有任务完成
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+//    }
 
     /**
      * 查询用户的点赞列表
