@@ -1,0 +1,89 @@
+version : '1.0.0'
+services:
+  niuyin-nacos:
+    container_name: niuyin-nacos
+    image: nacos/nacos-server
+    build:
+      context: ./nacos
+    environment:
+      - MODE=standalone
+    volumes:
+      - ./nacos/logs/:/home/nacos/logs
+      - ./nacos/conf/application.properties:/home/nacos/conf/application.properties
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    depends_on:
+      - niuyin-mysql
+  niuyin-mysql:
+    container_name: niuyin-mysql
+    image: mysql:8.0.20
+    build:
+      context: ./mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/logs:/logs
+      - ./mysql/data:/var/lib/mysql
+    command: [
+          'mysqld',
+          '--innodb-buffer-pool-size=80M',
+          '--default-time-zone=+8:00',
+          '--lower-case-table-names=1'
+        ]
+    environment:
+      MYSQL_DATABASE: 'niuyin_short_video_dev'
+      MYSQL_ROOT_PASSWORD: password
+  niuyin-redis:
+    container_name: niuyin-redis
+    image: redis
+    build:
+      context: ./redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/conf/redis.conf:/home/niuyin/redis/redis.conf
+      - ./redis/data:/data
+    command: redis-server /home/niuyin/redis/redis.conf
+  niuyin-nginx:
+    container_name: niuyin-nginx
+    image: nginx
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/html/dist:/home/niuyin/projects/niuyin-web
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - niuyin-gateway
+    links:
+      - niuyin-gateway
+  niuyin-gateway:
+    container_name: niuyin-gateway
+    build:
+      context: ./niuyin/gateway
+      dockerfile: dockerfile
+    ports:
+      - "9090:9090"
+    depends_on:
+      - niuyin-redis
+    links:
+      - niuyin-redis
+  niuyin-service-video:
+    container_name: niuyin-service-video
+    build:
+      context: ./niuyin/service/video
+      dockerfile: dockerfile
+    ports:
+      - "9201:9201"
+    depends_on:
+      - niuyin-redis
+      - niuyin-mysql
+    links:
+      - niuyin-redis
+      - niuyin-mysql
