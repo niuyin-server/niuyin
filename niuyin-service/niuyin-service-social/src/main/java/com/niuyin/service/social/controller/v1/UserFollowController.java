@@ -1,22 +1,17 @@
 package com.niuyin.service.social.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
-import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.member.domain.Member;
-import com.niuyin.model.social.UserFollow;
 import com.niuyin.model.behave.vo.UserFollowsFansVo;
+import com.niuyin.model.common.dto.PageDTO;
+import com.niuyin.model.social.UserFollow;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 用户关注表(UserFollow)表控制层
@@ -55,24 +50,7 @@ public class UserFollowController {
      */
     @PostMapping("/page")
     public PageDataInfo followPage(@RequestBody PageDTO pageDTO) {
-        if (StringUtils.isNull(pageDTO)) {
-            LambdaQueryWrapper<UserFollow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
-            List<UserFollow> list = userFollowService.list(lambdaQueryWrapper);
-            List<Member> res = new ArrayList<>();
-            list.forEach(l -> {
-                Member user = remoteMemberService.userInfoById(l.getUserFollowId()).getData();
-                res.add(user);
-            });
-            return PageDataInfo.genPageData(res, res.size());
-        }
-        IPage<UserFollow> userFollowIPage = userFollowService.followPage(pageDTO);
-        List<Member> userList = new ArrayList<>();
-        userFollowIPage.getRecords().forEach(uf -> {
-            Member user = remoteMemberService.userInfoById(uf.getUserFollowId()).getData();
-            userList.add(user);
-        });
-        return PageDataInfo.genPageData(userList, userFollowIPage.getTotal());
+        return userFollowService.getFollowPage(pageDTO);
     }
 
     /**

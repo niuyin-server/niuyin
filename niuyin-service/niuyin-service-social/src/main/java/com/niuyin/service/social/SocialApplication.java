@@ -5,6 +5,7 @@ import com.niuyin.common.config.MybatisPlusConfig;
 import com.niuyin.common.swagger.Swagger2Configuration;
 import com.niuyin.feign.config.FeignConfig;
 import com.niuyin.common.annotations.EnableUserTokenInterceptor;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -25,6 +26,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableUserTokenInterceptor
 @EnableRedisConfig
 @EnableAsync
+@EnableDubbo
 @Import({MybatisPlusConfig.class, Swagger2Configuration.class})
 public class SocialApplication {
     public static void main(String[] args) {
