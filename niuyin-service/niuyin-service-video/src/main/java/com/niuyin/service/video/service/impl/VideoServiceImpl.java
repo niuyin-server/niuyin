@@ -368,7 +368,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         CompletableFuture<Void> behaveDataFuture = packageVideoBehaveDataAsync(videoVO);
         CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
         CompletableFuture<Void> imageDataFuture = packageVideoImageDataAsync(videoVO);
-//        CompletableFuture<Void> positionDataFuture = packageVideoPositionDataAsync(videoVO);
         CompletableFuture.allOf(
                 behaveDataFuture,
                 memberDataFuture,

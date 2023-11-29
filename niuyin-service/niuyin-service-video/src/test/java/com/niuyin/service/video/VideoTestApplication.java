@@ -25,7 +25,7 @@ import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
 import org.junit.jupiter.api.DisplayName;
-import com.niuyin.starter.file.service.FfmpefVideoService;
+import com.niuyin.starter.file.service.FfmpegVideoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,7 +71,7 @@ public class VideoTestApplication {
     private VideoMapper videoMapper;
 
     @Resource
-    FfmpefVideoService ffmpefVideoService;
+    FfmpegVideoService ffmpegVideoService;
 
 //    void bindTest(){
 //        VideoBindDto videoBindDto = new VideoBindDto();
@@ -310,7 +310,7 @@ public class VideoTestApplication {
         String url = "http://s4bgg8hwg.hb-bkt.clouddn.com/2023/11/18/1234.avi";
         String s = "D:\\haose\\Videos\\12\\1234567.png";
 
-        ffmpefVideoService.getTargetThumbnail(url, s);
+        ffmpegVideoService.getTargetThumbnail(url, s);
     }
 
     @Test

@@ -21,6 +21,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
+import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -192,5 +193,30 @@ public class MemberController {
         }
     }
 
+    @Resource
+    private AliyunOssService aliyunOssService;
 
+    /**
+     * 头像上传
+     *
+     * @param file 图片文件，大小限制1M
+     * @return url
+     */
+    @ApiOperation("上传头像")
+    @PostMapping("/avatarv2")
+    public R<String> avatarv2(@RequestParam("file") MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isNull(originalFilename)) {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+        //对原始文件名进行判断
+        if (originalFilename.endsWith(".png")
+                || originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".webp")) {
+            return R.ok(aliyunOssService.uploadFile(file, "member"));
+        } else {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+    }
 }
