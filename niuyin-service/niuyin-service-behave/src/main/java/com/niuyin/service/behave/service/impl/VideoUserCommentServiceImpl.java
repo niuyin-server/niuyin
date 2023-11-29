@@ -1,5 +1,6 @@
 package com.niuyin.service.behave.service.impl;
 
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -7,10 +8,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.R;
+import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
-
+import com.niuyin.model.behave.vo.VideoUserCommentVO;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
@@ -20,13 +28,17 @@ import com.niuyin.service.behave.mapper.VideoUserCommentMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -48,6 +60,15 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private RemoteMemberService remoteMemberService;
+
+    @Resource
+    private RedisService redisService;
+
+    @DubboReference(version = "1.0.1", loadbalance = "random")
+    private DubboMemberService dubboMemberService;
 
     /**
      * 回复评论
@@ -173,5 +194,85 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         queryWrapper.eq(VideoUserComment::getVideoId, videoId);
         queryWrapper.eq(VideoUserComment::getStatus, VideoCommentStatus.NORMAL.getCode());
         return this.count(queryWrapper);
+    }
+
+    /**
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo getQueryTree(VideoUserCommentPageDTO pageDTO) throws ExecutionException, InterruptedException {
+        String newsId = pageDTO.getVideoId();
+        if (StringUtil.isEmpty(newsId)) {
+            R.ok();
+        }
+        CompletableFuture<IPage<VideoUserComment>> iPage = CompletableFuture.supplyAsync(() -> this.getRootListByVideoId(pageDTO));
+        List<VideoUserComment> rootRecords = iPage.join().getRecords();
+
+        List<VideoUserCommentVO> voList = new ArrayList<>();
+        CompletableFuture.allOf(rootRecords.stream()
+                .map(r -> CompletableFuture.runAsync(() -> {
+                    // 获取用户详情
+                    VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
+                    Long userId = r.getUserId();
+                    // 先走redis，有就直接返回
+                    CompletableFuture<Member> memberCache = CompletableFuture.supplyAsync(() -> redisService.getCacheObject("member:userinfo:" + userId));
+                    Member member = memberCache.join();
+                    if (StringUtils.isNotNull(member)) {
+                        appNewsCommentVO.setNickName(member.getNickName());
+                        appNewsCommentVO.setAvatar(member.getAvatar());
+                    } else {
+                        CompletableFuture<Member> userCompletableFuture = CompletableFuture.supplyAsync(() -> dubboMemberService.apiGetById(userId));
+                        Member user = userCompletableFuture.join();
+                        if (StringUtils.isNotNull(user)) {
+                            appNewsCommentVO.setNickName(user.getNickName());
+                            appNewsCommentVO.setAvatar(user.getAvatar());
+                        }
+                    }
+                    Long commentId = r.getCommentId();
+                    List<VideoUserComment> children = this.getChildren(commentId);
+                    List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
+                    CompletableFuture.allOf(childrenVOS.stream()
+                            .map(c -> CompletableFuture.runAsync(() -> {
+                                CompletableFuture<Member> userCompletableFuture2 = CompletableFuture.supplyAsync(() -> redisService.getCacheObject("member:userinfo:" + c.getUserId()));
+                                Member userCache2 = userCompletableFuture2.join();
+
+                                if (StringUtils.isNotNull(userCache2)) {
+                                    c.setNickName(userCache2.getNickName());
+                                    c.setAvatar(userCache2.getAvatar());
+                                } else {
+                                    CompletableFuture<Member> cUserCompletableFuture = CompletableFuture.supplyAsync(() -> dubboMemberService.apiGetById(c.getUserId()));
+                                    Member cUser = cUserCompletableFuture.join();
+
+                                    if (StringUtils.isNotNull(cUser)) {
+                                        c.setNickName(cUser.getNickName());
+                                        c.setAvatar(cUser.getAvatar());
+                                    }
+                                }
+                                if (!c.getParentId().equals(commentId)) {
+                                    // 回复了回复
+                                    CompletableFuture<VideoUserComment> byIdCommentCompletableFuture = CompletableFuture.supplyAsync(() -> this.getById(c.getParentId()));
+                                    VideoUserComment byId = byIdCommentCompletableFuture.join();
+
+                                    Long userId1 = byId.getUserId();
+                                    c.setReplayUserId(byId.getUserId());
+                                    CompletableFuture<Member> userCache3CompletableFuture = CompletableFuture.supplyAsync(() -> redisService.getCacheObject("member:userinfo:" + userId1));
+                                    Member userCache3 = userCache3CompletableFuture.join();
+
+                                    if (StringUtils.isNotNull(userCache2)) {
+                                        c.setReplayUserNickName(userCache3.getNickName());
+                                    } else {
+                                        CompletableFuture<Member> byUserCompletableFuture = CompletableFuture.supplyAsync(() -> dubboMemberService.apiGetById(userId1));
+                                        Member byUser = byUserCompletableFuture.join();
+                                        if (StringUtils.isNotNull(byUser)) {
+                                            c.setReplayUserNickName(byUser.getNickName());
+                                        }
+                                    }
+                                }
+                            })).toArray(CompletableFuture[]::new)).join();
+                    appNewsCommentVO.setChildren(childrenVOS);
+                    voList.add(appNewsCommentVO);
+                })).toArray(CompletableFuture[]::new)).join();
+        return PageDataInfo.genPageData(voList, iPage.join().getTotal());
     }
 }
