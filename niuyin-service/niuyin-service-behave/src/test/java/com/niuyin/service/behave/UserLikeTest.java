@@ -37,7 +37,7 @@ public class UserLikeTest {
     @Test
     void testFavorite() {
 
-        Page<VideoUserLike> page = videoUserLikeService.page(new Page<>(1, 10), null);
+        Page<VideoUserLike> page = videoUserLikeService.page(new Page<>(1, 20), null);
         List<String> collect = page.getRecords().stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
         log.debug("开始");
 //        videoUserLikeMapper.selectImagesByVideoIds(collect);
@@ -46,11 +46,12 @@ public class UserLikeTest {
 //        collect.forEach(c-> {
 //            videoUserLikeMapper.selectImagesByVideoId(c);
 //        });
-
+//
         List<CompletableFuture<Void>> futures = collect.stream()
                 .map(r -> CompletableFuture.runAsync(() -> {
                             videoUserLikeMapper.selectImagesByVideoId(r);
                         })).collect(Collectors.toList());
+        CompletableFuture<Object> objectCompletableFuture = new CompletableFuture<>();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         log.debug("结束");
 
