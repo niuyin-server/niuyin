@@ -157,7 +157,7 @@ public class VideoTestApplication {
         Long userId = 3L;
         String videoTitle = "御姐";
         String videoDesc = "甜心大姐姐";
-        String videoUrl = "http://s4pw9v9pl.hb-bkt.clouddn.com/2023/11/02/d1e511dd3e754c3fa23e872f608dd914.mp4";
+        String videoUrl = "http://s4vqrd8fr.hn-bkt.clouddn.com/2023/11/02/d1e511dd3e754c3fa23e872f608dd914.mp4";
         Long categoryId = 1L;
         String coverImage = "头像路径测试";
         VideoPublishDto videoPublishDto = new VideoPublishDto();
@@ -270,7 +270,7 @@ public class VideoTestApplication {
     @Test
     void videoTrans() {
 
-//        URL url = new URL("http://s4pw9v9pl.hb-bkt.clouddn.com/niuyin9161201e467d4889b247a3b7a106e8e4video.mp4");
+//        URL url = new URL("http://s4vqrd8fr.hn-bkt.clouddn.com/niuyin9161201e467d4889b247a3b7a106e8e4video.mp4");
 //        URLConnection urlConnection = url.openConnection();
 //        InputStream inputStream = urlConnection.getInputStream();
 //        File file =File.createTempFile("temp",".tmp");
