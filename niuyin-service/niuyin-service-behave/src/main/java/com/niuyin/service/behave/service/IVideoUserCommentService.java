@@ -59,9 +59,10 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
 
     /**
      * 分页查询评论树
+     *
      * @param pageDTO
      * @return
      * @throws InterruptedException
      */
-    PageDataInfo getQueryTree(VideoUserCommentPageDTO pageDTO) throws ExecutionException, InterruptedException;
+    PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO);
 }

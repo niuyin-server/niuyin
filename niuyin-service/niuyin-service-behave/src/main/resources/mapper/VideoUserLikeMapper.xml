@@ -40,30 +40,30 @@
     </select>
 
     <select id="selectPersonLikePage" resultType="com.niuyin.model.video.domain.Video">
-        WITH VideoUserLikeCTE AS (
-        SELECT *, ROW_NUMBER() OVER (ORDER BY create_time DESC) AS RowNum
-        FROM video_user_like
-        WHERE user_id =  #{userId}
-        )
+        <!--        WITH VideoUserLikeCTE AS (-->
+        <!--        SELECT *, ROW_NUMBER() OVER (ORDER BY create_time DESC) AS RowNum-->
+        <!--        FROM video_user_like-->
+        <!--        WHERE user_id =  #{userId}-->
+        <!--        )-->
+        <!--        SELECT v.*-->
+        <!--        FROM video v-->
+        <!--        RIGHT JOIN VideoUserLikeCTE vul ON v.video_id = vul.video_id-->
+        <!--        WHERE vul.RowNum BETWEEN  #{pageNum} * #{pageSize} + 1 AND #{pageNum} * #{pageSize} + #{pageSize}-->
+        <!--        <if test="videoTitle != null">-->
+        <!--            AND v.video_title like concat ('%', #{videoTitle},'%')-->
+        <!--        </if>-->
+        <!--        ORDER BY vul.create_time DESC;-->
+
         SELECT v.*
         FROM video v
-        RIGHT JOIN VideoUserLikeCTE vul ON v.video_id = vul.video_id
-        WHERE vul.RowNum BETWEEN  #{pageNum} * #{pageSize} + 1 AND #{pageNum} * #{pageSize} + #{pageSize}
+        RIGHT JOIN (SELECT * FROM video_user_like WHERE user_id = #{userId}) vul
+        ON v.video_id = vul.video_id
+        WHERE 1
         <if test="videoTitle != null">
             AND v.video_title like concat ('%', #{videoTitle},'%')
         </if>
-        ORDER BY vul.create_time DESC;
-
-<!--        SELECT v.*-->
-<!--        FROM video v-->
-<!--        RIGHT JOIN (SELECT * FROM video_user_like WHERE user_id = #{userId}) vul-->
-<!--        ON v.video_id = vul.video_id-->
-<!--        WHERE 1-->
-<!--        <if test="videoTitle != null">-->
-<!--            AND v.video_title like concat ('%', #{videoTitle},'%')-->
-<!--        </if>-->
-<!--        ORDER BY vul.create_time DESC-->
-<!--        LIMIT #{pageNum},#{pageSize}-->
+        ORDER BY vul.create_time DESC
+        LIMIT #{pageNum},#{pageSize}
     </select>
     <select id="selectPersonLikeCount" resultType="java.lang.Long">
         SELECT count(1)

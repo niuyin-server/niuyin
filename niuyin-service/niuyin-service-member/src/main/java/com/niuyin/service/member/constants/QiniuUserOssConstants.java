@@ -8,7 +8,7 @@ package com.niuyin.service.member.constants;
  **/
 public class QiniuUserOssConstants {
     /**
-     * 临时域名
+     * 七牛云用户空间 niuyin-user 临时域名
      */
-    public static final String PREFIX_URL = "http://s3adm4szs.hb-bkt.clouddn.com/";
+    public static final String PREFIX_URL = "http://s4vqqf38g.hn-bkt.clouddn.com/";
 }

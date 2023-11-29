@@ -68,8 +68,8 @@ public class VideoUserCommentController {
      * 分页查询评论集合树
      */
     @PostMapping("/tree")
-    public PageDataInfo queryTree(@RequestBody VideoUserCommentPageDTO pageDTO) throws ExecutionException, InterruptedException {
-        return videoUserCommentService.getQueryTree(pageDTO);
+    public PageDataInfo queryTree(@RequestBody VideoUserCommentPageDTO pageDTO) {
+        return videoUserCommentService.getCommentPageTree(pageDTO);
     }
 
     /**

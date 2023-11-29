@@ -20,7 +20,7 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
     boolean videoLike(String videoId);
 
     /**
-     * 分页查询我的视频
+     * 分页查询我的点赞视频
      *
      * @param pageDto
      * @return

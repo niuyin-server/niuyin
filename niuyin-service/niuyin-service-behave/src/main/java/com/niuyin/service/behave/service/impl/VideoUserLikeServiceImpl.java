@@ -1,6 +1,7 @@
 package com.niuyin.service.behave.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
@@ -9,6 +10,7 @@ import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.behave.domain.VideoUserLike;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.enums.ShowStatusEnum;
 import com.niuyin.model.notice.domain.Notice;
@@ -144,7 +146,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     }
 
     /**
-     * 分页查询我的视频
+     * 分页查询我的点赞视频
      *
      * @param pageDto
      * @return
@@ -154,52 +156,43 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
         List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
-        List<VideoVO> videoVOList = new ArrayList<>();
-        List<CompletableFuture<Void>> futures = records.stream()
-                .map(r -> CompletableFuture.runAsync(() -> {
-                    VideoVO videoVO = BeanCopyUtils.copyBean(r, VideoVO.class);
-                    // 若是图文则封装图片集合
-                    if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                        List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
-                        String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-                        videoVO.setImageList(imgs);
-                    }
-//                    // 若是开启定位，封装定位
-//                    if (r.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
-//                        VideoPosition videoPosition = videoUserLikeMapper.selectPositionByVideoId(videoVO.getVideoId());
-//                        videoVO.setPosition(videoPosition);
-//                    }
-                    videoVOList.add(videoVO);
-                })).collect(Collectors.toList());
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(records, VideoVO.class);
+        CompletableFuture.allOf(videoVOList.stream().map(this::packageVideoVOAsync).toArray(CompletableFuture[]::new)).join();
         return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
-//    public PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto) {
-//        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
-//        pageDto.setUserId(UserContext.getUserId());
-//        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
-//        List<VideoVO> videoVOList = new ArrayList<>();
-//        ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
-//        for (Video record : records) {
-//            executorService.submit(() -> { // 提交任务到线程池
-//                VideoVO videoVO = BeanCopyUtils.copyBean(record, VideoVO.class);
-//                // 若是图文则封装图片集合
-//                if (record.getPublishType().equals(PublishType.IMAGE.getCode())) {
-//                    List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
-//                    String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-//                    videoVO.setImageList(imgs);
-//                }
-//                videoVOList.add(videoVO); // 直接修改原始数据，避免数据复制
-//            });
-//        }
-//        executorService.shutdown(); // 关闭线程池
-//        try {
-//            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); // 等待所有任务完成
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
-//    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoVOAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoVO(videoVO));
+    }
+
+    @Async
+    public void packageVideoVO(VideoVO videoVO) {
+        CompletableFuture<Void> imageDataFuture = packageVideoImageDataAsync(videoVO);
+        CompletableFuture.allOf(
+                imageDataFuture
+        ).join();
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoImageDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoImageData(videoVO));
+    }
+
+    /**
+     * 封装图文数据
+     *
+     * @param videoVO
+     */
+    @Async
+    public void packageVideoImageData(VideoVO videoVO) {
+        // 若是图文则封装图片集合
+        if (videoVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(videoVO.getVideoId());
+            String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+            videoVO.setImageList(imgs);
+        }
+    }
 
     /**
      * 查询用户的点赞列表

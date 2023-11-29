@@ -197,14 +197,16 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     }
 
     /**
+     * 分页查询评论树
+     *
      * @param pageDTO
      * @return
      */
     @Override
-    public PageDataInfo getQueryTree(VideoUserCommentPageDTO pageDTO) throws ExecutionException, InterruptedException {
+    public PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO) {
         String newsId = pageDTO.getVideoId();
         if (StringUtil.isEmpty(newsId)) {
-            R.ok();
+            return PageDataInfo.emptyPage();
         }
         CompletableFuture<IPage<VideoUserComment>> iPage = CompletableFuture.supplyAsync(() -> this.getRootListByVideoId(pageDTO));
         List<VideoUserComment> rootRecords = iPage.join().getRecords();
