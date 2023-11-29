@@ -5,28 +5,32 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.model.common.enums.NoticeTypeEnum;
-import com.niuyin.model.notice.domain.Notice;
-import com.niuyin.model.notice.enums.NoticeType;
-import com.niuyin.model.notice.enums.ReceiveFlag;
-import com.niuyin.model.video.domain.Video;
-import com.niuyin.service.social.mapper.UserFollowMapper;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.notice.domain.Notice;
+import com.niuyin.model.notice.enums.NoticeType;
+import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.social.UserFollow;
+import com.niuyin.service.social.mapper.UserFollowMapper;
 import com.niuyin.service.social.service.IUserFollowService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -48,6 +52,9 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @DubboReference(version = "1.0.0", loadbalance = "random")
+    private DubboMemberService dubboMemberService;
 
     @Override
     public boolean followUser(Long userId) {
@@ -127,5 +134,34 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         LambdaQueryWrapper<UserFollow> userFollowLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userFollowLambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
         return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), userFollowLambdaQueryWrapper);
+    }
+
+    /**
+     * 分页查询我的关注
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo getFollowPage(PageDTO pageDTO) {
+        if (StringUtils.isNull(pageDTO)) {
+            LambdaQueryWrapper<UserFollow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
+            List<UserFollow> list = this.list(lambdaQueryWrapper);
+            List<Member> res = new ArrayList<>();
+            CompletableFuture.allOf(list.stream()
+                    .map(l -> CompletableFuture.runAsync(() -> {
+                        Member user = dubboMemberService.apiGetById(l.getUserFollowId());
+                        res.add(user);
+                    })).toArray(CompletableFuture[]::new)).join();
+            return PageDataInfo.genPageData(res, res.size());
+        }
+        IPage<UserFollow> userFollowIPage = this.followPage(pageDTO);
+        List<Member> userList = new ArrayList<>();
+        userFollowIPage.getRecords().forEach(uf -> {
+            Member user = dubboMemberService.apiGetById(uf.getUserFollowId());
+            userList.add(user);
+        });
+        return PageDataInfo.genPageData(userList, userFollowIPage.getTotal());
     }
 }

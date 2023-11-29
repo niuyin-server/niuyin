@@ -2,6 +2,7 @@ package com.niuyin.service.social.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.UserFollow;
 
@@ -34,4 +35,11 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @return IPage<User>
      */
     IPage<UserFollow> followPage(PageDTO pageDTO);
+
+    /**
+     * 分页查询我的关注
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo getFollowPage(PageDTO pageDTO);
 }

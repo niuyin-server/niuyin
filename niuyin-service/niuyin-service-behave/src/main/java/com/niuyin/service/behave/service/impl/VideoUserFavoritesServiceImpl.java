@@ -32,10 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -158,19 +155,6 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
      */
     @Override
     public PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto) {
-//        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
-//        pageDto.setUserId(UserContext.getUserId());
-//        List<UserFavoriteVideoVO> videos = videoUserFavoritesMapper.selectUserFavoriteVideos(pageDto);
-//        videos.forEach(r -> {
-//            // 若是图文则封装图片集合
-//            if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-//                List<VideoImage> videoImageList = videoUserLikeMapper.selectImagesByVideoId(r.getVideoId());
-//                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
-//                r.setImageList(imgs);
-//            }
-//        });
-//        Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
-//        return PageDataInfo.genPageData(videos, count);
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
         // 查询用户收藏的视频列表（包含分页）
@@ -185,17 +169,19 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
                 videoUserLikeMapper.selectImagesByVideoIds(imageVideoIds));
         // 更新视频对象的图片集合
         CompletableFuture<Void> updateVideosFuture = videoImagesFuture.thenAcceptAsync(videoImages -> {
-            Map<String, List<VideoImage>> videoImageMap = videoImages.stream()
-                    .collect(Collectors.groupingBy(VideoImage::getVideoId));
-            videos.forEach(r -> {
-                if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
-                    List<VideoImage> videoImageList = videoImageMap.getOrDefault(r.getVideoId(), Collections.emptyList());
-                    String[] imgs = videoImageList.stream()
-                            .map(VideoImage::getImageUrl)
-                            .toArray(String[]::new);
-                    r.setImageList(imgs);
-                }
-            });
+            if  (videoImages != null){
+                Map<String, List<VideoImage>> videoImageMap = videoImages.stream()
+                        .collect(Collectors.groupingBy(VideoImage::getVideoId));
+                videos.forEach(r -> {
+                    if (r.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                        List<VideoImage> videoImageList = videoImageMap.getOrDefault(r.getVideoId(), Collections.emptyList());
+                        String[] imgs = videoImageList.stream()
+                                .map(VideoImage::getImageUrl)
+                                .toArray(String[]::new);
+                        r.setImageList(imgs);
+                    }
+                });
+            }
         });
         // 等待异步操作完成
         CompletableFuture.allOf(videoImagesFuture, updateVideosFuture).join();
