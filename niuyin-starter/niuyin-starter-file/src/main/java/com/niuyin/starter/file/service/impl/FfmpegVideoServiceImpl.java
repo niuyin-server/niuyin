@@ -2,9 +2,7 @@ package com.niuyin.starter.file.service.impl;
 
 import com.niuyin.starter.file.config.FfmpegConfig;
 import com.niuyin.starter.file.config.FfmpegConfigProperties;
-import com.niuyin.starter.file.config.QiniuOssConfig;
-import com.niuyin.starter.file.config.QiniuOssConfigProperties;
-import com.niuyin.starter.file.service.FfmpefVideoService;
+import com.niuyin.starter.file.service.FfmpegVideoService;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import ws.schild.jave.process.ProcessWrapper;
@@ -14,7 +12,6 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 /**
  * 功能：
@@ -24,7 +21,7 @@ import java.util.Arrays;
  */
 @EnableConfigurationProperties(FfmpegConfigProperties.class)
 @Import(FfmpegConfig.class)
-public class FfmpefVideoServiceImpl implements FfmpefVideoService {
+public class FfmpegVideoServiceImpl implements FfmpegVideoService {
 
     @Resource
     private FfmpegConfigProperties ffmpegConfigProperties;
