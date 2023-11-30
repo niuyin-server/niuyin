@@ -41,8 +41,6 @@ public class UserLikeTest {
         List<String> collect = page.getRecords().stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
         log.debug("开始");
 //        videoUserLikeMapper.selectImagesByVideoIds(collect);
-
-
 //        collect.forEach(c-> {
 //            videoUserLikeMapper.selectImagesByVideoId(c);
 //        });
