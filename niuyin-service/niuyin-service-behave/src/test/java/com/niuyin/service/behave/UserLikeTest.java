@@ -33,7 +33,6 @@ public class UserLikeTest {
     @Resource
     private IVideoUserLikeService videoUserLikeService;
 
-
     @Test
     void testFavorite() {
 
@@ -42,20 +41,16 @@ public class UserLikeTest {
         log.debug("开始");
 //        videoUserLikeMapper.selectImagesByVideoIds(collect);
 
-
 //        collect.forEach(c-> {
 //            videoUserLikeMapper.selectImagesByVideoId(c);
 //        });
-//
+
         List<CompletableFuture<Void>> futures = collect.stream()
                 .map(r -> CompletableFuture.runAsync(() -> {
                             videoUserLikeMapper.selectImagesByVideoId(r);
                         })).collect(Collectors.toList());
-        CompletableFuture<Object> objectCompletableFuture = new CompletableFuture<>();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         log.debug("结束");
-
-
 
     }
 
