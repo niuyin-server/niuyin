@@ -49,6 +49,7 @@ public class UserLikeTest {
                 .map(r -> CompletableFuture.runAsync(() -> {
                             videoUserLikeMapper.selectImagesByVideoId(r);
                         })).collect(Collectors.toList());
+        CompletableFuture<Object> objectCompletableFuture = new CompletableFuture<>();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         log.debug("结束");
 
