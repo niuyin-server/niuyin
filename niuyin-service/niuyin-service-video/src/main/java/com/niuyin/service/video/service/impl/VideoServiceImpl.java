@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
-import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT5;
+import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT7;
 import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_POSITION_PREFIX_KEY;
 
@@ -687,8 +687,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             LocalDateTime createTime = video.getCreateTime();
             Duration between = Duration.between(LocalDateTime.now(), createTime);
             long hours = between.toHours();
-            // 计算的是五天的数据量，使用五天总的小时数减去这个差值
-            long totalHour = VIDEO_BEFORE_DAT5 * 24;
+            // 计算的是7天的数据量，使用7天总的小时数减去这个差值
+            long totalHour = VIDEO_BEFORE_DAT7 * 24;
             long realHour = totalHour - Math.abs(hours);
             score += Math.abs(realHour) * HotVideoConstants.WEIGHT_CREATE_TIME;
         }
