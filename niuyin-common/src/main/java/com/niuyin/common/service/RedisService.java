@@ -1,5 +1,6 @@
 package com.niuyin.common.service;
 
+import cn.hutool.core.util.BooleanUtil;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -297,4 +298,26 @@ public class RedisService {
     public Double getZSetScore(String key, String zkey) {
         return redisTemplate.opsForZSet().score(key, zkey);
     }
+
+
+    /**
+     * 尝试获取分布式锁
+     *
+     * @param key
+     * @return
+     */
+    public boolean tryLock(String key, long timeout, TimeUnit unit) {
+        Boolean flag = redisTemplate.opsForValue().setIfAbsent(key, "1", timeout, unit);
+        return BooleanUtil.isTrue(flag);
+    }
+
+    /**
+     * 释放分布式锁
+     *
+     * @param key
+     */
+    public void unLock(String key) {
+        redisTemplate.delete(key);
+    }
+
 }
