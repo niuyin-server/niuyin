@@ -208,73 +208,43 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         if (StringUtil.isEmpty(newsId)) {
             return PageDataInfo.emptyPage();
         }
-        CompletableFuture<IPage<VideoUserComment>> iPage = CompletableFuture.supplyAsync(() -> this.getRootListByVideoId(pageDTO));
-        List<VideoUserComment> rootRecords = iPage.join().getRecords();
+        IPage<VideoUserComment> iPage = this.getRootListByVideoId(pageDTO);
+        List<VideoUserComment> rootRecords = iPage.getRecords();
 
         List<VideoUserCommentVO> voList = new ArrayList<>();
         CompletableFuture.allOf(rootRecords.stream()
                 .map(r -> CompletableFuture.runAsync(() -> {
                     // 获取用户详情
                     VideoUserCommentVO appNewsCommentVO = BeanCopyUtils.copyBean(r, VideoUserCommentVO.class);
-                    Long userId = r.getUserId();
-                    // 先走redis，有就直接返回
-                    CompletableFuture<Member> memberCache = CompletableFuture.supplyAsync(() -> redisService.getCacheObject("member:userinfo:" + userId));
-                    Member member = memberCache.join();
-                    if (StringUtils.isNotNull(member)) {
-                        appNewsCommentVO.setNickName(member.getNickName());
-                        appNewsCommentVO.setAvatar(member.getAvatar());
-                    } else {
-                        CompletableFuture<Member> userCompletableFuture = CompletableFuture.supplyAsync(() -> dubboMemberService.apiGetById(userId));
-                        Member user = userCompletableFuture.join();
-                        if (StringUtils.isNotNull(user)) {
-                            appNewsCommentVO.setNickName(user.getNickName());
-                            appNewsCommentVO.setAvatar(user.getAvatar());
-                        }
+                    Member user = dubboMemberService.apiGetById(r.getUserId());
+                    if (StringUtils.isNotNull(user)) {
+                        appNewsCommentVO.setNickName(StringUtils.isEmpty(user.getNickName()) ? "-" : user.getNickName());
+                        appNewsCommentVO.setAvatar(StringUtils.isEmpty(user.getAvatar()) ? "" : user.getAvatar());
                     }
                     Long commentId = r.getCommentId();
                     List<VideoUserComment> children = this.getChildren(commentId);
                     List<VideoUserCommentVO> childrenVOS = BeanCopyUtils.copyBeanList(children, VideoUserCommentVO.class);
                     CompletableFuture.allOf(childrenVOS.stream()
                             .map(c -> CompletableFuture.runAsync(() -> {
-                                CompletableFuture<Member> userCompletableFuture2 = CompletableFuture.supplyAsync(() -> redisService.getCacheObject("member:userinfo:" + c.getUserId()));
-                                Member userCache2 = userCompletableFuture2.join();
-
-                                if (StringUtils.isNotNull(userCache2)) {
-                                    c.setNickName(userCache2.getNickName());
-                                    c.setAvatar(userCache2.getAvatar());
-                                } else {
-                                    CompletableFuture<Member> cUserCompletableFuture = CompletableFuture.supplyAsync(() -> dubboMemberService.apiGetById(c.getUserId()));
-                                    Member cUser = cUserCompletableFuture.join();
-
-                                    if (StringUtils.isNotNull(cUser)) {
-                                        c.setNickName(cUser.getNickName());
-                                        c.setAvatar(cUser.getAvatar());
-                                    }
+                                Member cUser = dubboMemberService.apiGetById(c.getUserId());
+                                if (StringUtils.isNotNull(cUser)) {
+                                    c.setNickName(StringUtils.isEmpty(cUser.getNickName()) ? "-" : cUser.getNickName());
+                                    c.setAvatar(StringUtils.isEmpty(cUser.getAvatar()) ? "" : cUser.getAvatar());
                                 }
                                 if (!c.getParentId().equals(commentId)) {
                                     // 回复了回复
-                                    CompletableFuture<VideoUserComment> byIdCommentCompletableFuture = CompletableFuture.supplyAsync(() -> this.getById(c.getParentId()));
-                                    VideoUserComment byId = byIdCommentCompletableFuture.join();
-
+                                    VideoUserComment byId = this.getById(c.getParentId());
                                     Long userId1 = byId.getUserId();
                                     c.setReplayUserId(byId.getUserId());
-                                    CompletableFuture<Member> userCache3CompletableFuture = CompletableFuture.supplyAsync(() -> redisService.getCacheObject("member:userinfo:" + userId1));
-                                    Member userCache3 = userCache3CompletableFuture.join();
-
-                                    if (StringUtils.isNotNull(userCache2)) {
-                                        c.setReplayUserNickName(userCache3.getNickName());
-                                    } else {
-                                        CompletableFuture<Member> byUserCompletableFuture = CompletableFuture.supplyAsync(() -> dubboMemberService.apiGetById(userId1));
-                                        Member byUser = byUserCompletableFuture.join();
-                                        if (StringUtils.isNotNull(byUser)) {
-                                            c.setReplayUserNickName(byUser.getNickName());
-                                        }
+                                    Member byUser = dubboMemberService.apiGetById(userId1);
+                                    if (StringUtils.isNotNull(byUser)) {
+                                        c.setReplayUserNickName(byUser.getNickName());
                                     }
                                 }
                             })).toArray(CompletableFuture[]::new)).join();
                     appNewsCommentVO.setChildren(childrenVOS);
                     voList.add(appNewsCommentVO);
                 })).toArray(CompletableFuture[]::new)).join();
-        return PageDataInfo.genPageData(voList, iPage.join().getTotal());
+        return PageDataInfo.genPageData(voList, iPage.getTotal());
     }
 }
