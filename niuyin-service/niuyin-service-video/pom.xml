@@ -31,9 +31,16 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>
         </dependency>
+        <!-- niuyin-oss-->
         <dependency>
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-starter-file</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <!-- niuyin-video -->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-starter-video</artifactId>
             <version>1.0.0</version>
         </dependency>
         <!-- amqp -->

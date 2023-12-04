@@ -1,4 +1,4 @@
-package com.niuyin.starter.file.config;
+package com.niuyin.starter.video.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

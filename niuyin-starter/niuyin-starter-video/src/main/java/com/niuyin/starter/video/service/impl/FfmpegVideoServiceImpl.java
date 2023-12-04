@@ -1,9 +1,9 @@
-package com.niuyin.starter.file.service.impl;
+package com.niuyin.starter.video.service.impl;
 
-import com.niuyin.starter.file.config.FfmpegConfig;
-import com.niuyin.starter.file.config.FfmpegConfigProperties;
-import com.niuyin.starter.file.service.FfmpegVideoService;
-import com.niuyin.starter.file.util.PathUtils;
+import com.niuyin.starter.video.config.FfmpegConfig;
+import com.niuyin.starter.video.config.FfmpegConfigProperties;
+import com.niuyin.starter.video.service.FfmpegVideoService;
+import com.niuyin.starter.video.util.PathUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
@@ -14,12 +14,14 @@ import ws.schild.jave.process.ProcessWrapper;
 import ws.schild.jave.process.ffmpeg.DefaultFFMPEGLocator;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**

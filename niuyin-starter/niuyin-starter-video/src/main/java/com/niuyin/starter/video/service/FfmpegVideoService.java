@@ -1,4 +1,4 @@
-package com.niuyin.starter.file.service;
+package com.niuyin.starter.video.service;
 
 import ws.schild.jave.info.MultimediaInfo;
 

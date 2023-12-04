@@ -1,4 +1,4 @@
-package com.niuyin.starter.file.constants;
+package com.niuyin.starter.video.constants;
 
 /**
  * FfmpegConstants
