@@ -47,6 +47,18 @@ public class AliyunOssServiceImpl implements AliyunOssService {
     }
 
     /**
+     * 上传视频文件
+     *
+     * @param file   文件本体
+     * @param folder
+     * @return url
+     */
+    @Override
+    public String uploadVideoFile(MultipartFile file, String folder) {
+        return uploadCommonImage(file, folder);
+    }
+
+    /**
      * 上传图片方法
      *
      * @param file   限制大小100M

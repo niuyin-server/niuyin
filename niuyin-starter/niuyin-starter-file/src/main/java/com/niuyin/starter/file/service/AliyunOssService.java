@@ -18,4 +18,12 @@ public interface AliyunOssService {
      */
     String uploadFile(MultipartFile file, String folder);
 
+    /**
+     * 上传视频文件
+     *
+     * @param file 文件本体
+     * @return url
+     */
+    String uploadVideoFile(MultipartFile file, String folder);
+
 }
