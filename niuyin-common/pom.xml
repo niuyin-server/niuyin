@@ -37,7 +37,6 @@
             </exclusions>
         </dependency>
 
-
         <dependency>
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-model</artifactId>

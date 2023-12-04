@@ -17,15 +17,6 @@
             <artifactId>niuyin-starter-file</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <!-- swagger2.0集成 -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-        </dependency>
         <!-- SpringCloud Alibaba Sentinel Gateway -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -46,7 +37,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
-
 
         <!-- spring cloud alibaba dubbo -->
         <dependency>

@@ -18,8 +18,6 @@
             <artifactId>hanlp</artifactId>
             <version>portable-1.7.6</version>
         </dependency>
-
-
         <!--elasticsearch-->
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
@@ -44,15 +42,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-        <!-- swagger2.0集成 -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
         <!-- SpringCloud Alibaba Sentinel Gateway -->
         <dependency>
