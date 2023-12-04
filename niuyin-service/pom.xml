@@ -14,6 +14,7 @@
 
     <modules>
         <module>niuyin-service-member</module>
+        <module>niuyin-service-creator</module>
         <module>niuyin-service-video</module>
         <module>niuyin-service-search</module>
         <module>niuyin-service-social</module>
