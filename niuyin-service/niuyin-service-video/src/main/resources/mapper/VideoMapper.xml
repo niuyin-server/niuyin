@@ -58,7 +58,7 @@
 
     <select id="userWeatherFavoriteVideo" resultType="java.lang.Long">
         select count(1) as count
-        from video_user_like
+        from video_user_favorites
         where video_id = #{videoId}
           and user_id = #{userId}
     </select>
@@ -69,6 +69,7 @@
         where user_id = #{userId}
           and user_follow_id = #{userFollowId};
     </select>
+
     <select id="batchSelectVideoAuthor" parameterType="java.util.List"  resultType="com.niuyin.model.member.domain.Member">
 
         SELECT m.nick_name,m.avatar FROM member m WHERE m.user_id IN

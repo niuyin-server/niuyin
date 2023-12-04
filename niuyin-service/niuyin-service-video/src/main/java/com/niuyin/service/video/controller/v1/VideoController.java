@@ -22,6 +22,7 @@ import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cache.annotation.Cacheable;
@@ -59,6 +60,9 @@ public class VideoController {
     @Resource
     private IVideoPositionService videoPositionService;
 
+    @Resource
+    private AliyunOssService aliyunOssService;
+
     @DubboReference(version = "1.0.1", loadbalance = "random")
     private DubboMemberService dubboMemberService;
 
@@ -67,6 +71,16 @@ public class VideoController {
         Member member = dubboMemberService.apiGetById(UserContext.getUserId());
 //        Member member = remoteMemberService.userInfoById(UserContext.getUserId()).getData();
         return R.ok(member);
+    }
+
+    /**
+     * 上传视频到aliyun oss测试
+     * @param file
+     * @return
+     */
+    @PostMapping("/test-upload-video")
+    public R<String> testUploadVideo(@RequestParam("file") MultipartFile file) {
+        return R.ok(aliyunOssService.uploadVideoFile(file, "video"));
     }
 
     /**
