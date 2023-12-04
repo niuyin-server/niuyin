@@ -15,11 +15,14 @@ import java.util.Map;
  */
 @Data
 @Component
-@ConfigurationProperties(prefix = "ffmpeg.vfrme")
+@ConfigurationProperties(prefix = "ffmpeg.vframes")
 public class FfmpegConfigProperties {
 
-    private String[] fbl;
-
-
+    // 目标路径
+    private String targetPath;
+    // 0~31 数字越小质量越高
+    private String quantity;
+    // 指定截取时间
+    private String timestamp;
 
 }
