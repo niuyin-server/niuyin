@@ -1,5 +1,10 @@
 package com.niuyin.service.video;
 
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.internal.Mimetypes;
+import com.aliyun.oss.model.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niuyin.common.utils.video.FfmpegUtil;
@@ -24,18 +29,24 @@ import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
+import com.aliyun.oss.ClientException;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import com.niuyin.starter.file.service.FfmpegVideoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
@@ -46,6 +57,7 @@ import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGE
  * 作者：lzq
  * 日期：2023/10/29 16:07
  */
+@Slf4j
 @SpringBootTest
 public class VideoTestApplication {
 
@@ -303,14 +315,51 @@ public class VideoTestApplication {
     }
 
     @Test
-    void videoPictureTest() {
-//        File file = new File("D:\\haose\\Videos\\1235.mp4");
-//        String s="D:\\haose\\Videos\\12\\12";
-//        FfmpegUtil.getVideoInfoAndGenerateThumbnail(file,s);
-        String url = "http://s4bgg8hwg.hb-bkt.clouddn.com/2023/11/18/1234.avi";
-        String s = "D:\\haose\\Videos\\12\\1234567.png";
+    @DisplayName("获取视频详情")
+    void getVideoInfo() {
+        // 横屏视频
+//        String urlheng = "http://s4bi8902v.hb-bkt.clouddn.com/2023/11/27/9829cce9da304b66902fdd19c7cfbfc8.mp4";
+        String urlheng = "http://s4vq4byfr.hn-bkt.clouddn.com/2023/11/29/18d83770d4a2480b8bfe917b5388ab96.mp4";
 
-        ffmpegVideoService.getTargetThumbnail(url, s);
+        MultimediaInfo info = ffmpegVideoService.getVideoInfo(urlheng);
+        log.debug("视频详情：{}", info);
+    }
+
+    @Test
+    @DisplayName("远程视频生成首帧截图")
+    void videoPictureTest() {
+        log.debug("开始生成缩略图：");
+        // 竖屏视频
+        String urlshu = "http://s4vq4byfr.hn-bkt.clouddn.com/2023/11/29/18d83770d4a2480b8bfe917b5388ab96.mp4";
+        String sshu = "18d83770d4a2480b8bfe917b5388ab96-1.jpg";
+        // 横屏视频
+//        String urlheng = "http://s4bi8902v.hb-bkt.clouddn.com/2023/11/27/9829cce9da304b66902fdd19c7cfbfc8.mp4";
+//        String sheng = "9829cce9da304b66902fdd19c7cfbfc8-5.jpg";
+
+        String targetThumbnail = ffmpegVideoService.getTargetThumbnail(urlshu, sshu);
+        log.debug("生成截图地址：{}", targetThumbnail);
+
+    }
+
+    @Test
+    @DisplayName("远程视频生成三张预览截图")
+    void testGenPreview() {
+
+        log.debug("开始生成缩略图：");
+//        // 竖屏视频
+//        String urlshu = "http://s4vq4byfr.hn-bkt.clouddn.com/2023/11/29/18d83770d4a2480b8bfe917b5388ab96.mp4";
+//        String sshu = "18d83770d4a2480b8bfe917b5388ab96-1.jpg";
+//        // 横屏视频
+        String urlheng = "http://s4bi8902v.hb-bkt.clouddn.com/2023/11/27/9829cce9da304b66902fdd19c7cfbfc8.mp4";
+        String sheng = "9829cce9da304b66902fdd19c7cfbfc8";
+//
+        String[] strs = ffmpegVideoService.generatePreviewCover(urlheng, sheng);
+        for (String str : strs) {
+            log.debug("生成截图地址：{}", str);
+        }
+
+        log.debug("结束生成缩略图：");
+
     }
 
     @Test
@@ -334,6 +383,143 @@ public class VideoTestApplication {
         // 重建缓存
         redisService.setCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoId, imgs);
         redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoId, 1, TimeUnit.DAYS);
+    }
+
+    /**
+     *     endpoint: oss-cn-shenzhen.aliyuncs.com
+     *     bucketName: niuyin-server
+     *     accessKeyId: LTAI5tDzXh9ZUzwDRyoPxs7n
+     *     accessKeySecret: Vf81KErpz5ScYJlprwbsbyVyKSysbW
+     */
+    @Test
+    @DisplayName("测试视频分片上传")
+    void testVideoPartUpload() {
+        log.debug("开始分片上传视频");
+        // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
+        String endpoint = "https://oss-cn-shenzhen.aliyuncs.com";
+        // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+        // 填写Bucket名称，例如examplebucket。
+        String bucketName = "niuyin-server";
+        // 填写Object完整路径，例如exampledir/exampleobject.txt。Object完整路径中不能包含Bucket名称。
+        String objectName = "test/exampleobject.mp4";
+        // 待上传本地文件路径。
+        String filePath = "C:\\Users\\roydon\\Videos\\niuyin\\这次不卡了   地平线，启动！.mp4";
+
+        // 创建OSSClient实例。
+        OSS ossClient = new OSSClient(endpoint, "LTAI5tDzXh9ZUzwDRyoPxs7n", "Vf81KErpz5ScYJlprwbsbyVyKSysbW");
+        try {
+            // 创建InitiateMultipartUploadRequest对象。
+            InitiateMultipartUploadRequest request = new InitiateMultipartUploadRequest(bucketName, objectName);
+
+            // 如果需要在初始化分片时设置请求头，请参考以下示例代码。
+            ObjectMetadata metadata = new ObjectMetadata();
+            // metadata.setHeader(OSSHeaders.OSS_STORAGE_CLASS, StorageClass.Standard.toString());
+            // 指定该Object的网页缓存行为。
+            // metadata.setCacheControl("no-cache");
+            // 指定该Object被下载时的名称。
+            // metadata.setContentDisposition("attachment;filename=oss_MultipartUpload.txt");
+            // 指定该Object的内容编码格式。
+            // metadata.setContentEncoding(OSSConstants.DEFAULT_CHARSET_NAME);
+            // 指定初始化分片上传时是否覆盖同名Object。此处设置为true，表示禁止覆盖同名Object。
+            // metadata.setHeader("x-oss-forbid-overwrite", "true");
+            // 指定上传该Object的每个part时使用的服务器端加密方式。
+            // metadata.setHeader(OSSHeaders.OSS_SERVER_SIDE_ENCRYPTION, ObjectMetadata.KMS_SERVER_SIDE_ENCRYPTION);
+            // 指定Object的加密算法。如果未指定此选项，表明Object使用AES256加密算法。
+            // metadata.setHeader(OSSHeaders.OSS_SERVER_SIDE_DATA_ENCRYPTION, ObjectMetadata.KMS_SERVER_SIDE_ENCRYPTION);
+            // 指定KMS托管的用户主密钥。
+            // metadata.setHeader(OSSHeaders.OSS_SERVER_SIDE_ENCRYPTION_KEY_ID, "9468da86-3509-4f8d-a61e-6eab1eac****");
+            // 指定Object的存储类型。
+            // metadata.setHeader(OSSHeaders.OSS_STORAGE_CLASS, StorageClass.Standard);
+            // 指定Object的对象标签，可同时设置多个标签。
+            // metadata.setHeader(OSSHeaders.OSS_TAGGING, "a:1");
+            // request.setObjectMetadata(metadata);
+
+            // 根据文件自动设置ContentType。如果不设置，ContentType默认值为application/oct-srream。
+            if (metadata.getContentType() == null) {
+                metadata.setContentType(Mimetypes.getInstance().getMimetype(new File(filePath), objectName));
+            }
+
+            // 初始化分片。
+            InitiateMultipartUploadResult upresult = ossClient.initiateMultipartUpload(request);
+            // 返回uploadId。
+            String uploadId = upresult.getUploadId();
+            // 根据uploadId执行取消分片上传事件或者列举已上传分片的操作。
+            // 如果您需要根据您需要uploadId执行取消分片上传事件的操作，您需要在调用InitiateMultipartUpload完成初始化分片之后获取uploadId。
+            // 如果您需要根据您需要uploadId执行列举已上传分片的操作，您需要在调用InitiateMultipartUpload完成初始化分片之后，且在调用CompleteMultipartUpload完成分片上传之前获取uploadId。
+            // System.out.println(uploadId);
+
+            // partETags是PartETag的集合。PartETag由分片的ETag和分片号组成。
+            List<PartETag> partETags = new ArrayList<PartETag>();
+            // 每个分片的大小，用于计算文件有多少个分片。单位为字节。
+            final long partSize = 1024 * 1024L;   //1 MB。
+
+            // 根据上传的数据大小计算分片数。以本地文件为例，说明如何通过File.length()获取上传数据的大小。
+            final File sampleFile = new File(filePath);
+            long fileLength = sampleFile.length();
+            int partCount = (int) (fileLength / partSize);
+            if (fileLength % partSize != 0) {
+                partCount++;
+            }
+            // 遍历分片上传。
+            for (int i = 0; i < partCount; i++) {
+                long startPos = i * partSize;
+                long curPartSize = (i + 1 == partCount) ? (fileLength - startPos) : partSize;
+                UploadPartRequest uploadPartRequest = new UploadPartRequest();
+                uploadPartRequest.setBucketName(bucketName);
+                uploadPartRequest.setKey(objectName);
+                uploadPartRequest.setUploadId(uploadId);
+                // 设置上传的分片流。
+                // 以本地文件为例说明如何创建FIleInputstream，并通过InputStream.skip()方法跳过指定数据。
+                InputStream instream = new FileInputStream(sampleFile);
+                instream.skip(startPos);
+                uploadPartRequest.setInputStream(instream);
+                // 设置分片大小。除了最后一个分片没有大小限制，其他的分片最小为100 KB。
+                uploadPartRequest.setPartSize(curPartSize);
+                // 设置分片号。每一个上传的分片都有一个分片号，取值范围是1~10000，如果超出此范围，OSS将返回InvalidArgument错误码。
+                uploadPartRequest.setPartNumber(i + 1);
+                // 每个分片不需要按顺序上传，甚至可以在不同客户端上传，OSS会按照分片号排序组成完整的文件。
+                UploadPartResult uploadPartResult = ossClient.uploadPart(uploadPartRequest);
+                // 每次上传分片之后，OSS的返回结果包含PartETag。PartETag将被保存在partETags中。
+                partETags.add(uploadPartResult.getPartETag());
+            }
+
+
+            // 创建CompleteMultipartUploadRequest对象。
+            // 在执行完成分片上传操作时，需要提供所有有效的partETags。OSS收到提交的partETags后，会逐一验证每个分片的有效性。当所有的数据分片验证通过后，OSS将把这些分片组合成一个完整的文件。
+            CompleteMultipartUploadRequest completeMultipartUploadRequest =
+                    new CompleteMultipartUploadRequest(bucketName, objectName, uploadId, partETags);
+
+            // 如果需要在完成分片上传的同时设置文件访问权限，请参考以下示例代码。
+            // completeMultipartUploadRequest.setObjectACL(CannedAccessControlList.Private);
+            // 指定是否列举当前UploadId已上传的所有Part。仅在Java SDK为3.14.0及以上版本时，支持通过服务端List分片数据来合并完整文件时，将CompleteMultipartUploadRequest中的partETags设置为null。
+            // Map<String, String> headers = new HashMap<String, String>();
+            // 如果指定了x-oss-complete-all:yes，则OSS会列举当前UploadId已上传的所有Part，然后按照PartNumber的序号排序并执行CompleteMultipartUpload操作。
+            // 如果指定了x-oss-complete-all:yes，则不允许继续指定body，否则报错。
+            // headers.put("x-oss-complete-all","yes");
+            // completeMultipartUploadRequest.setHeaders(headers);
+
+            // 完成分片上传。
+            CompleteMultipartUploadResult completeMultipartUploadResult = ossClient.completeMultipartUpload(completeMultipartUploadRequest);
+            System.out.println(completeMultipartUploadResult.getETag());
+        } catch (OSSException oe) {
+            System.out.println("Caught an OSSException, which means your request made it to OSS, "
+                    + "but was rejected with an error response for some reason.");
+            System.out.println("Error Message:" + oe.getErrorMessage());
+            System.out.println("Error Code:" + oe.getErrorCode());
+            System.out.println("Request ID:" + oe.getRequestId());
+            System.out.println("Host ID:" + oe.getHostId());
+        } catch (ClientException ce) {
+            System.out.println("Caught an ClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with OSS, "
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message:" + ce.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ossClient.shutdown();
+        }
+        log.debug("结束分片上传视频");
+
     }
 
 
