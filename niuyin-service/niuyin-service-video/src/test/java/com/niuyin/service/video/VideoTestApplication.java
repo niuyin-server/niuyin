@@ -332,10 +332,7 @@ public class VideoTestApplication {
         log.debug("开始生成缩略图：");
         // 竖屏视频
         String urlshu = "http://s4vq4byfr.hn-bkt.clouddn.com/2023/11/29/18d83770d4a2480b8bfe917b5388ab96.mp4";
-        String sshu = "18d83770d4a2480b8bfe917b5388ab96-1.jpg";
-        // 横屏视频
-//        String urlheng = "http://s4bi8902v.hb-bkt.clouddn.com/2023/11/27/9829cce9da304b66902fdd19c7cfbfc8.mp4";
-//        String sheng = "9829cce9da304b66902fdd19c7cfbfc8-5.jpg";
+        String sshu = "18d83770d4a2480b8bfe917b5388ab96.jpg";
 
         String targetThumbnail = ffmpegVideoService.getTargetThumbnail(urlshu, sshu);
         log.debug("生成截图地址：{}", targetThumbnail);

@@ -109,7 +109,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private IVideoPositionService videoPositionService;
 
     /**
-     * 解决异步线程无法访问五线程的ThreadLocal
+     * 解决异步线程无法访问主线程的ThreadLocal
      */
     private static final ThreadLocal<Long> userIdThreadLocal = new InheritableThreadLocal<>();
 
@@ -126,8 +126,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         String originalFilename = file.getOriginalFilename();
         //对文件id进行判断，如果文件已经存在，则不上传，直接返回数据库中文件的存储路径
         String filePath = PathUtils.generateFilePath(originalFilename);
-        VideoUploadVO videoUploadVO = new VideoUploadVO();
         String uploadVideo = fileStorageService.uploadVideo(file, filePath);
+        VideoUploadVO videoUploadVO = new VideoUploadVO();
         videoUploadVO.setOriginUrl(QiniuVideoOssConstants.VIDEO_ORIGIN_PREFIX_URL + uploadVideo);
         videoUploadVO.setVideoUrl(QiniuVideoOssConstants.VIDEO_PREFIX_URL_2K + uploadVideo);
         videoUploadVO.setVframe(QiniuVideoOssConstants.VIDEO_FRAME_PREFIX_URL + uploadVideo + QiniuVideoOssConstants.VIDEO_FRAME_1_END);
