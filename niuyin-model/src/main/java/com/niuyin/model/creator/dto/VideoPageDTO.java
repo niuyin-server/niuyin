@@ -10,6 +10,7 @@ import lombok.Data;
  **/
 @Data
 public class VideoPageDTO {
+    private Long userId;
     /**
      * 视频标题
      */
