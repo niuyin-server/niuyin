@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niuyin.service.creator.mapper.VideoMapper">
+
+    <select id="selectVideoPage" resultType="com.niuyin.model.video.domain.Video">
+        select *
+        from video
+        where 1
+        <if test="videoTitle != null and videoTitle != ''">
+            and video_title LIKE CONCAT('%', #{videoTitle}, '%')
+        </if>
+        <if test="publishType != null and publishType != ''">
+            and publish_type = #{publishType}
+        </if>
+        <if test="showType != null and showType != ''">
+            and show_type = #{showType}
+        </if>
+        <if test="positionFlag != null and positionFlag != ''">
+            and position_flag = #{positionFlag}
+        </if>
+        <if test="auditsStatus != null and auditsStatus != ''">
+            and audits_status = #{auditsStatus}
+        </if>
+        order by create_time desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="selectVideoPageCount" resultType="java.lang.Long">
+        select count(1) as count
+        from video
+        where 1
+        <if test="videoTitle != null and videoTitle != ''">
+            and video_title LIKE CONCAT('%', #{videoTitle}, '%')
+        </if>
+        <if test="publishType != null and publishType != ''">
+            and publish_type = #{publishType}
+        </if>
+        <if test="showType != null and showType != ''">
+            and show_type = #{showType}
+        </if>
+        <if test="positionFlag != null and positionFlag != ''">
+            and position_flag = #{positionFlag}
+        </if>
+        <if test="auditsStatus != null and auditsStatus != ''">
+            and audits_status = #{auditsStatus}
+        </if>
+    </select>
+</mapper>
+

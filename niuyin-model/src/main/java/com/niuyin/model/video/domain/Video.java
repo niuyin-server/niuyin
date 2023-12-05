@@ -60,6 +60,10 @@ public class Video implements Serializable {
      */
     private String positionFlag;
     /**
+     * 审核状态(0:待审核1:审核成功2:审核失败)
+     */
+    private String auditsStatus;
+    /**
      * 删除标志（0代表存在 1代表删除）
      */
     private String delFlag;
