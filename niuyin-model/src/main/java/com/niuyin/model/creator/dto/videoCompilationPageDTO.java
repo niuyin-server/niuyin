@@ -10,6 +10,7 @@ import lombok.Data;
  **/
 @Data
 public class videoCompilationPageDTO {
+    private Long userId;
     private String title;
     private Integer pageNum = 1;
     private Integer pageSize = 10;

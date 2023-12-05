@@ -26,18 +26,18 @@ public class CreatorController {
 
     /**
      * 视频分页
-     *
-     * @param videoPageDTO
-     * @return
      */
     @PostMapping("/videoPage")
     public PageDataInfo videoPage(@RequestBody VideoPageDTO videoPageDTO) {
         return creatorService.queryVideoPage(videoPageDTO);
     }
 
-//    @PostMapping("/videoCompilationPage")
-//    public PageDataInfo videoCompilationPage(@RequestBody videoCompilationPageDTO videoCompilationPageDTO){
-//        return creatorService.queryVideoCompilationPage(videoCompilationPageDTO);
-//    }
+    /**
+     * 视频合集分页
+     */
+    @PostMapping("/videoCompilationPage")
+    public PageDataInfo videoCompilationPage(@RequestBody videoCompilationPageDTO videoCompilationPageDTO) {
+        return creatorService.queryVideoCompilationPage(videoCompilationPageDTO);
+    }
 
 }

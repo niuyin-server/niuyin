@@ -2,6 +2,7 @@ package com.niuyin.service.creator.service;
 
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.creator.dto.VideoPageDTO;
+import com.niuyin.model.creator.dto.videoCompilationPageDTO;
 
 /**
  * CreatorService
@@ -17,4 +18,12 @@ public interface CreatorService {
      * @return
      */
     PageDataInfo queryVideoPage(VideoPageDTO videoPageDTO);
+
+    /**
+     * 视频合集分页
+     *
+     * @param videoCompilationPageDTO
+     * @return
+     */
+    PageDataInfo queryVideoCompilationPage(videoCompilationPageDTO videoCompilationPageDTO);
 }

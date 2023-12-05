@@ -2,10 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.creator.mapper.VideoMapper">
 
+    <!--    分页查询视频-->
     <select id="selectVideoPage" resultType="com.niuyin.model.video.domain.Video">
         select *
         from video
-        where 1
+        where user_id = #{userId}
         <if test="videoTitle != null and videoTitle != ''">
             and video_title LIKE CONCAT('%', #{videoTitle}, '%')
         </if>
@@ -28,7 +29,7 @@
     <select id="selectVideoPageCount" resultType="java.lang.Long">
         select count(1) as count
         from video
-        where 1
+        where user_id = #{userId}
         <if test="videoTitle != null and videoTitle != ''">
             and video_title LIKE CONCAT('%', #{videoTitle}, '%')
         </if>
@@ -43,6 +44,26 @@
         </if>
         <if test="auditsStatus != null and auditsStatus != ''">
             and audits_status = #{auditsStatus}
+        </if>
+    </select>
+    <!--    分页查询视频合集-->
+    <select id="selectVideoCompilationPage" resultType="com.niuyin.model.video.domain.UserVideoCompilation">
+        select *
+        from user_video_compilation
+        where user_id = #{userId}
+        <if test="title != null and title != ''">
+            and title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        order by create_time desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="selectVideoCompilationPageCount" resultType="java.lang.Long">
+        select count(1) as count
+        from user_video_compilation
+        where user_id = #{userId}
+        <if test="title != null and title != ''">
+            and title LIKE CONCAT('%', #{title}, '%')
         </if>
     </select>
 </mapper>
