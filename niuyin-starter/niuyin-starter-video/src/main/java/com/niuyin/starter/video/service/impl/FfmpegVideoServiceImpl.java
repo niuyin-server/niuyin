@@ -4,6 +4,7 @@ import com.niuyin.starter.video.config.FfmpegConfig;
 import com.niuyin.starter.video.config.FfmpegConfigProperties;
 import com.niuyin.starter.video.service.FfmpegVideoService;
 import com.niuyin.starter.video.util.PathUtils;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
@@ -57,14 +58,9 @@ public class FfmpegVideoServiceImpl implements FfmpegVideoService {
      * @return MultimediaInfo 对象,包含 (宽，高，时长，编码等)
      * @throws EncoderException
      */
+    @SneakyThrows
     public static MultimediaInfo getMultimediaInfo(String localPath) {
-        MultimediaInfo multimediaInfo = null;
-        try {
-            multimediaInfo = new MultimediaObject(new File(localPath)).getInfo();
-        } catch (EncoderException e) {
-            log.debug("获取多媒体文件信息异常：{}", e.getMessage());
-        }
-        return multimediaInfo;
+        return new MultimediaObject(new File(localPath)).getInfo();
     }
 
     /**
@@ -74,14 +70,9 @@ public class FfmpegVideoServiceImpl implements FfmpegVideoService {
      * @return MultimediaInfo 对象,包含 (宽，高，时长，编码等)
      * @throws EncoderException
      */
+    @SneakyThrows
     public static MultimediaInfo getMultimediaInfoByUrl(String url) {
-        MultimediaInfo multimediaInfo = null;
-        try {
-            multimediaInfo = new MultimediaObject(new URL(url)).getInfo();
-        } catch (Exception e) {
-            log.debug("获取多媒体文件信息异常：{}", e.getMessage());
-        }
-        return multimediaInfo;
+        return new MultimediaObject(new URL(url)).getInfo();
     }
 
     /**
@@ -91,32 +82,29 @@ public class FfmpegVideoServiceImpl implements FfmpegVideoService {
      * @param fileName
      * @return
      */
+    @SneakyThrows
     @Override
     public String getTargetThumbnail(String url, String fileName) {
         String thumbnailPath = null;
-        try {
-            // ffmpeg -i 输入视频文件名 -ss 时间戳 -vframes 1 输出图片文件名
-            thumbnailPath = ffmpegConfigProperties.getTargetPath() + PathUtils.generateDataPath() + fileName;
-            File file = new File(thumbnailPath);
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-            ProcessWrapper ffmpeg = new DefaultFFMPEGLocator().createExecutor();
-            ffmpeg.addArgument("-i");
-            ffmpeg.addArgument(url);
-            ffmpeg.addArgument("-ss");
-            ffmpeg.addArgument(ffmpegConfigProperties.getTimestamp());
-            ffmpeg.addArgument("-vframes");
-            ffmpeg.addArgument("1");
-            ffmpeg.addArgument("-q:v");
-            ffmpeg.addArgument(ffmpegConfigProperties.getQuantity());
-            ffmpeg.addArgument(thumbnailPath);
-            ffmpeg.execute();
-            BufferedReader br = new BufferedReader(new InputStreamReader(ffmpeg.getErrorStream()));
-            blockFfmpeg(br);
-        } catch (Exception e) {
-            log.debug("获取视频缩略图失败：{}", e.getMessage());
+        // ffmpeg -i 输入视频文件名 -ss 时间戳 -vframes 1 输出图片文件名
+        thumbnailPath = ffmpegConfigProperties.getTargetPath() + PathUtils.generateDataPath() + fileName;
+        File file = new File(thumbnailPath);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
         }
+        ProcessWrapper ffmpeg = new DefaultFFMPEGLocator().createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(url);
+        ffmpeg.addArgument("-ss");
+        ffmpeg.addArgument(ffmpegConfigProperties.getTimestamp());
+        ffmpeg.addArgument("-vframes");
+        ffmpeg.addArgument("1");
+        ffmpeg.addArgument("-q:v");
+        ffmpeg.addArgument(ffmpegConfigProperties.getQuantity());
+        ffmpeg.addArgument(thumbnailPath);
+        ffmpeg.execute();
+        BufferedReader br = new BufferedReader(new InputStreamReader(ffmpeg.getErrorStream()));
+        blockFfmpeg(br);
         return thumbnailPath;
     }
 
@@ -159,9 +147,7 @@ public class FfmpegVideoServiceImpl implements FfmpegVideoService {
         }
         // 等待所有异步任务完成
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-
         allFutures.join(); // 等待所有异步任务完成
-
         return res.toArray(new String[3]);
     }
 
@@ -188,31 +174,28 @@ public class FfmpegVideoServiceImpl implements FfmpegVideoService {
      * @param timestamp 00:00:01
      * @return
      */
+    @SneakyThrows
     public String generateCoverByTime(String url, String fileName, String timestamp) {
         String thumbnailPath = null;
-        try {
-            // ffmpeg -i 输入视频文件名 -ss 时间戳 -vframes 1 输出图片文件名
-            thumbnailPath = ffmpegConfigProperties.getTargetPath() + PathUtils.generateDataPath() + fileName + ".jpg";
-            File file = new File(thumbnailPath);
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-            ProcessWrapper ffmpeg = new DefaultFFMPEGLocator().createExecutor();
-            ffmpeg.addArgument("-i");
-            ffmpeg.addArgument(url);
-            ffmpeg.addArgument("-ss");
-            ffmpeg.addArgument(timestamp);
-            ffmpeg.addArgument("-vframes");
-            ffmpeg.addArgument("1");
-            ffmpeg.addArgument("-q:v");
-            ffmpeg.addArgument(ffmpegConfigProperties.getQuantity());
-            ffmpeg.addArgument(thumbnailPath);
-            ffmpeg.execute();
-            BufferedReader br = new BufferedReader(new InputStreamReader(ffmpeg.getErrorStream()));
-            blockFfmpeg(br);
-        } catch (Exception e) {
-            log.debug("获取视频缩略图失败：{}", e.getMessage());
+        // ffmpeg -i 输入视频文件名 -ss 时间戳 -vframes 1 输出图片文件名
+        thumbnailPath = ffmpegConfigProperties.getTargetPath() + PathUtils.generateDataPath() + fileName + ".jpg";
+        File file = new File(thumbnailPath);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
         }
+        ProcessWrapper ffmpeg = new DefaultFFMPEGLocator().createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(url);
+        ffmpeg.addArgument("-ss");
+        ffmpeg.addArgument(timestamp);
+        ffmpeg.addArgument("-vframes");
+        ffmpeg.addArgument("1");
+        ffmpeg.addArgument("-q:v");
+        ffmpeg.addArgument(ffmpegConfigProperties.getQuantity());
+        ffmpeg.addArgument(thumbnailPath);
+        ffmpeg.execute();
+        BufferedReader br = new BufferedReader(new InputStreamReader(ffmpeg.getErrorStream()));
+        blockFfmpeg(br);
         return thumbnailPath;
     }
 

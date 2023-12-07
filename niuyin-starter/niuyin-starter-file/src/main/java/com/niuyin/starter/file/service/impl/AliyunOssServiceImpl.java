@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.niuyin.starter.file.config.aliyun.AliyunOssConfigProperties.BUCKET_NAME;
@@ -97,13 +98,13 @@ public class AliyunOssServiceImpl implements AliyunOssService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String filePath = PathUtils.generateFilePath(file.getOriginalFilename());
+        String filePath = PathUtils.generateFilePath(Objects.requireNonNull(file.getOriginalFilename()));
         // 文件存储名称：服务名称/2023/11/11/uuid.jpg
         String ossFileName = folder + "/" + filePath;
         ossClient.putObject(BUCKET_NAME, ossFileName, inputStream);
         String url = "https://" + BUCKET_NAME + "." + END_POINT + "/" + ossFileName;
         //关闭 OSSClient
-        ossClient.shutdown();
+//        ossClient.shutdown();
         return url;
     }
 
