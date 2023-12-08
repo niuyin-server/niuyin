@@ -51,6 +51,12 @@
             <artifactId>niuyin-dubbo</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <!--        aliyun 审核工具-->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-green</artifactId>
+            <version>3.6.6</version>
+        </dependency>
     </dependencies>
 
     <build>
