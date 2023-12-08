@@ -22,6 +22,7 @@ import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.service.video.service.InterestPushService;
 import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -46,25 +48,16 @@ public class VideoController {
     private IVideoService videoService;
 
     @Resource
-    private RedisService redisService;
-
-    @Resource
-    private RemoteMemberService remoteMemberService;
-
-    @Resource
     private FileStorageService fileStorageService;
-
-    @Resource
-    private IVideoImageService videoImageService;
-
-    @Resource
-    private IVideoPositionService videoPositionService;
 
     @Resource
     private AliyunOssService aliyunOssService;
 
-    @DubboReference(version = "1.0.1", loadbalance = "random")
+    @DubboReference(loadbalance = "random")
     private DubboMemberService dubboMemberService;
+
+    @Resource
+    private InterestPushService interestPushService;
 
     @GetMapping("/test-dubbo")
     public R<?> testDubbo() {
@@ -75,12 +68,23 @@ public class VideoController {
 
     /**
      * 上传视频到aliyun oss测试
+     *
      * @param file
      * @return
      */
     @PostMapping("/test-upload-video")
     public R<String> testUploadVideo(@RequestParam("file") MultipartFile file) {
         return R.ok(aliyunOssService.uploadVideoFile(file, "video"));
+    }
+
+    /**
+     * 首页推送视频
+     *
+     * @return
+     */
+    @GetMapping("/pushVideo")
+    public R<?> pushVideo() {
+       return R.ok(videoService.pushVideoList());
     }
 
     /**
@@ -92,7 +96,7 @@ public class VideoController {
     @PostMapping("/hot")
     @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
-        return videoService.getHotvideos(pageDTO);
+        return videoService.getHotVideos(pageDTO);
     }
 
     /**
