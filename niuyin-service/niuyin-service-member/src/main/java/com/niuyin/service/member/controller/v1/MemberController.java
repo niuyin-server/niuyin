@@ -56,6 +56,9 @@ public class MemberController {
     @Resource
     private IMemberInfoService memberInfoService;
 
+    @Resource
+    private AliyunOssService aliyunOssService;
+
     /**
      * 登录
      *
@@ -185,38 +188,33 @@ public class MemberController {
                 || originalFilename.endsWith(".jpg")
                 || originalFilename.endsWith(".jpeg")
                 || originalFilename.endsWith(".webp")) {
-            String filePath = PathUtils.generateFilePath(originalFilename);
-            String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
-            return R.ok(url);
-        } else {
-            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
-        }
-    }
-
-    @Resource
-    private AliyunOssService aliyunOssService;
-
-    /**
-     * 头像上传
-     *
-     * @param file 图片文件，大小限制1M
-     * @return url
-     */
-    @ApiOperation("上传头像")
-    @PostMapping("/avatarv2")
-    public R<String> avatarv2(@RequestParam("file") MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
-        if (StringUtils.isNull(originalFilename)) {
-            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
-        }
-        //对原始文件名进行判断
-        if (originalFilename.endsWith(".png")
-                || originalFilename.endsWith(".jpg")
-                || originalFilename.endsWith(".jpeg")
-                || originalFilename.endsWith(".webp")) {
             return R.ok(aliyunOssService.uploadFile(file, "member"));
         } else {
             throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
         }
     }
+
+//    /**
+//     * 头像上传
+//     *
+//     * @param file 图片文件，大小限制1M
+//     * @return url
+//     */
+//    @ApiOperation("上传头像")
+//    @PostMapping("/avatarv2")
+//    public R<String> avatarv2(@RequestParam("file") MultipartFile file) {
+//        String originalFilename = file.getOriginalFilename();
+//        if (StringUtils.isNull(originalFilename)) {
+//            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+//        }
+//        //对原始文件名进行判断
+//        if (originalFilename.endsWith(".png")
+//                || originalFilename.endsWith(".jpg")
+//                || originalFilename.endsWith(".jpeg")
+//                || originalFilename.endsWith(".webp")) {
+//            return R.ok(aliyunOssService.uploadFile(file, "member"));
+//        } else {
+//            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+//        }
+//    }
 }
