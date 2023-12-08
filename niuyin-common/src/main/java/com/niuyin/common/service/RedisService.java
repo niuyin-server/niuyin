@@ -4,10 +4,7 @@ import cn.hutool.core.util.BooleanUtil;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.BoundSetOperations;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -319,5 +316,13 @@ public class RedisService {
     public void unLock(String key) {
         redisTemplate.delete(key);
     }
+
+    /**
+     * redis 管道操作
+     */
+    public List pipeline(RedisCallback redisCallback) {
+        return redisTemplate.executePipelined(redisCallback);
+    }
+
 
 }
