@@ -128,5 +128,7 @@ public interface IVideoService extends IService<Video> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo getHotvideos(PageDTO pageDTO);
+    PageDataInfo getHotVideos(PageDTO pageDTO);
+
+    List<VideoVO> pushVideoList();
 }

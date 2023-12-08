@@ -12,9 +12,11 @@ import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.audit.SensitiveWordUtil;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
+import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.behave.RemoteBehaveService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.feign.social.RemoteSocialService;
@@ -38,6 +40,7 @@ import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.*;
 import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -107,6 +110,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private IVideoPositionService videoPositionService;
+
+    @Resource
+    private InterestPushService interestPushService;
+
+    @DubboReference(loadbalance = "random")
+    private DubboMemberService dubboMemberService;
 
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
@@ -290,6 +299,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     return message;
                 });
                 log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+                // 同步视频标签库
+                interestPushService.cacheVideoToTagRedis(video.getVideoId(), Arrays.asList(videoPublishDto.getVideoTags()));
+                // 同步视频分类库
+
                 return video.getVideoId();
             }
         } else {
@@ -740,7 +753,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return
      */
     @Override
-    public PageDataInfo getHotvideos(PageDTO pageDTO) {
+    public PageDataInfo getHotVideos(PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
         Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
@@ -773,6 +786,17 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         allFutures.join();
         return PageDataInfo.genPageData(videoVOList, hotCount);
+    }
+
+    @Override
+    public List<VideoVO> pushVideoList() {
+        Member member = dubboMemberService.apiGetById(UserContext.getUserId());
+        Collection<String> videoIdsByUserModel = interestPushService.getVideoIdsByUserModel(member);
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Video::getVideoId, videoIdsByUserModel);
+        List<Video> videoList = this.list(queryWrapper);
+        List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
+        return videoVOList;
     }
 
 }

@@ -70,4 +70,50 @@ public class VideoTagRelationServiceImpl extends ServiceImpl<VideoTagRelationMap
         List<VideoTag> tags = videoTagService.list(vtQW);
         return tags.stream().map(VideoTag::getTag).toArray(String[]::new);
     }
+
+    @Override
+    public List<String> queryVideoTagsReturnList(String videoId) {
+        LambdaQueryWrapper<VideoTagRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoTagRelation::getTagId);
+        queryWrapper.eq(VideoTagRelation::getVideoId, videoId);
+        List<VideoTagRelation> list = this.list(queryWrapper);
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Long> tagIds = list.stream().map(VideoTagRelation::getTagId).collect(Collectors.toList());
+        LambdaQueryWrapper<VideoTag> vtQW = new LambdaQueryWrapper<>();
+        vtQW.select(VideoTag::getTag);
+        vtQW.in(VideoTag::getTagId, tagIds);
+        List<VideoTag> tags = videoTagService.list(vtQW);
+        return tags.stream().map(VideoTag::getTag).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VideoTag> queryVideoTagsByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoTagRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoTagRelation::getTagId);
+        queryWrapper.eq(VideoTagRelation::getVideoId, videoId);
+        List<VideoTagRelation> list = this.list(queryWrapper);
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Long> tagIds = list.stream().map(VideoTagRelation::getTagId).collect(Collectors.toList());
+        LambdaQueryWrapper<VideoTag> vtQW = new LambdaQueryWrapper<>();
+        vtQW.select(VideoTag::getTag);
+        vtQW.in(VideoTag::getTagId, tagIds);
+        List<VideoTag> tags = videoTagService.list(vtQW);
+        return tags;
+    }
+
+    @Override
+    public List<Long> queryVideoTagIdsByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoTagRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoTagRelation::getTagId);
+        queryWrapper.eq(VideoTagRelation::getVideoId, videoId);
+        List<VideoTagRelation> list = this.list(queryWrapper);
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return list.stream().map(VideoTagRelation::getTagId).collect(Collectors.toList());
+    }
 }
