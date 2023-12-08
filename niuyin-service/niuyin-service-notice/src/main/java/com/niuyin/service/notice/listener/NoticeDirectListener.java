@@ -28,7 +28,7 @@ public class NoticeDirectListener {
     private INoticeService noticeService;
 
     /**
-     * video延时消息
+     * video延时消息 todo 考虑到业务场景，需要引入消息堆积解决方案：1、多个消费者；2、线程池；3、扩大队列容积（惰性队列lazy）
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = NoticeDirectConstant.NOTICE_CREATE_QUEUE, durable = "true"),
