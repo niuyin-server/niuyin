@@ -44,9 +44,6 @@ public class AuthorizeFilter implements GlobalFilter {
 
         //4.判断token是否存在
         if (StringUtils.isBlank(token)) {
-//            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            //指定编码，否则在浏览器中会中文乱码
-//            throw new RuntimeException("用户未登录");
             response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
             R<?> result = R.fail(401, "用户未登录");
             DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(result).getBytes());
@@ -60,7 +57,6 @@ public class AuthorizeFilter implements GlobalFilter {
             //是否是过期
             int result = JwtUtil.verifyToken(claimsBody);
             if (result == 1 || result == 2) {
-//                response.setStatusCode(HttpStatus.UNAUTHORIZED);
                 response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
                 DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "用户未登录")).getBytes());
                 return response.writeWith(Mono.just(dataBuffer));
@@ -77,7 +73,6 @@ public class AuthorizeFilter implements GlobalFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
-//            response.setStatusCode(HttpStatus.UNAUTHORIZED);
             response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
             DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "用户未登录")).getBytes());
             return response.writeWith(Mono.just(dataBuffer));

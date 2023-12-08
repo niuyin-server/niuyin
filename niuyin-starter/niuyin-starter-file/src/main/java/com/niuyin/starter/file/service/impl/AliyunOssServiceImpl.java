@@ -56,7 +56,7 @@ public class AliyunOssServiceImpl implements AliyunOssService {
      */
     @Override
     public String uploadVideoFile(MultipartFile file, String folder) {
-        return uploadCommonImage(file, folder);
+        return uploadCommonVideo(file, folder);
     }
 
     /**
@@ -68,7 +68,7 @@ public class AliyunOssServiceImpl implements AliyunOssService {
      */
     private String uploadCommonImage(MultipartFile file, String folder) {
         // 校验图片格式
-        FileUploadUtils.assertAllowed(file, MimeTypeUtils.IMAGE_EXTENSION);
+        FileUploadUtils.assertImageAllowed(file, MimeTypeUtils.IMAGE_EXTENSION);
         return putObject(file, folder);
     }
 
@@ -81,7 +81,7 @@ public class AliyunOssServiceImpl implements AliyunOssService {
      */
     private String uploadCommonVideo(MultipartFile file, String folder) {
         // 校验视频格式
-        FileUploadUtils.assertAllowed(file, MimeTypeUtils.VIDEO_EXTENSION);
+        FileUploadUtils.assertVideoAllowed(file, MimeTypeUtils.VIDEO_EXTENSION);
         return putObject(file, folder);
     }
 
