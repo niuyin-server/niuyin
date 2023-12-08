@@ -117,6 +117,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @DubboReference(loadbalance = "random")
     private DubboMemberService dubboMemberService;
 
+    @Resource
+    private IUserVideoCompilationRelationService userVideoCompilationRelationService;
+
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
      */
@@ -197,6 +200,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             // 将video对象存入video表中
             boolean save = this.save(video);
             if (save) {
+                // 关联视频合集
+                userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
                 // 发布成功添加缓存
                 redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 1.发送整个video对象发送消息，
@@ -260,6 +265,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             // 将video对象存入video表中
             boolean save = this.save(video);
             if (save) {
+                // 关联视频合集
+                userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
                 // 发布成功添加缓存
                 redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 异步批量保存图片集合到mysql
