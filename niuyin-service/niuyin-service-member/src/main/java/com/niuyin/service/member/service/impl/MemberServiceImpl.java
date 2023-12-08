@@ -12,7 +12,6 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.IpUtils;
 import com.niuyin.common.utils.JwtUtil;
-import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
