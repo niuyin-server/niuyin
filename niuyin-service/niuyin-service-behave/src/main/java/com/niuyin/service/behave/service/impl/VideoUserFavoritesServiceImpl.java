@@ -64,16 +64,12 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
 
     /**
      * 用户收藏
-     *
-     * @param videoId
-     * @return
      */
     @Transactional
     @Override
-    public boolean videoFavorites(String videoId) {
-
+    public boolean userOnlyFavoriteVideo(String videoId) {
         //从token获取用户id
-        Long userId = UserContext.getUser().getUserId();
+        Long userId = UserContext.getUserId();
         //构建查询条件
         LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
@@ -90,19 +86,26 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
             // 发送消息到通知
             sendNotice2MQ(videoId, userId);
             return this.save(videoUserFavorites);
-        } else {
-            //将本条点赞信息从redis移除
-            favoriteNumDecrease(videoId);
-            //如果收藏夹中有此视频，同时移除
-            LambdaQueryWrapper<UserFavoriteVideo> qw = new LambdaQueryWrapper<>();
-            qw.eq(UserFavoriteVideo::getUserId, userId)
-                    .eq(UserFavoriteVideo::getVideoId, videoId);
-            userFavoriteVideoMapper.delete(qw);
-            return this.remove(queryWrapper);
         }
-//        }
+        return false;
+    }
 
-
+    /**
+     * 取消收藏
+     */
+    @Override
+    public boolean userUnFavoriteVideo(String videoId) {
+        //将本条点赞信息从redis移除
+        favoriteNumDecrease(videoId);
+        //如果收藏夹中有此视频，同时移除
+        LambdaQueryWrapper<UserFavoriteVideo> qw = new LambdaQueryWrapper<>();
+        qw.eq(UserFavoriteVideo::getUserId, UserContext.getUserId())
+                .eq(UserFavoriteVideo::getVideoId, videoId);
+        userFavoriteVideoMapper.delete(qw);
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId)
+                .eq(VideoUserFavorites::getUserId, UserContext.getUserId());
+        return this.remove(queryWrapper);
     }
 
     /**
@@ -169,7 +172,7 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
                 videoUserLikeMapper.selectImagesByVideoIds(imageVideoIds));
         // 更新视频对象的图片集合
         CompletableFuture<Void> updateVideosFuture = videoImagesFuture.thenAcceptAsync(videoImages -> {
-            if  (videoImages != null){
+            if (videoImages != null) {
                 Map<String, List<VideoImage>> videoImageMap = videoImages.stream()
                         .collect(Collectors.groupingBy(VideoImage::getVideoId));
                 videos.forEach(r -> {

@@ -14,7 +14,15 @@ import com.niuyin.model.video.dto.VideoPageDto;
  */
 public interface IVideoUserFavoritesService extends IService<VideoUserFavorites> {
 
-    boolean videoFavorites(String video);
+    /**
+     * 收藏视频
+     */
+    boolean userOnlyFavoriteVideo(String videoId);
+
+    /**
+     * 取消收藏视频
+     */
+    boolean userUnFavoriteVideo(String videoId);
 
     IPage<VideoUserFavorites> queryFavoritePage(VideoPageDto pageDto);
 
@@ -25,4 +33,5 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      * @return
      */
     PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
+
 }

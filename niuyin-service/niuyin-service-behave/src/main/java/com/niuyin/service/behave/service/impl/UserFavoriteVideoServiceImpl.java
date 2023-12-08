@@ -78,6 +78,10 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Transactional(rollbackFor = CustomException.class)
     @Override
     public Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO) {
+        // 删除仅仅收藏此视频的一条记录
+        videoUserFavoritesService.remove(new LambdaQueryWrapper<VideoUserFavorites>()
+                .eq(VideoUserFavorites::getUserId, UserContext.getUserId())
+                .eq(VideoUserFavorites::getVideoId, userFavoriteVideoDTO.getVideoId()));
         // 收藏到收藏夹的同时收藏到仅收藏视频
         VideoUserFavorites videoUserFavorite = new VideoUserFavorites();
         videoUserFavorite.setVideoId(userFavoriteVideoDTO.getVideoId());

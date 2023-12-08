@@ -30,18 +30,20 @@ public class VideoUserFavoritesController {
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
 
-    @Resource
-    private RemoteVideoService remoteVideoService;
-
     /**
-     * 用户收藏
-     *
-     * @param videoId
-     * @return
+     * 用户仅收藏视频
      */
     @GetMapping("/{videoId}")
-    public R<Boolean> getDetails(@PathVariable String videoId) {
-        return R.ok(videoUserFavoritesService.videoFavorites(videoId));
+    public R<Boolean> userFavoriteOnlyVideo(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserFavoritesService.userOnlyFavoriteVideo(videoId));
+    }
+
+    /**
+     * 取消收藏视频
+     */
+    @PutMapping("/unFavorite/{videoId}")
+    public R<Boolean> userUnFavoriteVideo(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserFavoritesService.userUnFavoriteVideo(videoId));
     }
 
     /**

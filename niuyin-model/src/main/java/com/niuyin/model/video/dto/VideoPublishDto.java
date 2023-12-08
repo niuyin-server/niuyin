@@ -26,4 +26,7 @@ public class VideoPublishDto extends Video {
     // 视频定位
     private VideoPosition position;
 
+    // 视频合集id
+    private Long compilationId;
+
 }
