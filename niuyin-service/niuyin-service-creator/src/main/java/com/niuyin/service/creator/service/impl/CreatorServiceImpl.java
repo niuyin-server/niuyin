@@ -1,15 +1,23 @@
 package com.niuyin.service.creator.service.impl;
 
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.utils.file.PathUtils;
+import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
 import com.niuyin.model.video.domain.UserVideoCompilation;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.creator.mapper.VideoMapper;
 import com.niuyin.service.creator.service.CreatorService;
+import com.niuyin.starter.file.service.AliyunOssService;
+import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -26,6 +34,12 @@ public class CreatorServiceImpl implements CreatorService {
 
     @Resource
     private VideoMapper videoMapper;
+
+    @Resource
+    private FileStorageService fileStorageService;
+
+    @Resource
+    AliyunOssService aliyunOssService;
 
     /**
      * 视频分页
@@ -59,5 +73,40 @@ public class CreatorServiceImpl implements CreatorService {
             return PageDataInfo.emptyPage();
         }
         return PageDataInfo.genPageData(compilationList, videoMapper.selectVideoCompilationPageCount(videoCompilationPageDTO));
+    }
+
+    /**
+     * 上传图文视频图片
+     *
+     * @param file
+     * @return
+     */
+    @Override
+    public String uploadVideoImage(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isNull(originalFilename)) {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+        // todo 对文件大小进行判断
+        // 对原始文件名进行判断
+        if (originalFilename.endsWith(".png")
+                || originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".webp")) {
+            return aliyunOssService.uploadFile(file, "video");
+        } else {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+    }
+
+    /**
+     * 上传视频
+     *
+     * @param file
+     * @return
+     */
+    @Override
+    public String uploadVideo(MultipartFile file) {
+        return aliyunOssService.uploadVideoFile(file, "video");
     }
 }
