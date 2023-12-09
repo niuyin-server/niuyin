@@ -1,5 +1,7 @@
 package com.niuyin.dubbo.api;
 
+import com.niuyin.model.video.domain.Video;
+
 import java.util.List;
 
 /**
@@ -14,5 +16,10 @@ public interface DubboVideoService {
      * 同步视频标签库
      */
     void apiSyncVideoTagStack(String videoId, List<Long> tagsIds);
+
+    /**
+     * 通过id获取视频
+     */
+    Video apiGetVideoByVideoId(String videoId);
 
 }
