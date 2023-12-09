@@ -3,8 +3,13 @@ package com.niuyin.service.search.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.dubbo.api.DubboVideoService;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
+import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.service.VideoSearchService;
@@ -13,6 +18,7 @@ import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -33,6 +39,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -54,15 +61,32 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     @Resource
     private RedisService redisService;
 
+    @DubboReference
+    private DubboVideoService dubboVideoService;
+
+    @DubboReference
+    private DubboMemberService dubboMemberService;
+
     /**
      * 视频同步新增到es
      */
     @Override
-    public void videoSync(String json) {
-        VideoSearchVO videoSearchVO = JSON.parseObject(json, VideoSearchVO.class);
+    public void videoSync(String videoId) {
+        Video video = dubboVideoService.apiGetVideoByVideoId(videoId);
+        Member member = dubboMemberService.apiGetById(video.getUserId());
+        VideoSearchVO searchVO = new VideoSearchVO();
+        searchVO.setVideoId(video.getVideoId());
+        searchVO.setVideoTitle(video.getVideoTitle());
+        searchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+        searchVO.setCoverImage(video.getCoverImage());
+        searchVO.setVideoUrl(video.getVideoUrl());
+        searchVO.setUserId(video.getUserId());
+        searchVO.setUserNickName(member.getNickName());
+        searchVO.setUserAvatar(member.getAvatar());
+
         IndexRequest indexRequest = new IndexRequest(ESIndexConstants.INDEX_VIDEO);
-        indexRequest.id(videoSearchVO.getVideoId());
-        indexRequest.source(json, XContentType.JSON);
+        indexRequest.id(searchVO.getVideoId())
+                .source(JSON.toJSONString(searchVO), XContentType.JSON);
         try {
             restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {

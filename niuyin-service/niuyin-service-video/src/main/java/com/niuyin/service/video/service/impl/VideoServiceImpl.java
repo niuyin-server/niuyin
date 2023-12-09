@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -208,32 +209,32 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 1.发送整个video对象发送消息，
                 // 待添加视频封面
-                VideoSearchVO videoSearchVO = new VideoSearchVO();
-                videoSearchVO.setVideoId(video.getVideoId());
-                videoSearchVO.setVideoTitle(video.getVideoTitle());
-                // localdatetime转换为date
-                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-                videoSearchVO.setCoverImage(video.getCoverImage());
-                videoSearchVO.setVideoUrl(video.getVideoUrl());
-                videoSearchVO.setUserId(userId);
-                // 获取用户信息
-                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-                if (StringUtils.isNotNull(userCache)) {
-                    videoSearchVO.setUserNickName(userCache.getNickName());
-                    videoSearchVO.setUserAvatar(userCache.getAvatar());
-                } else {
-                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-                    videoSearchVO.setUserNickName(remoteUser.getNickName());
-                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
-                }
-                String msg = JSON.toJSONString(videoSearchVO);
+//                VideoSearchVO videoSearchVO = new VideoSearchVO();
+//                videoSearchVO.setVideoId(video.getVideoId());
+//                videoSearchVO.setVideoTitle(video.getVideoTitle());
+//                // localdatetime转换为date
+//                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+//                videoSearchVO.setCoverImage(video.getCoverImage());
+//                videoSearchVO.setVideoUrl(video.getVideoUrl());
+//                videoSearchVO.setUserId(userId);
+//                // 获取用户信息
+//                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
+//                if (StringUtils.isNotNull(userCache)) {
+//                    videoSearchVO.setUserNickName(userCache.getNickName());
+//                    videoSearchVO.setUserAvatar(userCache.getAvatar());
+//                } else {
+//                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
+//                    videoSearchVO.setUserNickName(remoteUser.getNickName());
+//                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+//                }
+//                String msg = JSON.toJSONString(videoSearchVO);
                 // 2.利用消息后置处理器添加消息头
-                rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
+                rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, videoId, message -> {
                     // 3.添加延迟消息属性，设置1分钟
                     message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
                     return message;
                 });
-                log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+                log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, videoId);
                 return videoId;
             } else {
                 throw new CustomException(null);
@@ -284,32 +285,32 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     boolean save1 = videoPositionService.save(videoPosition);
                 }
                 // 1.发送整个video对象发送消息
-                VideoSearchVO videoSearchVO = new VideoSearchVO();
-                videoSearchVO.setVideoId(video.getVideoId());
-                videoSearchVO.setVideoTitle(video.getVideoTitle());
-                // localdatetime转换为date
-                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-                videoSearchVO.setCoverImage(video.getCoverImage());
-                videoSearchVO.setVideoUrl(video.getVideoUrl());
-                videoSearchVO.setUserId(userId);
-                // 获取用户信息
-                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-                if (StringUtils.isNotNull(userCache)) {
-                    videoSearchVO.setUserNickName(userCache.getNickName());
-                    videoSearchVO.setUserAvatar(userCache.getAvatar());
-                } else {
-                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-                    videoSearchVO.setUserNickName(remoteUser.getNickName());
-                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
-                }
-                String msg = JSON.toJSONString(videoSearchVO);
+//                VideoSearchVO videoSearchVO = new VideoSearchVO();
+//                videoSearchVO.setVideoId(video.getVideoId());
+//                videoSearchVO.setVideoTitle(video.getVideoTitle());
+//                // localdatetime转换为date
+//                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+//                videoSearchVO.setCoverImage(video.getCoverImage());
+//                videoSearchVO.setVideoUrl(video.getVideoUrl());
+//                videoSearchVO.setUserId(userId);
+//                // 获取用户信息
+//                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
+//                if (StringUtils.isNotNull(userCache)) {
+//                    videoSearchVO.setUserNickName(userCache.getNickName());
+//                    videoSearchVO.setUserAvatar(userCache.getAvatar());
+//                } else {
+//                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
+//                    videoSearchVO.setUserNickName(remoteUser.getNickName());
+//                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
+//                }
+//                String msg = JSON.toJSONString(videoSearchVO);
                 // 2.利用消息后置处理器添加消息头
-                rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
+                rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, video.getVideoId(), message -> {
                     // 3.添加延迟消息属性，设置1分钟
                     message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
                     return message;
                 });
-                log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+                log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, video.getVideoId());
                 // 同步视频标签库
                 interestPushService.cacheVideoToTagRedis(video.getVideoId(), Arrays.asList(videoPublishDto.getVideoTags()));
                 // 同步视频分类库

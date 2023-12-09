@@ -18,9 +18,9 @@ public interface VideoSearchService {
     /**
      * 视频同步新增到es
      *
-     * @param json videoSearchVO json
+     * @param videoId
      */
-    void videoSync(String json);
+    void videoSync(String videoId);
 
     /**
      * 更新视频索引文档
