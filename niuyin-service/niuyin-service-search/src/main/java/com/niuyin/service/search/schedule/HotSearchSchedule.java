@@ -88,7 +88,7 @@ public class HotSearchSchedule {
         for (int j = 0; j < videoHotTitles.size(); j++) {
             Integer videoViewNum = redisService.getCacheMapValue(VideoHotTitleCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoSearchVOS.get(j).getVideoId());
             if (videoViewNum != null) {
-                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), videoViewNum / 100);
+                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), ((double) videoViewNum) / 100);
             }
         }
     }
