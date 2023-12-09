@@ -201,7 +201,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             boolean save = this.save(video);
             if (save) {
                 // 关联视频合集
-                userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
+                if (StringUtils.isNotNull(videoPublishDto.getCompilationId())) {
+                    userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
+                }
                 // 发布成功添加缓存
                 redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 1.发送整个video对象发送消息，
@@ -266,7 +268,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             boolean save = this.save(video);
             if (save) {
                 // 关联视频合集
-                userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
+                if (StringUtils.isNotNull(videoPublishDto.getCompilationId())) {
+                    userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
+                }
                 // 发布成功添加缓存
                 redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 异步批量保存图片集合到mysql
@@ -644,7 +648,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Transactional
     @Override
     public void deleteVideoByVideoId(String videoId) {
-        //从视频表删除视频（单条）
+        //从视频表删除视频（单条） todo 还得验证当前登录用户
         videoMapper.deleteById(videoId);
         //从视频分类表关联表删除信息（单条）
         videoCategoryRelationService.removeById(videoId);
@@ -654,7 +658,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         remoteBehaveService.deleteVideoFavoriteRecordByVideoId(videoId);
         //从视频点赞表删除该视频的所有记录
         remoteBehaveService.deleteVideoLikeRecord(videoId);
-
+        // todo 删除标签库该视频记录
+        // todo 删除视频标签关联表
+        // todo 删除视频位置信息表
+        // todo 删除视频合集关联表
+        // todo 删除相关redis
+        // todo 删除别的用户对此视频点赞、收藏记录
+        // todo 删除视频评论
     }
 
     @Override

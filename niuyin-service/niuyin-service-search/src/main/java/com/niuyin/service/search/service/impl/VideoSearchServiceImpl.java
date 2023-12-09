@@ -127,6 +127,28 @@ public class VideoSearchServiceImpl implements VideoSearchService {
             videoSearchHistoryService.insert(dto.getKeyword(), userId);
         }
         //2.设置查询条件
+//        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
+//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//        // 只根据videoTitle查询
+//        MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("videoTitle", dto.getKeyword());
+//        // 查询小于mindate的数据
+//        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("publishTime").lt(dto.getMinBehotTime() == null ? new Date().getTime() : dto.getMinBehotTime().getTime());
+//        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().must(matchQueryBuilder).filter(rangeQueryBuilder);
+//        // 分页查询
+//        searchSourceBuilder.from(dto.getPageNum());
+//        searchSourceBuilder.size(dto.getPageSize());
+//        // 按照发布时间倒序查询
+//        searchSourceBuilder.sort("publishTime", SortOrder.DESC);
+//        // 设置高亮 videoTitle
+//        HighlightBuilder highlightBuilder = new HighlightBuilder();
+//        highlightBuilder.field("videoTitle");
+//        highlightBuilder.preTags("<font class='keyword-hint'>");
+//        highlightBuilder.postTags("</font>");
+//        searchSourceBuilder.highlighter(highlightBuilder);
+//        searchSourceBuilder.query(boolQueryBuilder);
+//        searchRequest.source(searchSourceBuilder);
+//        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
         SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         //布尔查询videoTitle或者userNickName

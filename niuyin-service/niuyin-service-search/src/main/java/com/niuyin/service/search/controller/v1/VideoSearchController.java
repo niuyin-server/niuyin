@@ -2,6 +2,7 @@ package com.niuyin.service.search.controller.v1;
 
 import com.niuyin.common.domain.R;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
@@ -42,6 +43,9 @@ public class VideoSearchController {
     @PostMapping()
     public R<List<VideoSearchUserVO>> searchVideo(@RequestBody VideoSearchKeywordDTO dto) throws Exception {
         List<VideoSearchVO> videoSearchVOS = videoSearchService.searchVideoFromES(dto);
+        if (StringUtils.isNull(videoSearchVOS) || videoSearchVOS.isEmpty()) {
+            return R.ok();
+        }
         List<VideoSearchUserVO> res = new ArrayList<>();
         // 封装用户，视频点赞量，喜欢量。。。
         videoSearchVOS.forEach(v -> {
