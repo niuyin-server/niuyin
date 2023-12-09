@@ -291,8 +291,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
      */
     @Override
     public Set findSearchHot(PageDTO pageDTO) {
-        Set cacheZSetRange = redisService.getCacheZSetRange(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX,
-                (pageDTO.getPageNum() - 1) * pageDTO.getPageSize(), pageDTO.getPageSize());
+        int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
+        int endIndex = startIndex + pageDTO.getPageSize() - 1;
+        Set cacheZSetRange = redisService.getCacheZSetRange(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, startIndex, endIndex);
         return cacheZSetRange;
     }
 }
