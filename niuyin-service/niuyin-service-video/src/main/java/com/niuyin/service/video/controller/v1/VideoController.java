@@ -53,7 +53,7 @@ public class VideoController {
     @Resource
     private AliyunOssService aliyunOssService;
 
-    @DubboReference(loadbalance = "random")
+    @DubboReference
     private DubboMemberService dubboMemberService;
 
     @Resource
@@ -84,7 +84,7 @@ public class VideoController {
      */
     @GetMapping("/pushVideo")
     public R<?> pushVideo() {
-       return R.ok(videoService.pushVideoList());
+        return R.ok(videoService.pushVideoList());
     }
 
     /**
@@ -139,9 +139,6 @@ public class VideoController {
 
     /**
      * 将用户上传的视频和用户信息绑定到一起
-     *
-     * @param videoPublishDto
-     * @return
      */
     @PostMapping("/publish")
     public R<?> videoPublish(@RequestBody VideoPublishDto videoPublishDto) {
@@ -150,9 +147,6 @@ public class VideoController {
 
     /**
      * 分页查询我的视频
-     *
-     * @param pageDto
-     * @return
      */
     @PostMapping("/mypage")
     public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
@@ -161,9 +155,6 @@ public class VideoController {
 
     /**
      * 分页查询用户视频
-     *
-     * @param pageDto
-     * @return
      */
     @PostMapping("/userpage")
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
@@ -172,15 +163,15 @@ public class VideoController {
 
     /**
      * 通过ids获取video集合
-     *
-     * @param videoIds
-     * @return
      */
     @GetMapping("{videoIds}")
     public R<List<Video>> queryVideoByVideoIds(@PathVariable("videoIds") List<String> videoIds) {
         return R.ok(videoService.queryVideoByVideoIds(videoIds));
     }
 
+    /**
+     * 删除视频
+     */
     @DeleteMapping("/{videoId}")
     public R<?> deleteVideoByVideoIds(@PathVariable("videoId") String videoId) {
         videoService.deleteVideoByVideoId(videoId);
@@ -189,9 +180,6 @@ public class VideoController {
 
     /**
      * 用户视频总获赞量
-     *
-     * @param userId
-     * @return
      */
     @GetMapping("/likeNums/{userId}")
     public R<Long> getVideoLikeAllNumByUserId(@PathVariable("userId") Long userId) {
