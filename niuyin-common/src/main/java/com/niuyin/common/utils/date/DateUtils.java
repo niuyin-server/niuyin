@@ -6,6 +6,7 @@ import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -292,7 +293,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return localDateTime2Long(getTodayPlusStartLocalDateTime(day));
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
 
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 //		System.out.println(sdf.format(new Date()));
@@ -304,8 +305,26 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 //        System.out.println(friendlyDisplayTime(10L));
 //        System.out.println(friendlyDisplayTime(1000L));
 //        System.out.println(friendlyDisplayTime(100000L));
-        LocalDateTime localDateTime = getTodayMinusStartLocalDateTime(2);
-        System.out.println("localDateTime = " + localDateTime);
+//        LocalDateTime localDateTime = getTodayMinusStartLocalDateTime(2);
+//        System.out.println("localDateTime = " + localDateTime);
+
+//        String string = getTime();
+//
+//        System.out.println("string = " + string);
+
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+// 将LocalDateTime格式化为字符串
+        String formattedDateTime = LocalDateTime.now().format(formatter);
+
+// 定义目标日期时间格式
+        SimpleDateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+// 将格式化后的字符串解析为Date对象
+        Date date = targetFormat.parse(formattedDateTime);
+
+        System.out.println("date = " + date);
     }
 
 }
