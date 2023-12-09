@@ -235,6 +235,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     return message;
                 });
                 log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, videoId);
+                // 同步视频标签库
+                interestPushService.cacheVideoToTagRedis(video.getVideoId(), Arrays.asList(videoPublishDto.getVideoTags()));
+
                 return videoId;
             } else {
                 throw new CustomException(null);
