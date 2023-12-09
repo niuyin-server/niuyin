@@ -53,7 +53,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @Resource
     private RabbitTemplate rabbitTemplate;
 
-    @DubboReference(loadbalance = "random")
+    @DubboReference
     private DubboMemberService dubboMemberService;
 
     @Override

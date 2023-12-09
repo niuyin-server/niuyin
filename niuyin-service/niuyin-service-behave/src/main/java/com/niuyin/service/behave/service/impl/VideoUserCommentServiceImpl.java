@@ -67,7 +67,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     @Resource
     private RedisService redisService;
 
-    @DubboReference(loadbalance = "random")
+    @DubboReference
     private DubboMemberService dubboMemberService;
 
     /**

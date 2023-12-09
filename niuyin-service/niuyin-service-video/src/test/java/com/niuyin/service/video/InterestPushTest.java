@@ -50,7 +50,7 @@ public class InterestPushTest {
     @Resource
     private IVideoCategoryRelationService videoCategoryRelationService;
 
-    @DubboReference(loadbalance = "random")
+    @DubboReference
     private DubboMemberService dubboMemberService;
 
     @Resource
