@@ -84,6 +84,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
+    public List<Member> queryInIds(List<Long> userIds) {
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Member::getUserId, userIds);
+        return this.list(queryWrapper);
+    }
+
+    @Override
     public String login(LoginUserDTO loginUserDTO) {
         //1.检查参数
         if (StringUtils.isBlank(loginUserDTO.getUsername()) || StringUtils.isBlank(loginUserDTO.getPassword())) {

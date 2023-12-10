@@ -6,9 +6,9 @@ import com.niuyin.service.member.service.IMemberService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
- *
  * @author roydon
  * @since 2023-10-24 19:18:25
  * 超时与重试，预防网络抖动
@@ -21,12 +21,17 @@ public class DubboMemberServiceImpl implements DubboMemberService {
 
     /**
      * 通过ID查询单条数据
-     *
-     * @param userId
      */
     @Override
     public Member apiGetById(Long userId) {
         return memberService.getById(userId);
     }
 
+    /**
+     * 根据ids查询
+     */
+    @Override
+    public List<Member> apiGetInIds(List<Long> userIds) {
+        return memberService.queryInIds(userIds);
+    }
 }

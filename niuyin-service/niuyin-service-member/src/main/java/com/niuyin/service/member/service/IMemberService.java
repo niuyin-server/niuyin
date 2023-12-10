@@ -6,6 +6,8 @@ import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
 
+import java.util.List;
+
 /**
  * 用户表(User)表服务接口
  *
@@ -18,6 +20,7 @@ public interface IMemberService extends IService<Member> {
      * 通过ID查询单条数据
      */
     Member queryById(Long userId);
+    List<Member> queryInIds(List<Long> userIds);
 
     /**
      * 用户注册

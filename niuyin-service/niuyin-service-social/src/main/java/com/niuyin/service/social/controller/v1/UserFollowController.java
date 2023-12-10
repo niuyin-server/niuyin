@@ -26,9 +26,6 @@ public class UserFollowController {
     @Resource
     private IUserFollowService userFollowService;
 
-    @Resource
-    private RemoteMemberService remoteMemberService;
-
     /**
      * 关注
      */
@@ -68,7 +65,7 @@ public class UserFollowController {
     }
 
     /**
-     * 根据用户id查询该用户的关注和粉丝
+     * 根据用户id查询该用户的关注和粉丝数量
      *
      * @param userId
      * @return
@@ -87,6 +84,16 @@ public class UserFollowController {
         return R.ok(userFollowsFansVo);
     }
 
+    /**
+     * 分页查询我的粉丝
+     *
+     * @param pageDTO
+     * @return
+     */
+    @PostMapping("/fans-page")
+    public PageDataInfo getUserFansPage(@RequestBody PageDTO pageDTO) {
+        return userFollowService.queryUserFansPage(pageDTO);
+    }
 
 }
 

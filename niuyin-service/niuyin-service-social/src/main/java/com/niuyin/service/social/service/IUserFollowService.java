@@ -43,4 +43,12 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @return
      */
     PageDataInfo getFollowPage(PageDTO pageDTO);
+
+    /**
+     * 分页用户粉丝
+     *
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo queryUserFansPage(PageDTO pageDTO);
 }

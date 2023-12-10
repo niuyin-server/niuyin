@@ -164,4 +164,26 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         });
         return PageDataInfo.genPageData(userList, userFollowIPage.getTotal());
     }
+
+    /**
+     * 分页用户粉丝
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo queryUserFansPage(PageDTO pageDTO) {
+        Long userId = UserContext.getUserId();
+        // 查询粉丝ids
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserFollowId, userId);
+        Page<UserFollow> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
+        List<UserFollow> records = page.getRecords();
+        if (records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<Long> fansUserIds = records.stream().map(UserFollow::getUserId).collect(Collectors.toList());
+        List<Member> memberList = dubboMemberService.apiGetInIds(fansUserIds);
+        return PageDataInfo.genPageData(memberList, page.getTotal());
+    }
 }
