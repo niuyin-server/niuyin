@@ -3,6 +3,7 @@ package com.niuyin.service.creator.service;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
+import com.niuyin.model.creator.vo.DashboardAmountVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -43,5 +44,10 @@ public interface CreatorService {
      * @return
      */
     String uploadVideo(MultipartFile file);
+
+    /**
+     * 视频播放量
+     */
+    DashboardAmountVO dashboardAmount();
 
 }

@@ -2,14 +2,10 @@ package com.niuyin.service.creator.controller.v1;
 
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.file.PathUtils;
-import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
+import com.niuyin.model.creator.vo.DashboardAmountVO;
 import com.niuyin.service.creator.service.CreatorService;
-import com.niuyin.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,6 +54,14 @@ public class CreatorController {
     @PostMapping("/upload-video")
     public R<String> uploadVideo(@RequestParam("file") MultipartFile file) {
         return R.ok(creatorService.uploadVideo(file));
+    }
+
+    /**
+     * 视频播放量等流向数据
+     */
+    @GetMapping("/dashboard-amount")
+    public R<DashboardAmountVO> dashboardAmount() {
+        return R.ok(creatorService.dashboardAmount());
     }
 
 }

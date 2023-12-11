@@ -33,5 +33,22 @@ public interface VideoMapper extends BaseMapper<Video> {
     List<UserVideoCompilation> selectVideoCompilationPage(videoCompilationPageDTO videoCompilationPageDTO);
 
     Long selectVideoCompilationPageCount(videoCompilationPageDTO videoCompilationPageDTO);
+
+    // 视频播放量
+    Long selectVideoPlayAmount(Long userId);
+    Long selectVideoPlayAmountAdd(Long userId);
+    List<Long> selectVideoPlayAmount7Day(Long userId);
+    // 粉丝量
+    Long selectFansAmount(Long userId);
+    Long selectFansAmountAdd(Long userId);
+    List<Long> selectFansAmount7Day(Long userId);
+    // 作品获赞量
+    Long selectVideoLikeAmount(Long userId);
+    Long selectVideoLikeAmountAdd(Long userId);
+    List<Long> selectVideoLikeAmount7Day(Long userId);
+    // 作品评论量
+    Long selectVideoCommentAmount(Long userId);
+    Long selectVideoCommentAmountAdd(Long userId);
+    List<Long> selectVideoCommentAmount7Day(Long userId);
 }
 

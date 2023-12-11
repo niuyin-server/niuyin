@@ -9,6 +9,8 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
+import com.niuyin.model.creator.vo.DashboardAmountItem;
+import com.niuyin.model.creator.vo.DashboardAmountVO;
 import com.niuyin.model.video.domain.UserVideoCompilation;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.creator.mapper.VideoMapper;
@@ -109,4 +111,24 @@ public class CreatorServiceImpl implements CreatorService {
     public String uploadVideo(MultipartFile file) {
         return aliyunOssService.uploadVideoFile(file, "video");
     }
+
+    /**
+     * 视频播放量
+     */
+    @Override
+    public DashboardAmountVO dashboardAmount() {
+        // todo 添加每日10点的定时任务缓存到redis
+
+        Long userId = UserContext.getUserId();
+        DashboardAmountVO dashboardAmountVO = new DashboardAmountVO();
+        Long videoPlayCount = videoMapper.selectVideoPlayAmount(userId);
+        dashboardAmountVO.setPlayAmount(new DashboardAmountItem(videoPlayCount, videoMapper.selectVideoPlayAmountAdd(userId), videoMapper.selectVideoPlayAmount7Day(userId)));
+        dashboardAmountVO.setIndexViewAmount(new DashboardAmountItem(userId, userId));
+        dashboardAmountVO.setFansAmount(new DashboardAmountItem(videoMapper.selectFansAmount(userId), videoMapper.selectFansAmountAdd(userId), videoMapper.selectFansAmount7Day(userId)));
+        dashboardAmountVO.setLikeAmount(new DashboardAmountItem(videoMapper.selectVideoLikeAmount(userId), videoMapper.selectVideoLikeAmountAdd(userId), videoMapper.selectVideoLikeAmount7Day(userId)));
+        dashboardAmountVO.setCommentAmount(new DashboardAmountItem(videoMapper.selectVideoCommentAmount(userId), videoMapper.selectVideoCommentAmountAdd(userId), videoMapper.selectVideoCommentAmount7Day(userId)));
+        dashboardAmountVO.setShareAmount(new DashboardAmountItem(1L, 0L));
+        return dashboardAmountVO;
+    }
+
 }
