@@ -1,21 +1,16 @@
 package com.niuyin.service.behave.controller.v1;
 
-import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson2.JSON;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
-import com.niuyin.model.behave.vo.VideoUserCommentVO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
@@ -28,11 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
