@@ -80,7 +80,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             throw new CustomException(HttpCodeEnum.ALREADY_FOLLOW);
         }
         sendNotice2MQ(loginUserId, userId);
-        return this.save(new UserFollow(loginUserId, userId));
+        return this.save(new UserFollow(loginUserId, userId, LocalDateTime.now()));
     }
 
     /**
