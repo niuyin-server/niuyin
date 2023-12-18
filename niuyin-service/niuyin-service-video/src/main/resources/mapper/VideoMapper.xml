@@ -36,11 +36,25 @@
         where v.user_id = #{userId}
     </select>
 
+    <!--    查询视频点赞数-->
+    <select id="selectLikeCountByVideoId" resultType="java.lang.Long">
+        select ifnull(count(1), 0) as count
+        from video_user_like
+        where video_id = #{videoId}
+    </select>
+
+    <!--    查询视频收藏数-->
+    <select id="selectFavoriteCountByVideoId" resultType="java.lang.Long">
+        select ifnull(count(1), 0) as count
+        from video_user_favorites
+        where video_id = #{videoId}
+    </select>
+
     <!--    查询视频评论数-->
     <select id="selectCommentCountByVideoId" resultType="Long">
         select count(1) as count
         from video_user_comment
-        where video_id = #{videoId};
+        where video_id = #{videoId}
     </select>
 
     <!--    点赞表查询用户是否点赞某视频-->
@@ -77,5 +91,6 @@
             #{id}
         </foreach>;
     </select>
+
 </mapper>
 

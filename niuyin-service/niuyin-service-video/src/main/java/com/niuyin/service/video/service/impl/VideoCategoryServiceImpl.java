@@ -156,13 +156,11 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     @Async
     public void packageVideoBehaveData(VideoVO videoVO) {
         log.debug("packageVideoBehaveData开始");
-        // 封装点赞数，观看量，评论量
-        Integer cacheLikeNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoVO.getVideoId());
+        // 封装观看量、点赞数、收藏量
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
-        Integer cacheFavoriteNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoVO.getVideoId());
-        videoVO.setLikeNum(StringUtils.isNull(cacheLikeNum) ? 0L : cacheLikeNum);
         videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        videoVO.setFavoritesNum(StringUtils.isNull(cacheFavoriteNum) ? 0L : cacheFavoriteNum);
+        videoVO.setLikeNum(videoMapper.selectLikeCountByVideoId(videoVO.getVideoId()));
+        videoVO.setFavoritesNum(videoMapper.selectFavoriteCountByVideoId(videoVO.getVideoId()));
         // 评论数
         videoVO.setCommentNum(videoMapper.selectCommentCountByVideoId(videoVO.getVideoId()));
         log.debug("packageVideoBehaveData结束");
