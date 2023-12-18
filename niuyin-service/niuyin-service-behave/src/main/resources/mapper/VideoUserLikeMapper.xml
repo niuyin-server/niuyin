@@ -75,7 +75,7 @@
         </if>
     </select>
     <select id="selectPersonLikeShowStatus" resultType="com.niuyin.model.member.domain.MemberInfo">
-        select mi.like_show_status
+        select *
         from member_info mi
         where mi.user_id = #{userId}
     </select>
