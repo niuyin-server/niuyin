@@ -12,7 +12,6 @@ import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.audit.SensitiveWordUtil;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
@@ -22,7 +21,6 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
-import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.*;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
@@ -48,10 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -498,7 +494,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Async
     public void viewNumIncrement(String videoId) {
         log.debug("viewNumIncrement开始");
-        redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
+        if (StringUtils.isNotEmpty(videoId)) {
+            redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoId, 1);
+        }
         log.debug("viewNumIncrement结束");
     }
 
