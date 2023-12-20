@@ -53,7 +53,6 @@ public class VideoUserCommentController {
     @Resource
     RabbitTemplate rabbitTemplate;
 
-
     /**
      * 分页查询评论集合树
      */
