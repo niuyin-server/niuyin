@@ -11,8 +11,6 @@ import com.niuyin.service.video.service.IVideoTagRelationService;
 import com.niuyin.service.video.service.IVideoTagService;
 import com.niuyin.service.video.service.InterestPushService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -24,6 +22,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.niuyin.service.video.constants.InterestPushConstant.*;
+
 /**
  * InterestPushServiceImpl
  *
@@ -33,11 +33,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class InterestPushServiceImpl implements InterestPushService {
-    private static final String VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX = "video:tag:videos:";
-    private static final String VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX = "video:category:videos:";
-    private static final String VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX = "video:member:model:";
-    // 视频观看历史，使用redis保存7天
-    private static final String VIDEO_VIEW_HISTORY_CACHE_KEY_PREFIX = "video:view:history:";
 
     @Resource
     private RedisService redisService;
