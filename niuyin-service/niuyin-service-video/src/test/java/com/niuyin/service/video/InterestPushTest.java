@@ -1,6 +1,7 @@
 package com.niuyin.service.video;
 
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
@@ -17,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,12 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @SpringBootTest
 public class InterestPushTest {
-
-    private static final String VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX = "video:tag:videos:";
-    private static final String VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX = "video:category:videos:";
-    private static final String VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX = "video:member:model:";
-    // 视频观看历史，使用redis保存7天
-    private static final String VIDEO_VIEW_HISTORY_CACHE_KEY_PREFIX = "video:view:history:";
 
     @Resource
     private IVideoTagService videoTagService;
@@ -82,6 +78,40 @@ public class InterestPushTest {
     }
 
     @Test
+    @DisplayName("根据分类随机推送视频")
+    void randomPushCategoryVideo() {
+//        List<Object> objects = redisTemplate.opsForSet().randomMembers(VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + "11", 10);
+//        assert objects != null;
+
+        Long totalCount = redisTemplate.opsForSet().size(VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + "11");
+        Long pushedCount = redisTemplate.opsForSet().size(VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + "1");
+        if (StringUtils.isNull(totalCount) || totalCount < 1) {
+            System.out.println("没有分类视频");
+        }
+        Long subCount = totalCount - pushedCount;
+        // 查询当前用户已推送历史
+        Set<Object> cacheSet = redisService.getCacheSet(VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + "1");
+        // 去重结果
+        Set<Object> results = new HashSet<>(10);
+        // 随机获取10条记录
+        while (results.size() < 10) {
+            Object item = redisTemplate.opsForSet().randomMember(VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + "11");
+            if (!cacheSet.contains(item)) {
+                // 筛选出未被推送过的数据
+                results.add(item);
+                cacheSet.add(item);
+                // 已推送记录存到redis，过期时间为6小时，可以封装为异步
+                redisTemplate.opsForSet().add(VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + "1", item.toString());
+                redisService.expire(VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + "1", 10, TimeUnit.MINUTES);
+            }
+            if (results.size() >= subCount) {
+                break;
+            }
+        }
+        results.forEach(System.out::println);
+    }
+
+    @Test
     @DisplayName("初始化视频观看历史")
     void initVideoViewHistory() {
 
@@ -114,7 +144,6 @@ public class InterestPushTest {
 //        Object object = redisTemplate.opsForSet().randomMember("video:tag:videos:1");
 //        System.out.println("object = " + object);
     }
-
 
 
     /**
