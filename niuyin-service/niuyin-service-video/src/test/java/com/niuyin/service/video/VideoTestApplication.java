@@ -386,8 +386,8 @@ public class VideoTestApplication {
     /**
      *     endpoint: oss-cn-shenzhen.aliyuncs.com
      *     bucketName: niuyin-server
-     *     accessKeyId: LTAI5tDzXh9ZUzwDRyoPxs7n
-     *     accessKeySecret: Vf81KErpz5ScYJlprwbsbyVyKSysbW
+     *     accessKeyId: ***
+     *     accessKeySecret: ***
      */
     @Test
     @DisplayName("测试视频分片上传")
@@ -404,7 +404,7 @@ public class VideoTestApplication {
         String filePath = "C:\\Users\\roydon\\Videos\\niuyin\\这次不卡了   地平线，启动！.mp4";
 
         // 创建OSSClient实例。
-        OSS ossClient = new OSSClient(endpoint, "LTAI5tDzXh9ZUzwDRyoPxs7n", "Vf81KErpz5ScYJlprwbsbyVyKSysbW");
+        OSS ossClient = new OSSClient(endpoint, "***", "***");
         try {
             // 创建InitiateMultipartUploadRequest对象。
             InitiateMultipartUploadRequest request = new InitiateMultipartUploadRequest(bucketName, objectName);

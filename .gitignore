@@ -42,13 +42,7 @@ build/
 **/.bin/**
 
 ### Spring Boot Properties ###
-/niuyin-gateway/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-behave/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-creator/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-notice/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-search/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-social/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-member/src/main/resources/bootstrap.yml
-/niuyin-service/niuyin-service-video/src/main/resources/bootstrap.yml
+niuyin-gateway/src/main/resources/bootstrap.yml
+niuyin-service/**/src/main/resources/bootstrap.yml
 
 
