@@ -3,13 +3,17 @@ package com.niuyin.service.video.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
-import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.Author;
+import com.niuyin.model.video.vo.VideoPushVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryService;
@@ -26,16 +30,22 @@ import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import static com.niuyin.service.video.constants.InterestPushConstant.*;
 import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
@@ -64,6 +74,12 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
 
     @Resource
     private IVideoImageService videoImageService;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @DubboReference
+    private DubboMemberService dubboMemberService;
 
     @Override
     public List<VideoCategory> saveVideoCategoriesToRedis() {
@@ -216,6 +232,92 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
             }
         }
         log.debug("packageVideoImageData结束");
+    }
+
+    @Override
+    public List<VideoPushVO> pushVideoByCategory(Long categoryId) {
+        // 先判断 categoryId 是否有效
+        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategory::getId, categoryId);
+        if (this.count(queryWrapper) < 1) {
+            return new ArrayList<>();
+        }
+        String categoryKey = VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + categoryId;
+        String pushedKey = VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + UserContext.getUserId();
+        Long totalCount = redisTemplate.opsForSet().size(categoryKey);
+        Long pushedCount = redisTemplate.opsForSet().size(pushedKey);
+        if (StringUtils.isNull(totalCount) || totalCount < 1) {
+            System.out.println("没有分类视频");
+        }
+        Long subCount = totalCount - pushedCount;
+        if (subCount < 1) {
+            return new ArrayList<>();
+        }
+        // 查询当前用户已推送历史
+        Set<Object> cacheSet = redisService.getCacheSet(pushedKey);
+        // 去重结果
+        Set<String> results = new HashSet<>(10);
+        // 随机获取10条记录
+        while (results.size() < 10) {
+            String item = (String) redisTemplate.opsForSet().randomMember(categoryKey);
+            if (!cacheSet.contains(item)) {
+                // 筛选出未被推送过的数据
+                results.add(item);
+                cacheSet.add(item);
+                // 已推送记录存到redis，过期时间为1小时，可以封装为异步
+                redisTemplate.opsForSet().add(pushedKey, item);
+                redisService.expire(pushedKey, 1, TimeUnit.MINUTES);
+            }
+            if (results.size() >= subCount) {
+                break;
+            }
+        }
+        // 封装result
+        List<Video> videoList = videoService.listByIds(results);
+        List<VideoPushVO> videoPushVOList = BeanCopyUtils.copyBeanList(videoList, VideoPushVO.class);
+        CompletableFuture.allOf(videoPushVOList.stream()
+                .map(videoPushVO -> CompletableFuture.runAsync(() -> {
+                    asyncPackageAuthor(videoPushVO);
+                    asyncPackageVideoImage(videoPushVO);
+                })).toArray(CompletableFuture[]::new)).join();
+        return videoPushVOList;
+    }
+
+    /**
+     * 封装视频作者
+     */
+    @Async
+    public void asyncPackageAuthor(VideoPushVO videoPushVO) {
+        Member member = dubboMemberService.apiGetById(videoPushVO.getUserId());
+        Author author = BeanCopyUtils.copyBean(member, Author.class);
+        videoPushVO.setAuthor(author);
+    }
+
+    /**
+     * 封装视频图文
+     */
+    @Async
+    public void asyncPackageVideoImage(VideoPushVO videoPushVO) {
+        // 封装图文
+        if (videoPushVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            Object imgsCacheObject = redisService.getCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoPushVO.getVideoId());
+            if (StringUtils.isNotNull(imgsCacheObject)) {
+                if (imgsCacheObject instanceof JSONArray) {
+                    JSONArray jsonArray = (JSONArray) imgsCacheObject;
+                    videoPushVO.setImageList(jsonArray.toArray(new String[0]));
+                } else if (imgsCacheObject instanceof String) {
+                    String jsonString = (String) imgsCacheObject;
+                    videoPushVO.setImageList(JSON.parseObject(jsonString, String[].class));
+                }
+            } else {
+                List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoPushVO.getVideoId());
+                String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                videoPushVO.setImageList(imgs);
+                // 重建缓存 todo 加分布式锁
+                redisService.setCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoPushVO.getVideoId(), imgs);
+                redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoPushVO.getVideoId(), 1, TimeUnit.DAYS);
+            }
+        }
     }
 
 }

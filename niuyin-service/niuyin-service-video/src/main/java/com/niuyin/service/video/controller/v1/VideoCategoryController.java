@@ -60,5 +60,13 @@ public class VideoCategoryController {
         return videoCategoryService.selectVideoByCategory(pageDTO);
     }
 
+    /**
+     * 根据分类推送10条视频
+     */
+    @GetMapping("/category/pushVideo/{categoryId}")
+    public R<?> categoryVideoPage(@PathVariable Long categoryId) {
+        return R.ok(videoCategoryService.pushVideoByCategory(categoryId));
+    }
+
 }
 
