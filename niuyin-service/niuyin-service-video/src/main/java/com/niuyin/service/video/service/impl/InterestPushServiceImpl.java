@@ -263,7 +263,7 @@ public class InterestPushServiceImpl implements InterestPushService {
                 int requestNum = 10 - videoIdsSize;
                 log.debug("requestNum:{}", requestNum);
                 for (int i = 0; i < requestNum; i++) {
-                    String videoId = randomVideoIdFromTag("1".equals(sex) ? 10L : 1L);
+                    String videoId = randomVideoIdFromTag("1".equals(sex) ? 100L : 1L);
                     log.debug("add videoId:{}", videoId);
                     videoIds.add(videoId);
                 }
@@ -307,8 +307,7 @@ public class InterestPushServiceImpl implements InterestPushService {
 
     public String randomVideoIdFromTag(Long tagId) {
         String key = VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tagId;
-        Object o = redisTemplate.opsForSet().randomMember(key);
-        return o.toString();
+        return redisTemplate.opsForSet().randomMember(key).toString();
     }
 
     @Override
