@@ -6,7 +6,7 @@
     <select id="getVideoUrlByVideoId" resultType="java.lang.String">
         SELECT video_url
         FROM video
-        WHERE video_id = #{videoId}
+        WHERE video_id = #{videoId} and del_flag = '0'
     </select>
 
     <!--    -->
@@ -34,6 +34,7 @@
         select sum(like_num)
         from video v
         where v.user_id = #{userId}
+          and v.del_flag = '0'
     </select>
 
     <!--    查询视频点赞数-->
@@ -85,7 +86,6 @@
     </select>
 
     <select id="batchSelectVideoAuthor" parameterType="java.util.List"  resultType="com.niuyin.model.member.domain.Member">
-
         SELECT m.nick_name,m.avatar FROM member m WHERE m.user_id IN
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}

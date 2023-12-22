@@ -6,7 +6,7 @@
     <select id="selectVideoPage" resultType="com.niuyin.model.video.domain.Video">
         select *
         from video
-        where user_id = #{userId}
+        where user_id = #{userId} and del_flag = '0'
         <if test="videoTitle != null and videoTitle != ''">
             and video_title LIKE CONCAT('%', #{videoTitle}, '%')
         </if>
@@ -29,7 +29,7 @@
     <select id="selectVideoPageCount" resultType="java.lang.Long">
         select count(1) as count
         from video
-        where user_id = #{userId}
+        where user_id = #{userId} and del_flag = '0'
         <if test="videoTitle != null and videoTitle != ''">
             and video_title LIKE CONCAT('%', #{videoTitle}, '%')
         </if>
@@ -69,7 +69,7 @@
     <select id="selectVideoPlayAmount" resultType="java.lang.Long">
         select sum(view_num) as count
         from video
-        where user_id = #{userId};
+        where user_id = #{userId} and del_flag = '0';
     </select>
     <select id="selectFansAmount" resultType="java.lang.Long">
         select count(1) as count
@@ -79,7 +79,7 @@
     <select id="selectVideoLikeAmount" resultType="java.lang.Long">
         select sum(like_num) as count
         from video
-        where user_id = #{userId};
+        where user_id = #{userId} and del_flag = '0';
     </select>
     <select id="selectVideoCommentAmount" resultType="java.lang.Long">
         select count(*) as count
@@ -146,7 +146,7 @@
                                    SELECT 8
                                    UNION ALL
                                    SELECT 9) AS c) AS dates
-                 LEFT JOIN video ON DATE(video.create_time) = dates.day AND video.user_id = #{userId}
+                 LEFT JOIN video ON DATE(video.create_time) = dates.day AND video.user_id = #{userId} and video.del_flag = '0'
         WHERE dates.day BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
         GROUP BY dates.day
         ORDER BY dates.day;
@@ -156,7 +156,7 @@
                                 WHEN DATE(video.create_time) > DATE_SUB(CURDATE(), INTERVAL 7 DAY)
                                     THEN video.view_num END), 0) AS view_growth
         FROM video
-        WHERE video.user_id = #{userId};
+        WHERE video.user_id = #{userId} and video.del_flag = '0';
     </select>
     <select id="selectFansAmountAdd" resultType="java.lang.Long">
         SELECT COUNT(*) AS follower_growth
@@ -189,7 +189,7 @@
                                 WHEN DATE(video.create_time) > DATE_SUB(CURDATE(), INTERVAL 7 DAY)
                                     THEN video.like_num END), 0) AS view_growth
         FROM video
-        WHERE video.user_id = #{userId};
+        WHERE video.user_id = #{userId} and video.del_flag = '0'
     </select>
     <select id="selectVideoLikeAmount7Day" resultType="java.lang.Long">
         SELECT COALESCE(SUM(video.like_num), 0) AS total_views
@@ -251,7 +251,7 @@
                                    SELECT 8
                                    UNION ALL
                                    SELECT 9) AS c) AS dates
-                 LEFT JOIN video ON DATE(video.create_time) = dates.day AND video.user_id = #{userId}
+                 LEFT JOIN video ON DATE(video.create_time) = dates.day AND video.user_id = #{userId} and video.del_flag = '0'
         WHERE dates.day BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
         GROUP BY dates.day
         ORDER BY dates.day;
