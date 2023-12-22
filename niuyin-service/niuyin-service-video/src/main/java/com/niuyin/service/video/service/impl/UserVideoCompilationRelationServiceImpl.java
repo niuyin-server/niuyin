@@ -1,5 +1,6 @@
 package com.niuyin.service.video.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.model.video.domain.UserVideoCompilationRelation;
 import com.niuyin.service.video.mapper.UserVideoCompilationRelationMapper;
@@ -32,5 +33,18 @@ public class UserVideoCompilationRelationServiceImpl extends ServiceImpl<UserVid
         userVideoCompilationRelation.setCompilationId(compilationId);
         userVideoCompilationRelation.setVideoId(videoId);
         return this.save(userVideoCompilationRelation);
+    }
+
+    /**
+     * 删除视频
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean deleteRecordByVideoId(String videoId) {
+        LambdaQueryWrapper<UserVideoCompilationRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserVideoCompilationRelation::getVideoId, videoId);
+        return this.remove(queryWrapper);
     }
 }

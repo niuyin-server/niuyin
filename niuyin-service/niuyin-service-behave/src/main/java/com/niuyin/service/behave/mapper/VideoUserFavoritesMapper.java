@@ -27,5 +27,6 @@ public interface VideoUserFavoritesMapper extends BaseMapper<VideoUserFavorites>
     List<UserFavoriteVideoVO> selectUserFavoriteVideos(VideoPageDto videoPageDto);
     Long selectUserFavoriteVideosCount(VideoPageDto videoPageDto);
 
+    Long selectFavoriteCountByVideoId(String videoId);
 }
 

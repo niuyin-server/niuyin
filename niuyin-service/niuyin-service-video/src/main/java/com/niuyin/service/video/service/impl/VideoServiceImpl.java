@@ -3,6 +3,7 @@ package com.niuyin.service.video.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,11 +16,13 @@ import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
+import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.behave.RemoteBehaveService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.model.common.dto.PageDTO;
+import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.*;
 import com.niuyin.model.video.dto.VideoFeedDTO;
@@ -40,6 +43,7 @@ import com.niuyin.starter.file.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,8 +60,9 @@ import java.util.stream.Collectors;
 import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT7;
-import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
-import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_POSITION_PREFIX_KEY;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
+import static com.niuyin.service.video.constants.VideoCacheConstants.*;
 
 /**
  * 视频表(Video)表服务实现类
@@ -86,6 +91,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private RedisService redisService;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Resource
     private IVideoSensitiveService videoSensitiveService;
@@ -117,6 +125,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private IUserVideoCompilationRelationService userVideoCompilationRelationService;
 
+    @DubboReference
+    private DubboBehaveService dubboBehaveService;
+
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
      */
@@ -130,6 +141,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return userIdThreadLocal.get();
     }
 
+    /**
+     * 上传视频
+     *
+     * @param file
+     * @return
+     */
     @Override
     public VideoUploadVO uploadVideo(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -141,11 +158,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoUploadVO.setVideoUrl(QiniuVideoOssConstants.VIDEO_PREFIX_URL_2K + uploadVideo);
         videoUploadVO.setVframe(QiniuVideoOssConstants.VIDEO_FRAME_PREFIX_URL + uploadVideo + QiniuVideoOssConstants.VIDEO_FRAME_1_END);
         return videoUploadVO;
-    }
-
-    @Override
-    public Video selectById(String id) {
-        return videoMapper.selectById(id);
     }
 
     /**
@@ -202,7 +214,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
                 }
                 // 发布成功添加缓存
-                redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
+                redisService.setCacheObject(VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 1.发送整个video对象发送消息，
                 // 待添加视频封面
 //                VideoSearchVO videoSearchVO = new VideoSearchVO();
@@ -272,7 +284,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     userVideoCompilationRelationService.videoRelateCompilation(video.getVideoId(), videoPublishDto.getCompilationId());
                 }
                 // 发布成功添加缓存
-                redisService.setCacheObject(VideoCacheConstants.VIDEO_INFO_PREFIX + video.getVideoId(), video);
+                redisService.setCacheObject(VIDEO_INFO_PREFIX + video.getVideoId(), video);
                 // 异步批量保存图片集合到mysql
                 CompletableFuture<Void> allFutures = CompletableFuture.allOf(Arrays.stream(videoPublishDto.getImageFileList())
                         .map(url -> asyncSaveVideoImagesToDB(video.getVideoId(), url)).toArray(CompletableFuture[]::new));
@@ -368,6 +380,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public PageDataInfo getUserVideoPage(VideoPageDto pageDto) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, pageDto.getUserId());
+        queryWrapper.eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
         queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
         queryWrapper.orderByDesc(Video::getCreateTime);
         IPage<Video> videoIPage = this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
@@ -412,6 +425,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         log.debug("mp开始feed");
         // 小于 createTime 的数据
         queryWrapper.lt(Video::getCreateTime, StringUtils.isNull(createTime) ? LocalDateTime.now() : createTime)
+                .eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode())
                 .orderByDesc(Video::getCreateTime)
                 .last("limit 10");
         List<Video> videoList = this.list(queryWrapper);
@@ -511,10 +525,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         // 封装观看量、点赞数、收藏量
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
         videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        videoVO.setLikeNum(videoMapper.selectLikeCountByVideoId(videoVO.getVideoId()));
-        videoVO.setFavoritesNum(videoMapper.selectFavoriteCountByVideoId(videoVO.getVideoId()));
+        videoVO.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(videoVO.getVideoId()));
+        videoVO.setFavoritesNum(dubboBehaveService.apiGetVideoFavoriteNum(videoVO.getVideoId()));
         // 评论数
-        videoVO.setCommentNum(videoMapper.selectCommentCountByVideoId(videoVO.getVideoId()));
+        videoVO.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(videoVO.getVideoId()));
         log.debug("packageVideoBehaveData结束");
     }
 
@@ -643,28 +657,72 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     /**
+     * 删除视频
+     *
      * @param videoId
      */
     @Transactional
     @Override
-    public void deleteVideoByVideoId(String videoId) {
-        //从视频表删除视频（单条） todo 还得验证当前登录用户
-        videoMapper.deleteById(videoId);
-        //从视频分类表关联表删除信息（单条）
-        videoCategoryRelationService.removeById(videoId);
-        //删除视频对应的es文档
-        remoteBehaveService.deleteVideoDocumentByVideoId(videoId);
-        //从视频收藏表删除该视频的所有记录
-        remoteBehaveService.deleteVideoFavoriteRecordByVideoId(videoId);
-        //从视频点赞表删除该视频的所有记录
-        remoteBehaveService.deleteVideoLikeRecord(videoId);
-        // todo 删除标签库该视频记录
-        // todo 删除视频标签关联表
-        // todo 删除视频位置信息表
-        // todo 删除视频合集关联表
-        // todo 删除相关redis
-        // todo 删除别的用户对此视频点赞、收藏记录
-        // todo 删除视频评论
+    public boolean deleteVideoByVideoId(String videoId) {
+        // 从视频表删除视频（单条） todo 还得验证当前登录用户
+        boolean deleted = this.deleteVideoByUser(videoId);
+        if (deleted) {
+            // 删除相关redis缓存
+            // 删除视频分类库记录
+            List<Long> categoryIds = videoCategoryRelationService.queryVideoCategoryIdsByVideoId(videoId);
+            if (!categoryIds.isEmpty()) {
+                categoryIds.forEach(cid -> {
+                    redisTemplate.opsForSet().remove(VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + cid, videoId);
+                });
+            }
+            // 删除标签库该视频记录x
+            List<Long> videoTagIds = videoTagRelationService.queryVideoTagIdsByVideoId(videoId);
+            if (!videoTagIds.isEmpty()) {
+                videoTagIds.forEach(tid -> {
+                    redisTemplate.opsForSet().remove(VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tid, videoId);
+                });
+            }
+            // 删除视频缓存
+            redisService.deleteObject(VIDEO_INFO_PREFIX + videoId);
+            // 删除热门视频记录缓存
+            redisTemplate.opsForZSet().remove(VIDEO_HOT, videoId);
+            // todo 删除视频观看量缓存
+
+            // 删除图文视频图片数据
+            videoImageService.deleteVideoImagesByVideoId(videoId);
+            // 从视频分类表关联表删除信息
+            videoCategoryRelationService.deleteRecordByVideoId(videoId);
+            // 删除视频对应的es文档
+//            remoteBehaveService.deleteVideoDocumentByVideoId(videoId);
+            // 删除视频评论
+            dubboBehaveService.removeVideoCommentByVideoId(videoId);
+            // 删除视频标签关联表
+            videoTagRelationService.deleteRecordByVideoId(videoId);
+            // 删除视频位置信息表
+            videoPositionService.deleteRecordByVideoId(videoId);
+            // 删除视频合集关联表
+            userVideoCompilationRelationService.deleteRecordByVideoId(videoId);
+            // 删除别的用户对此视频点赞、收藏记录
+            dubboBehaveService.removeOtherLikeVideoBehaveRecord(videoId);
+            dubboBehaveService.removeOtherFavoriteVideoBehaveRecord(videoId);
+        }
+        return deleted;
+    }
+
+    /**
+     * 隐式删除视频
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean deleteVideoByUser(String videoId) {
+        Long userId = UserContext.getUserId();
+        LambdaUpdateWrapper<Video> queryWrapper = new LambdaUpdateWrapper<>();
+        queryWrapper.eq(Video::getVideoId, videoId);
+        queryWrapper.eq(Video::getUserId, userId);
+        queryWrapper.set(Video::getDelFlag, DelFlagEnum.DELETED.getCode());
+        return this.update(queryWrapper);
     }
 
     @Override
@@ -746,7 +804,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public Long queryUserVideoCount() {
-        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId, UserContext.getUserId()));
+        return this.count(new LambdaQueryWrapper<Video>().eq(Video::getUserId, UserContext.getUserId()).eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode()));
     }
 
     /**

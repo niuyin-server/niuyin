@@ -30,7 +30,20 @@ public class VideoImageServiceImpl extends ServiceImpl<VideoImageMapper, VideoIm
     @Override
     public List<VideoImage> queryImagesByVideoId(String videoId) {
         LambdaQueryWrapper<VideoImage> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoImage::getVideoId,videoId);
+        queryWrapper.eq(VideoImage::getVideoId, videoId);
         return this.list(queryWrapper);
+    }
+
+    /**
+     * 删除视频
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean deleteVideoImagesByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoImage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoImage::getVideoId, videoId);
+        return this.remove(queryWrapper);
     }
 }

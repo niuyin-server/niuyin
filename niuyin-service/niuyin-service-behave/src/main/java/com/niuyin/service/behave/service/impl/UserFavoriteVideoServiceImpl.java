@@ -23,6 +23,7 @@ import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -64,10 +65,8 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     private RabbitTemplate rabbitTemplate;
 
     @Resource
+    @Lazy // 解决循环依赖问题
     private IVideoUserFavoritesService videoUserFavoritesService;
-
-    @Resource
-    private IVideoUserLikeService videoUserLikeService;
 
     /**
      * 收藏视频到收藏夹

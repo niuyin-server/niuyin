@@ -19,4 +19,11 @@ public interface IVideoPositionService extends IService<VideoPosition> {
      */
     VideoPosition queryPositionByVideoId(String videoId);
 
+    /**
+     * 删除视频定位
+     *
+     * @param videoId
+     * @return
+     */
+    boolean deleteRecordByVideoId(String videoId);
 }

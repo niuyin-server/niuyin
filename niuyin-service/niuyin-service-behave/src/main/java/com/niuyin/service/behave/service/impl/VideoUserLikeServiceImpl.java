@@ -230,4 +230,27 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
+    /**
+     * 删除所有用户对此视频的点赞
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean removeLikeRecordByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId);
+        return this.remove(queryWrapper);
+    }
+
+    /**
+     * 获取视频点赞数
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public Long getVideoLikeNum(String videoId) {
+        return videoUserLikeMapper.selectVideoLikeCount(videoId);
+    }
 }

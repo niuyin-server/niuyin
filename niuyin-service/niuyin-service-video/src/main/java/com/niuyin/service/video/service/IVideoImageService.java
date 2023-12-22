@@ -21,4 +21,11 @@ public interface IVideoImageService extends IService<VideoImage> {
      */
     List<VideoImage> queryImagesByVideoId(String videoId);
 
+    /**
+     * 删除视频
+     *
+     * @param videoId
+     * @return
+     */
+    boolean deleteVideoImagesByVideoId(String videoId);
 }

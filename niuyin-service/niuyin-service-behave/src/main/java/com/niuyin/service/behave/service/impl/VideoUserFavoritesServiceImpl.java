@@ -23,9 +23,12 @@ import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
+import com.niuyin.service.behave.service.IUserFavoriteVideoService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +49,7 @@ import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCH
  * @since 2023-10-31 15:57:38
  */
 @Slf4j
+@AllArgsConstructor
 @Service("videoUserFavoritesService")
 public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavoritesMapper, VideoUserFavorites> implements IVideoUserFavoritesService {
     @Resource
@@ -53,6 +57,7 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
 
     @Resource
     private UserFavoriteVideoMapper userFavoriteVideoMapper;
+
     @Resource
     private RedisService redisService;
 
@@ -61,6 +66,9 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Lazy // 解决循环依赖问题
+    private IUserFavoriteVideoService userFavoriteVideoService;
 
     /**
      * 用户收藏
@@ -201,5 +209,30 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     @Async
     protected void favoriteNumDecrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, -1);
+    }
+
+    /**
+     * 删除说有用户收藏此视频记录 ！！！
+     *
+     * @param videoId
+     * @return
+     */
+    @Transactional
+    @Override
+    public boolean removeFavoriteRecordByVideoId(String videoId) {
+        // 删除仅收藏
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId);
+        boolean remove = this.remove(queryWrapper);
+        // 从收藏夹删除
+        LambdaQueryWrapper<UserFavoriteVideo> qwUFV = new LambdaQueryWrapper<>();
+        qwUFV.eq(UserFavoriteVideo::getVideoId, videoId);
+        boolean removed = userFavoriteVideoService.remove(qwUFV);
+        return remove && removed;
+    }
+
+    @Override
+    public Long getFavoriteCountByVideoId(String videoId) {
+        return videoUserFavoritesMapper.selectFavoriteCountByVideoId(videoId);
     }
 }

@@ -116,4 +116,16 @@ public class VideoTagRelationServiceImpl extends ServiceImpl<VideoTagRelationMap
         }
         return list.stream().map(VideoTagRelation::getTagId).collect(Collectors.toList());
     }
+
+    /**
+     * 删除视频关联标签
+     *
+     * @param videoId
+     */
+    @Override
+    public boolean deleteRecordByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoTagRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoTagRelation::getVideoId, videoId);
+        return this.remove(queryWrapper);
+    }
 }

@@ -22,4 +22,12 @@ public interface IVideoCategoryRelationService extends IService<VideoCategoryRel
      * @return
      */
     List<Long> queryVideoCategoryIdsByVideoId(String videoId);
+
+    /**
+     * 删除视频分类关联
+     *
+     * @param videoId
+     * @return
+     */
+    boolean deleteRecordByVideoId(String videoId);
 }

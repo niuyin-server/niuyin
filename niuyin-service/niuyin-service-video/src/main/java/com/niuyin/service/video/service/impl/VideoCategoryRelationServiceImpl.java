@@ -40,4 +40,17 @@ public class VideoCategoryRelationServiceImpl extends ServiceImpl<VideoCategoryR
         List<VideoCategoryRelation> videoCategoryRelationList = this.list(queryWrapper);
         return videoCategoryRelationList.stream().map(VideoCategoryRelation::getCategoryId).collect(Collectors.toList());
     }
+
+    /**
+     * 删除视频分类关联
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean deleteRecordByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoCategoryRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategoryRelation::getVideoId, videoId);
+        return this.remove(queryWrapper);
+    }
 }

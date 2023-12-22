@@ -34,4 +34,13 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      */
     PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
 
+    /**
+     * 删除说有用户收藏此视频记录 ！！！
+     *
+     * @param videoId
+     * @return
+     */
+    boolean removeFavoriteRecordByVideoId(String videoId);
+
+    Long getFavoriteCountByVideoId(String videoId);
 }

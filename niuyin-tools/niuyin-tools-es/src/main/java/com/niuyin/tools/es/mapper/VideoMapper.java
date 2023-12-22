@@ -15,5 +15,6 @@ import java.util.List;
 @Mapper
 public interface VideoMapper extends BaseMapper<Video> {
 
+    List<Video> selectExistVideoList();
 }
 

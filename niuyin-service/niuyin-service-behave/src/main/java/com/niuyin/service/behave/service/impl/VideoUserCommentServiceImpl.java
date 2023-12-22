@@ -183,7 +183,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     }
 
     /**
-     * 查找指定视频评论量 todo 对逻辑删除过的子评论进行过滤
+     * 查找指定视频评论量 对逻辑删除过的评论进行过滤
      *
      * @param videoId
      * @return
@@ -246,5 +246,18 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
                     voList.add(appNewsCommentVO);
                 })).toArray(CompletableFuture[]::new)).join();
         return PageDataInfo.genPageData(voList, iPage.getTotal());
+    }
+
+    /**
+     * 删除视频所有评论
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean removeCommentByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoUserComment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserComment::getVideoId, videoId);
+        return this.remove(queryWrapper);
     }
 }

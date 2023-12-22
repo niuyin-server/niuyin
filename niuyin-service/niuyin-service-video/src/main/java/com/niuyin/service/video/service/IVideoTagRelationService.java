@@ -51,4 +51,8 @@ public interface IVideoTagRelationService extends IService<VideoTagRelation> {
      */
     List<Long> queryVideoTagIdsByVideoId(String videoId);
 
+    /**
+     * 删除视频关联标签
+     */
+    boolean deleteRecordByVideoId(String videoId);
 }

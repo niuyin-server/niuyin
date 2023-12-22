@@ -20,4 +20,10 @@ public interface IUserVideoCompilationRelationService extends IService<UserVideo
      */
     Boolean videoRelateCompilation(String videoId, Long compilationId);
 
+    /**
+     * 删除视频
+     * @param videoId
+     * @return
+     */
+    boolean deleteRecordByVideoId(String videoId);
 }

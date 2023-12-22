@@ -32,4 +32,17 @@ public class VideoPositionServiceImpl extends ServiceImpl<VideoPositionMapper, V
         queryWrapper.eq(VideoPosition::getVideoId, videoId);
         return this.getOne(queryWrapper);
     }
+
+    /**
+     * 删除视频定位
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public boolean deleteRecordByVideoId(String videoId) {
+        LambdaQueryWrapper<VideoPosition> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoPosition::getVideoId, videoId);
+        return this.remove(queryWrapper);
+    }
 }

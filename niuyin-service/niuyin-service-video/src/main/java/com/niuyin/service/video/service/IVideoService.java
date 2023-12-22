@@ -34,8 +34,6 @@ public interface IVideoService extends IService<Video> {
      */
     VideoUploadVO uploadVideo(MultipartFile file);
 
-    Video selectById(String id);
-
     /**
      * 发布视频
      *
@@ -77,11 +75,13 @@ public interface IVideoService extends IService<Video> {
     List<Video> queryVideoByVideoIds(List<String> videoIds);
 
     /**
-     * 删除视频，并且将视频同步从 es中删除
+     * 删除视频
      *
      * @param videoId
      */
-    void deleteVideoByVideoId(String videoId);
+    boolean deleteVideoByVideoId(String videoId);
+
+    boolean deleteVideoByUser(String videoId);
 
     /**
      * 筛选大于ctime的视频数据
@@ -125,6 +125,7 @@ public interface IVideoService extends IService<Video> {
 
     /**
      * 热门视频查询
+     *
      * @param pageDTO
      * @return
      */

@@ -65,4 +65,12 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @throws InterruptedException
      */
     PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO);
+
+    /**
+     * 删除视频所有评论
+     *
+     * @param videoId
+     * @return
+     */
+    boolean removeCommentByVideoId(String videoId);
 }

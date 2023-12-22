@@ -34,4 +34,20 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @return
      */
     PageDataInfo queryPersonLikePage(VideoPageDto pageDto);
+
+    /**
+     * 删除所有用户对此视频的点赞 ！！！
+     *
+     * @param videoId
+     * @return
+     */
+    boolean removeLikeRecordByVideoId(String videoId);
+
+    /**
+     * 获取视频点赞数
+     *
+     * @param videoId
+     * @return
+     */
+    Long getVideoLikeNum(String videoId);
 }

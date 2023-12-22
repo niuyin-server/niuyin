@@ -23,12 +23,14 @@ public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
      * 查询用户的点赞列表
      */
     List<Video> selectPersonLikePage(VideoPageDto videoPageDto);
+
     Long selectPersonLikeCount(VideoPageDto videoPageDto);
 
     MemberInfo selectPersonLikeShowStatus(Long userId);
 
     /**
      * 通过videoId获取视频
+     *
      * @param videoId
      * @return
      */
@@ -51,5 +53,13 @@ public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
     VideoPosition selectPositionByVideoId(String videoId);
 
     List<VideoImage> selectImagesByVideoIds(List<String> imageVideoIds);
+
+    /**
+     * 点赞数
+     *
+     * @param videoId
+     * @return
+     */
+    Long selectVideoLikeCount(String videoId);
 }
 

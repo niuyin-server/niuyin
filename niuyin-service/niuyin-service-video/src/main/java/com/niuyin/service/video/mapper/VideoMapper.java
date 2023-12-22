@@ -47,6 +47,7 @@ public interface VideoMapper extends BaseMapper<Video> {
 
     /**
      * 视频点赞量
+     *
      * @param videoId
      * @return
      */
@@ -54,6 +55,7 @@ public interface VideoMapper extends BaseMapper<Video> {
 
     /**
      * 视频收藏量
+     *
      * @param videoId
      * @return
      */
@@ -74,13 +76,14 @@ public interface VideoMapper extends BaseMapper<Video> {
 
     /**
      * 用户是否收藏视频
+     *
      * @param videoId
      * @param userId
      * @return
      */
     Long userWeatherFavoriteVideo(@Param("videoId") String videoId, @Param("userId") Long userId);
 
-    Long userWeatherAuthor(@Param("userId") Long userId,@Param("userFollowId") Long userFollowId);
+    Long userWeatherAuthor(@Param("userId") Long userId, @Param("userFollowId") Long userFollowId);
 
     /**
      * 查询视频作者
@@ -92,6 +95,7 @@ public interface VideoMapper extends BaseMapper<Video> {
 
     /**
      * 批量查询作者信息
+     *
      * @param userId
      * @return
      */
