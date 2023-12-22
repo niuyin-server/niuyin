@@ -1,6 +1,7 @@
 package com.niuyin.tools.es;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.member.domain.Member;
@@ -49,8 +50,7 @@ public class EsVideoTest {
     @Test
     @DisplayName("所有视频同步到es")
     public void init() throws Exception {
-
-        List<Video> videos = videoMapper.selectList(null);
+        List<Video> videos = videoMapper.selectExistVideoList();
         List<VideoSearchVO> searchVOS = new ArrayList<>();
         videos.forEach(v -> {
             VideoSearchVO videoSearchVO = new VideoSearchVO();
