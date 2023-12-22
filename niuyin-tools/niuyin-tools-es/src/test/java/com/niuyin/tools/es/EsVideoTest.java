@@ -67,7 +67,6 @@ public class EsVideoTest {
                 videoSearchVO.setUserNickName(userCache.getNickName());
                 videoSearchVO.setUserAvatar(userCache.getAvatar());
             } else {
-//                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
                 videoSearchVO.setUserNickName("-");
                 videoSearchVO.setUserAvatar("-");
             }
