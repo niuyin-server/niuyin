@@ -109,5 +109,11 @@
 
     </select>
 
+    <select id="selectVideoLikeCount" resultType="java.lang.Long">
+        select ifnull(count(1), 0) as count
+        from video_user_like
+        where video_id = #{videoId}
+    </select>
+
 </mapper>
 

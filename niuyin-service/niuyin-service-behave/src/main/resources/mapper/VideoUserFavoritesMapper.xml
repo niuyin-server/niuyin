@@ -38,5 +38,10 @@
             AND video_title like concat ('%', #{videoTitle},'%')
         </if>
     </select>
+    <select id="selectFavoriteCountByVideoId" resultType="java.lang.Long">
+        select ifnull(count(1), 0) as count
+        from video_user_favorites
+        where video_id = #{videoId}
+    </select>
 </mapper>
 
