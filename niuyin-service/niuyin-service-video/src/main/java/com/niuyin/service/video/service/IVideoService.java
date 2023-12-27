@@ -7,6 +7,7 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.dto.UpdateVideoDTO;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.dto.VideoPublishDto;
@@ -132,4 +133,10 @@ public interface IVideoService extends IService<Video> {
     PageDataInfo getHotVideos(PageDTO pageDTO);
 
     List<VideoVO> pushVideoList();
+
+    /**
+     * 更新视频
+     */
+    boolean updateVideo(UpdateVideoDTO updateVideoDTO);
+
 }

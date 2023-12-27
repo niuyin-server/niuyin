@@ -13,6 +13,7 @@ import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.dto.UpdateVideoDTO;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.dto.VideoPublishDto;
@@ -116,6 +117,7 @@ public class VideoController {
     /**
      * 图片上传
      */
+    @Deprecated
     @PostMapping("/upload/image")
     public R<String> uploadImages(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -165,6 +167,14 @@ public class VideoController {
     @GetMapping("{videoIds}")
     public R<List<Video>> queryVideoByVideoIds(@PathVariable("videoIds") List<String> videoIds) {
         return R.ok(videoService.queryVideoByVideoIds(videoIds));
+    }
+
+    /**
+     * 更新视频
+     */
+    @PutMapping("/update")
+    public R<?> updateVideo(@RequestBody UpdateVideoDTO updateVideoDTO) {
+        return R.ok(videoService.updateVideo(updateVideoDTO));
     }
 
     /**

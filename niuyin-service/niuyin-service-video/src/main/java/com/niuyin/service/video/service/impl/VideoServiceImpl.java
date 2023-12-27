@@ -25,6 +25,7 @@ import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.*;
+import com.niuyin.model.video.dto.UpdateVideoDTO;
 import com.niuyin.model.video.dto.VideoFeedDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.dto.VideoPublishDto;
@@ -874,4 +875,46 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoVOList;
     }
 
+    /**
+     * 更新视频
+     *
+     * @param updateVideoDTO
+     */
+    @Override
+    public boolean updateVideo(UpdateVideoDTO updateVideoDTO) {
+        if (StringUtils.isEmpty(updateVideoDTO.getVideoId())) {
+            return false;
+        }
+        Video dbVideo = this.getById(updateVideoDTO.getVideoId());
+        if (StringUtils.isNotNull(dbVideo) && UserContext.getUserId().equals(dbVideo.getUserId())) {
+            LambdaUpdateWrapper<Video> queryWrapper = new LambdaUpdateWrapper<>();
+            queryWrapper.eq(Video::getVideoId, updateVideoDTO.getVideoId());
+            queryWrapper.set(StringUtils.isNotEmpty(updateVideoDTO.getVideoTitle()), Video::getVideoTitle, updateVideoDTO.getVideoTitle());
+            queryWrapper.set(StringUtils.isNotEmpty(updateVideoDTO.getVideoDesc()), Video::getVideoDesc, updateVideoDTO.getVideoDesc());
+            queryWrapper.set(StringUtils.isNotEmpty(updateVideoDTO.getCoverImage()), Video::getCoverImage, updateVideoDTO.getCoverImage());
+            queryWrapper.set(StringUtils.isNotEmpty(updateVideoDTO.getShowType()), Video::getShowType, updateVideoDTO.getShowType());
+            queryWrapper.set(StringUtils.isNotEmpty(updateVideoDTO.getPositionFlag()), Video::getPositionFlag, updateVideoDTO.getPositionFlag());
+            boolean update = this.update(queryWrapper);
+            if (update) {
+                // 修改成功更新缓存
+                if (StringUtils.isNotEmpty(updateVideoDTO.getVideoTitle())) {
+                    dbVideo.setVideoTitle(updateVideoDTO.getVideoTitle());
+                }
+                if (StringUtils.isNotEmpty(updateVideoDTO.getVideoDesc())) {
+                    dbVideo.setVideoDesc(updateVideoDTO.getVideoDesc());
+                }
+                if (StringUtils.isNotEmpty(updateVideoDTO.getCoverImage())) {
+                    dbVideo.setCoverImage(updateVideoDTO.getCoverImage());
+                }
+                if (StringUtils.isNotEmpty(updateVideoDTO.getShowType())) {
+                    dbVideo.setShowType(updateVideoDTO.getShowType());
+                }
+                if (StringUtils.isNotEmpty(updateVideoDTO.getPositionFlag())) {
+                    dbVideo.setPositionFlag(updateVideoDTO.getPositionFlag());
+                }
+                redisService.setCacheObject(VIDEO_INFO_PREFIX + updateVideoDTO.getVideoId(), dbVideo);
+            }
+        }
+        return false;
+    }
 }
