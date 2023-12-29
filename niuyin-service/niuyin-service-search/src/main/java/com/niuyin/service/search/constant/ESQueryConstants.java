@@ -11,7 +11,7 @@ public class ESQueryConstants {
      * 语言
      */
     public static final String zh_CN = "zh_CN";
-    public static final String Highlight_preTags = "<font class='keyword-hit'>";
+    public static final String Highlight_preTags = "<font class='keyword-hint'>";
     public static final String Highlight_postTags = "</font>";
 
 }

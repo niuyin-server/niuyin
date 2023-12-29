@@ -37,7 +37,7 @@ public interface VideoSearchService {
      *
      * @param dto
      */
-    List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) throws Exception;
+    List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto);
 
     /**
      * 查询当天所有的搜索记录

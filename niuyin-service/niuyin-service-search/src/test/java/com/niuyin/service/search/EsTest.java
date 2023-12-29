@@ -1,10 +1,13 @@
 package com.niuyin.service.search;
 
+import com.alibaba.fastjson.JSON;
 import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.domain.VideoSearchVO;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -24,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.time.*;
 import java.util.Date;
 import java.util.Map;
@@ -70,7 +74,7 @@ public class EsTest {
         // 构建查询请求
         VideoSearchKeywordDTO videoSearchKeywordDTO = new VideoSearchKeywordDTO();
         videoSearchKeywordDTO.setKeyword("这次不卡了   地平线，启动！");
-        videoSearchKeywordDTO.setPageNum(2);
+        videoSearchKeywordDTO.setPageNum(1);
         videoSearchKeywordDTO.setPageSize(10);
 //        long todayStartLong = DateUtils.getTodayPlusStartLocalLong(-1); //今日数据
 //        long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-7); //本周数据
@@ -84,7 +88,7 @@ public class EsTest {
 
             // 处理搜索结果
             processSearchResponse(searchResponse);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -134,7 +138,7 @@ public class EsTest {
         return searchRequest;
     }
 
-    private static void processSearchResponse(SearchResponse searchResponse) {
+    private static void processSearchResponse(SearchResponse searchResponse) throws Exception {
         // 处理搜索结果
         SearchHit[] hits = searchResponse.getHits().getHits();
         for (SearchHit hit : hits) {
@@ -161,18 +165,25 @@ public class EsTest {
                 }
             }
 
+            Map map = JSON.parseObject(hit.getSourceAsString(), Map.class);
+            VideoSearchVO searchVO = new VideoSearchVO();
+            BeanUtils.populate(searchVO, map);
+            searchVO.setVideoTitle((highlightedTitle.equals("") || highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
+            searchVO.setUserNickName((highlightedNickname.equals("") || highlightedNickname.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME) : highlightedNickname));
+            System.out.println("searchVO = " + searchVO);
             // 打印结果
-            System.out.println("videoTitle: " + (highlightedTitle.equals("") || highlightedTitle.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
-            System.out.println("userNickname: " + (highlightedNickname.equals("") || highlightedNickname.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME) : highlightedNickname));
-            System.out.println("Publish Time: " + hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TIME));
-            System.out.println("Publish Type: " + hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TYPE));
-            System.out.println("coverImage: " + hit.getSourceAsMap().get(VideoSearchVO.COVER_IMAGE));
-            System.out.println("userAvatar: " + hit.getSourceAsMap().get(VideoSearchVO.USER_AVATAR));
-            System.out.println("userId: " + hit.getSourceAsMap().get(VideoSearchVO.USER_ID));
-            System.out.println("videoId: " + hit.getSourceAsMap().get(VideoSearchVO.VIDEO_ID));
-            System.out.println("videoUrl: " + hit.getSourceAsMap().get(VideoSearchVO.VIDEO_URL));
-            System.out.println("Score: " + hit.getScore());
+//            System.out.println("videoTitle: " + (highlightedTitle.equals("") || highlightedTitle.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
+//            System.out.println("userNickname: " + (highlightedNickname.equals("") || highlightedNickname.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME) : highlightedNickname));
+//            System.out.println("Publish Time: " + hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TIME));
+//            System.out.println("Publish Type: " + hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TYPE));
+//            System.out.println("coverImage: " + hit.getSourceAsMap().get(VideoSearchVO.COVER_IMAGE));
+//            System.out.println("userAvatar: " + hit.getSourceAsMap().get(VideoSearchVO.USER_AVATAR));
+//            System.out.println("userId: " + hit.getSourceAsMap().get(VideoSearchVO.USER_ID));
+//            System.out.println("videoId: " + hit.getSourceAsMap().get(VideoSearchVO.VIDEO_ID));
+//            System.out.println("videoUrl: " + hit.getSourceAsMap().get(VideoSearchVO.VIDEO_URL));
+//            System.out.println("Score: " + hit.getScore());
             System.out.println("---------------------------------------");
+
         }
     }
 

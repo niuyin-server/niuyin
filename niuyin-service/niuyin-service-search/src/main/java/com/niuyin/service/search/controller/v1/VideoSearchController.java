@@ -41,7 +41,7 @@ public class VideoSearchController {
      * @throws Exception
      */
     @PostMapping()
-    public R<List<VideoSearchUserVO>> searchVideo(@RequestBody VideoSearchKeywordDTO dto) throws Exception {
+    public R<List<VideoSearchUserVO>> searchVideo(@RequestBody VideoSearchKeywordDTO dto) {
         List<VideoSearchVO> videoSearchVOS = videoSearchService.searchVideoFromES(dto);
         if (StringUtils.isNull(videoSearchVOS) || videoSearchVOS.isEmpty()) {
             return R.ok();
