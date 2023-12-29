@@ -2,5 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.video.mapper.UserVideoCompilationRelationMapper">
 
+    <select id="compilationVideoPageList" resultType="com.niuyin.model.video.vo.CompilationVideoVO">
+        select v.video_id, v.video_title, v.video_desc, v.cover_image, v.video_url, uvcr.create_time
+        from user_video_compilation_relation uvcr
+                 left join video v on v.video_id = uvcr.video_id
+        where uvcr.compilation_id = #{compilationId}
+        order by uvcr.create_time desc
+        limit #{pageNum},#{pageSize};
+    </select>
+
+    <select id="selectCompilationVideoPageCount" resultType="java.lang.Long">
+        select count(1) as count
+        from user_video_compilation_relation uvcr
+        where uvcr.compilation_id = #{compilationId}
+    </select>
+
 </mapper>
 

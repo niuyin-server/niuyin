@@ -1,9 +1,11 @@
 package com.niuyin.model.video.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 用户视频合集与视频关联表(UserVideoCompilationRelation)实体类
@@ -23,6 +25,9 @@ public class UserVideoCompilationRelation implements Serializable {
      * 视频id
      */
     private String videoId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 
 }
 

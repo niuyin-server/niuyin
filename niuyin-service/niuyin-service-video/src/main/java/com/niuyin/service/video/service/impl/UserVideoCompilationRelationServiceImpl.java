@@ -1,13 +1,22 @@
 package com.niuyin.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.model.video.domain.UserVideoCompilationRelation;
+import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoCategoryRelation;
+import com.niuyin.model.video.dto.CompilationVideoPageDTO;
+import com.niuyin.model.video.vo.CompilationVideoVO;
 import com.niuyin.service.video.mapper.UserVideoCompilationRelationMapper;
 import com.niuyin.service.video.service.IUserVideoCompilationRelationService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 用户视频合集与视频关联表(UserVideoCompilationRelation)表服务实现类
@@ -46,5 +55,33 @@ public class UserVideoCompilationRelationServiceImpl extends ServiceImpl<UserVid
         LambdaQueryWrapper<UserVideoCompilationRelation> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserVideoCompilationRelation::getVideoId, videoId);
         return this.remove(queryWrapper);
+    }
+
+    @Override
+    public IPage<UserVideoCompilationRelation> compilationVideoPage(CompilationVideoPageDTO pageDTO) {
+        if (StringUtils.isNull(pageDTO.getCompilationId())) {
+            return new Page<>();
+        }
+        LambdaQueryWrapper<UserVideoCompilationRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserVideoCompilationRelation::getCompilationId, pageDTO.getCompilationId());
+        queryWrapper.orderByDesc(UserVideoCompilationRelation::getCreateTime);
+        return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
+    }
+
+    /**
+     * 合集视频分页查询
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public List<CompilationVideoVO> compilationVideoPageList(CompilationVideoPageDTO pageDTO) {
+        pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
+        return userVideoCompilationRelationMapper.compilationVideoPageList(pageDTO);
+    }
+
+    @Override
+    public Long compilationVideoPageCount(Long compilationId) {
+        return userVideoCompilationRelationMapper.selectCompilationVideoPageCount(compilationId);
     }
 }
