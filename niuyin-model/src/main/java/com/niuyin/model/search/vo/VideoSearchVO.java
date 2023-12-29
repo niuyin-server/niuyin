@@ -24,6 +24,7 @@ public class VideoSearchVO {
     private String coverImage;
     // 视频地址
     private String videoUrl;
+    private String publishType;
     // 用户id
     private Long userId;
     // 用户昵称

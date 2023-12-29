@@ -37,7 +37,7 @@ public class HotVideoTask {
     @Resource
     private IVideoService videoService;
 
-    @Scheduled(fixedRate = 1000 * 60 * 10)
+    @Scheduled(fixedRate = 1000 * 60 * 30)
     public void computeHotVideo() {
         // 获取互斥锁
         try {

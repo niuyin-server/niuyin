@@ -139,4 +139,11 @@ public interface IVideoService extends IService<Video> {
      */
     boolean updateVideo(UpdateVideoDTO updateVideoDTO);
 
+    /**
+     * 根据视频ids查询
+     *
+     * @param videoIds
+     * @return
+     */
+    List<Video> listByVideoIds(List<String> videoIds);
 }

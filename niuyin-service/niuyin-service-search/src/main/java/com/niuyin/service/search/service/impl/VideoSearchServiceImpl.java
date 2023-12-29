@@ -80,6 +80,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         searchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
         searchVO.setCoverImage(video.getCoverImage());
         searchVO.setVideoUrl(video.getVideoUrl());
+        searchVO.setPublishType(video.getPublishType());
         searchVO.setUserId(video.getUserId());
         searchVO.setUserNickName(member.getNickName());
         searchVO.setUserAvatar(member.getAvatar());

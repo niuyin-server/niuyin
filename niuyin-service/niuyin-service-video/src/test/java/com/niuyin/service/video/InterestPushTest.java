@@ -5,21 +5,21 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoTag;
-import com.niuyin.model.video.domain.VideoTagRelation;
 import com.niuyin.service.video.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 
 /**
  * 兴趣推送测试 xq

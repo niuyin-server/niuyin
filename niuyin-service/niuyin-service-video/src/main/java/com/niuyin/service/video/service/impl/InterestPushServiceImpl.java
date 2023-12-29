@@ -263,7 +263,7 @@ public class InterestPushServiceImpl implements InterestPushService {
                 int requestNum = 10 - videoIdsSize;
                 log.debug("requestNum:{}", requestNum);
                 for (int i = 0; i < requestNum; i++) {
-                    String videoId = randomVideoIdFromTag("1".equals(sex) ? 100L : 1L);
+                    String videoId = randomVideoIdFromTag("1".equals(sex) ? 20L : 1L);
                     log.debug("add videoId:{}", videoId);
                     videoIds.add(videoId);
                 }

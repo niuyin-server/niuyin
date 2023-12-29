@@ -758,19 +758,17 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     // 视频算分
     private double computeVideoScore(Video video) {
         double score = 0;
-        // 点赞
-        if (video.getLikeNum() != null) {
-            score += video.getLikeNum() * HotVideoConstants.WEIGHT_LIKE;
-        }
         // 观看
         if (video.getViewNum() != null) {
             //获取redis中的浏览量
             score += video.getViewNum() * HotVideoConstants.WEIGHT_VIEW;
         }
+        // 点赞
+        Long likeCount = videoMapper.selectLikeCountByVideoId(video.getVideoId());
+        score += likeCount * HotVideoConstants.WEIGHT_LIKE;
         // 收藏
-        if (video.getFavoritesNum() != null) {
-            score += video.getFavoritesNum() * HotVideoConstants.WEIGHT_FAVORITE;
-        }
+        Long favoriteCount = videoMapper.selectFavoriteCountByVideoId(video.getVideoId());
+        score += favoriteCount * HotVideoConstants.WEIGHT_FAVORITE;
         // 创建时间
         if (video.getCreateTime() != null) {
             LocalDateTime createTime = video.getCreateTime();
@@ -872,7 +870,29 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.in(Video::getVideoId, videoIdsByUserModel);
         List<Video> videoList = this.list(queryWrapper);
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
+                .stream()
+                .map(this::packageUserVideoVOAsync)
+                .toArray(CompletableFuture[]::new));
+        allFutures.join();
         return videoVOList;
+    }
+
+    @Async
+    public CompletableFuture<Void> packagePushVideoVOAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packagePushVideoVO(videoVO));
+    }
+
+    @Async
+    public void packagePushVideoVO(VideoVO videoVO) {
+        log.debug("packagePushVideoVO");
+        CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
+        CompletableFuture<Void> imageDataFuture = packageVideoImageDataAsync(videoVO);
+        CompletableFuture.allOf(
+                memberDataFuture,
+                imageDataFuture
+        ).join();
+        log.debug("packagePushVideoVO");
     }
 
     /**
@@ -916,5 +936,18 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             }
         }
         return false;
+    }
+
+    /**
+     * 根据视频ids查询
+     *
+     * @param videoIds
+     * @return
+     */
+    @Override
+    public List<Video> listByVideoIds(List<String> videoIds) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Video::getVideoId, videoIds);
+        return this.list(queryWrapper);
     }
 }

@@ -31,7 +31,7 @@ public class UpdateVideoTask {
     /**
      * 从redis更新视频点赞量
      */
-    @Scheduled(fixedRate = 1000 * 60 * 5)
+//    @Scheduled(fixedRate = 1000 * 60 * 5)
     public void updateLikeCount() {
         log.info("开始从redis更新视频点赞量==>");
         //获取redis中的浏览量
@@ -50,7 +50,7 @@ public class UpdateVideoTask {
     /**
      * 从redis更新视频收藏量
      */
-    @Scheduled(fixedRate = 1000 * 60 * 5)
+//    @Scheduled(fixedRate = 1000 * 60 * 5)
     public void updateFavoriteCount() {
         log.info("开始从redis更新视频收藏量==>");
         //获取redis中的浏览量

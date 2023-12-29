@@ -247,7 +247,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         Long totalCount = redisTemplate.opsForSet().size(categoryKey);
         Long pushedCount = redisTemplate.opsForSet().size(pushedKey);
         if (StringUtils.isNull(totalCount) || totalCount < 1) {
-            System.out.println("没有分类视频");
+           log.debug("没有分类视频");
         }
         Long subCount = totalCount - pushedCount;
         if (subCount < 1) {

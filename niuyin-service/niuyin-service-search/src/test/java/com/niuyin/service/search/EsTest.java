@@ -69,8 +69,8 @@ public class EsTest {
     void searchVideo() {
         // 构建查询请求
         VideoSearchKeywordDTO videoSearchKeywordDTO = new VideoSearchKeywordDTO();
-        videoSearchKeywordDTO.setKeyword("李一桐");
-        videoSearchKeywordDTO.setPageNum(1);
+        videoSearchKeywordDTO.setKeyword("这次不卡了   地平线，启动！");
+        videoSearchKeywordDTO.setPageNum(2);
         videoSearchKeywordDTO.setPageSize(10);
 //        long todayStartLong = DateUtils.getTodayPlusStartLocalLong(-1); //今日数据
 //        long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-7); //本周数据
@@ -165,6 +165,7 @@ public class EsTest {
             System.out.println("videoTitle: " + (highlightedTitle.equals("") || highlightedTitle.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
             System.out.println("userNickname: " + (highlightedNickname.equals("") || highlightedNickname.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME) : highlightedNickname));
             System.out.println("Publish Time: " + hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TIME));
+            System.out.println("Publish Type: " + hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TYPE));
             System.out.println("coverImage: " + hit.getSourceAsMap().get(VideoSearchVO.COVER_IMAGE));
             System.out.println("userAvatar: " + hit.getSourceAsMap().get(VideoSearchVO.USER_AVATAR));
             System.out.println("userId: " + hit.getSourceAsMap().get(VideoSearchVO.USER_ID));

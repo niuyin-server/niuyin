@@ -31,6 +31,9 @@ public class VideoSearchVO {
     // 视频地址
     private String videoUrl;
     public static final String VIDEO_URL = "videoUrl";
+    // 视频类型
+    private String publishType;
+    public static final String PUBLISH_TYPE = "publishType";
     // 用户id
     private Long userId;
     public static final String USER_ID = "userId";

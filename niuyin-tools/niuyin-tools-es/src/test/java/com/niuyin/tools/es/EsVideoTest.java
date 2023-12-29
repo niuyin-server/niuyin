@@ -60,6 +60,7 @@ public class EsVideoTest {
             videoSearchVO.setPublishTime(Date.from(v.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
             videoSearchVO.setCoverImage(v.getCoverImage());
             videoSearchVO.setVideoUrl(v.getVideoUrl());
+            videoSearchVO.setPublishType(v.getPublishType());
             videoSearchVO.setUserId(v.getUserId());
             // 获取用户信息
             Member userCache = redisService.getCacheObject("member:userinfo:" + v.getUserId());
