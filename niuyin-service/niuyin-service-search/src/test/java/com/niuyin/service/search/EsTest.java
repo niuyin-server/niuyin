@@ -12,6 +12,8 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.AnalyzeRequest;
+import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
@@ -22,6 +24,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,7 +33,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.niuyin.service.search.constant.ESQueryConstants.*;
 
@@ -105,7 +110,7 @@ public class EsTest {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
         // 构建多字段匹配查询
-        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE, VideoSearchVO.USER_NICKNAME);
+        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE);
         boolQueryBuilder.must(multiMatchQueryBuilder);
 
         // 构建范围过滤器
@@ -120,7 +125,6 @@ public class EsTest {
         HighlightBuilder highlightBuilder = new HighlightBuilder()
                 .boundaryScannerLocale(zh_CN)
                 .field(VideoSearchVO.VIDEO_TITLE)
-                .field(VideoSearchVO.USER_NICKNAME)
                 .preTags(Highlight_preTags)
                 .postTags(Highlight_postTags);
         searchSourceBuilder.highlighter(highlightBuilder);
@@ -145,7 +149,6 @@ public class EsTest {
             // 获取高亮字段
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
-            HighlightField nicknameHighlightField = highlightFields.get(VideoSearchVO.USER_NICKNAME);
 
             // 处理高亮显示的片段
             String highlightedTitle = "";
@@ -156,18 +159,11 @@ public class EsTest {
                     highlightedTitle += fragment;
                 }
             }
-            if (nicknameHighlightField != null) {
-                Text[] nicknameFragments = nicknameHighlightField.fragments();
-                for (Text fragment : nicknameFragments) {
-                    highlightedNickname += fragment;
-                }
-            }
 
             Map map = JSON.parseObject(hit.getSourceAsString(), Map.class);
             VideoSearchVO searchVO = new VideoSearchVO();
             BeanUtils.populate(searchVO, map);
             searchVO.setVideoTitle((highlightedTitle.equals("") || highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
-            searchVO.setUserNickName((highlightedNickname.equals("") || highlightedNickname.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME) : highlightedNickname));
             System.out.println("searchVO = " + searchVO);
             // 打印结果
 //            System.out.println("videoTitle: " + (highlightedTitle.equals("") || highlightedTitle.isEmpty() ? hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
@@ -183,6 +179,27 @@ public class EsTest {
             System.out.println("---------------------------------------");
 
         }
+    }
+
+    @Test
+    @DisplayName("测试ik分词器")
+    public void testIkAnalyzer() {
+        AnalyzeRequest request = AnalyzeRequest.withGlobalAnalyzer("ik_smart", "原神，启动！");
+        Set<String> res = new HashSet<>();
+        try {
+            AnalyzeResponse response = restHighLevelClient.indices().analyze(request, RequestOptions.DEFAULT);
+            response.getTokens().forEach(token -> {
+                String term = token.getTerm();
+                int startOffset = token.getStartOffset();
+                int endOffset = token.getEndOffset();
+                String type = token.getType();
+//                System.out.println("Term: " + term + ", Start Offset: " + startOffset + ", End Offset: " + endOffset + ", Type: " + type);
+                res.add(term);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        res.forEach(System.out::println);
     }
 
 }

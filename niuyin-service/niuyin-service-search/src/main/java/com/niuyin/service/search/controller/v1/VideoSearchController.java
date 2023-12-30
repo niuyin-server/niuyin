@@ -11,6 +11,8 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
+import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
+import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;
@@ -97,5 +99,16 @@ public class VideoSearchController {
     @Cacheable(value = "hotSearchs", key = "'hotSearchs' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public R<?> getSearchHot(@RequestBody PageDTO pageDTO) {
         return R.ok(videoSearchService.findSearchHot(pageDTO));
+    }
+
+    /**
+     * 视频搜索建议
+     *
+     * @param videoSearchSuggestDTO
+     * @return
+     */
+    @PostMapping("/suggest")
+    public R<?> getVideoSearchSuggest(@RequestBody VideoSearchSuggestDTO videoSearchSuggestDTO) {
+        return R.ok(videoSearchService.pushVideoSearchSuggest(videoSearchSuggestDTO));
     }
 }

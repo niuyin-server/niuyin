@@ -2,6 +2,7 @@ package com.niuyin.service.search.service;
 
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
+import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
 import com.niuyin.service.search.domain.VideoSearchVO;
 
 import java.util.List;
@@ -54,4 +55,12 @@ public interface VideoSearchService {
      * @return
      */
     Set findSearchHot(PageDTO pageDTO);
+
+    /**
+     * 视频搜索推荐
+     *
+     * @param videoSearchSuggestDTO
+     * @return
+     */
+    List<String> pushVideoSearchSuggest(VideoSearchSuggestDTO videoSearchSuggestDTO);
 }

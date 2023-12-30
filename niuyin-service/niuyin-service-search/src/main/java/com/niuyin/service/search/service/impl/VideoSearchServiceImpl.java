@@ -10,15 +10,18 @@ import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
+import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
 import com.niuyin.model.search.enums.VideoSearchScreenPublishTime;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
+import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -29,6 +32,8 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.AnalyzeRequest;
+import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
@@ -38,6 +43,10 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.*;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,6 +54,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.niuyin.service.search.constant.ESQueryConstants.*;
 
@@ -72,6 +82,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     @DubboReference
     private DubboMemberService dubboMemberService;
+
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     /**
      * 视频同步新增到es
@@ -230,43 +243,26 @@ public class VideoSearchServiceImpl implements VideoSearchService {
             HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
             HighlightField tagsHighlightField = highlightFields.get(VideoSearchVO.TAGS);
 
-            // 处理高亮显示的片段
-            String highlightedTitle = "";
-            if (titleHighlightField != null) {
-                Text[] titleFragments = titleHighlightField.fragments();
-                for (Text fragment : titleFragments) {
-                    highlightedTitle += fragment;
-                }
-            }
+// 处理高亮显示的片段
+            String highlightedTitle = getHighlightedText(titleHighlightField);
+            String[] highlightedTags = getHighlightedTags(tagsHighlightField);
+            log.debug("高亮标签: {}", Arrays.toString(highlightedTags));
 
-            String highlightedTag = "";
-            if (tagsHighlightField != null) {
-                Text[] tagsFragments = tagsHighlightField.fragments();
-                for (Text fragment : tagsFragments) {
-                    highlightedTag += fragment;
-                }
-            }
-            log.debug("高亮标签: {}", highlightedTag);
+// 结果封装
+            Map<String, Object> sourceMap = hit.getSourceAsMap();
+            VideoSearchVO searchVO = JSON.parseObject(JSON.toJSONString(sourceMap), VideoSearchVO.class);
+            searchVO.setVideoTitle(highlightedTitle.isEmpty() ? searchVO.getVideoTitle() : highlightedTitle);
 
-            // 结果封装
-            Map map = JSON.parseObject(hit.getSourceAsString(), Map.class);
-            VideoSearchVO searchVO = new VideoSearchVO();
-            try {
-                BeanUtils.populate(searchVO, map);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                continue;
-            }
-            // 高亮标题
-            searchVO.setVideoTitle((highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
-            // 高亮标签
-            if (StringUtils.isNotEmpty(highlightedTag)) {
+            if (highlightedTags.length > 0) {
                 String[] tags = searchVO.getTags();
                 for (int i = 0; i < tags.length; i++) {
                     String originalTag = tags[i];
-                    String replacedTag = highlightedTag.replace(Highlight_preTags, "").replace(Highlight_postTags, "");
-                    if (originalTag.equals(replacedTag)) {
-                        tags[i] = highlightedTag;
+                    for (String highlightedTag : highlightedTags) {
+                        String replacedTag = highlightedTag.replace(Highlight_preTags, "").replace(Highlight_postTags, "");
+                        if (originalTag.equals(replacedTag)) {
+                            tags[i] = highlightedTag;
+                            break;
+                        }
                     }
                 }
                 searchVO.setTags(tags);
@@ -275,6 +271,32 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         }
         return res;
     }
+
+    private String getHighlightedText(HighlightField field) {
+        if (field != null) {
+            Text[] fragments = field.fragments();
+            StringBuilder highlightedText = new StringBuilder();
+            for (Text fragment : fragments) {
+                highlightedText.append(fragment.string());
+            }
+            return highlightedText.toString();
+        }
+        return "";
+    }
+
+
+    private String[] getHighlightedTags(HighlightField field) {
+        if (field != null) {
+            Text[] fragments = field.fragments();
+            String[] highlightedTags = new String[fragments.length];
+            for (int i = 0; i < fragments.length; i++) {
+                highlightedTags[i] = fragments[i].string();
+            }
+            return highlightedTags;
+        }
+        return new String[0];
+    }
+
 
     /**
      * @param dto
@@ -350,5 +372,44 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
         Set cacheZSetRange = redisService.getCacheZSetRange(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, startIndex, endIndex);
         return cacheZSetRange;
+    }
+
+    /**
+     * 视频搜索推荐
+     *
+     * @param videoSearchSuggestDTO
+     * @return
+     */
+    @SneakyThrows
+    @Override
+    public List<String> pushVideoSearchSuggest(VideoSearchSuggestDTO videoSearchSuggestDTO) {
+        String keyword = videoSearchSuggestDTO.getKeyword();
+        if (StringUtils.isEmpty(keyword)) {
+            return new ArrayList<>();
+        }
+        AnalyzeRequest request = AnalyzeRequest.withGlobalAnalyzer("ik_smart", keyword);
+        Set<String> keywordRes = new HashSet<>();
+        AnalyzeResponse response = restHighLevelClient.indices().analyze(request, RequestOptions.DEFAULT);
+        response.getTokens().forEach(token -> {
+            String term = token.getTerm();
+            keywordRes.add(term);
+        });
+        // 构建模糊查询条件
+        Criteria criteria = Criteria.where("keyword").regex(String.join("|", keywordRes), "i"); // "i" 表示不区分大小写
+
+        // 构建聚合管道
+        MatchOperation matchOperation = Aggregation.match(criteria);
+        GroupOperation groupOperation = Aggregation.group("keyword").first("$$ROOT").as("doc");
+        SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Direction.DESC, "doc.createdTime"));
+        LimitOperation limitOperation = Aggregation.limit(10);
+        SampleOperation sampleOperation = Aggregation.sample(10);
+
+        Aggregation aggregation = Aggregation.newAggregation(matchOperation, groupOperation, sortOperation, limitOperation, sampleOperation);
+
+        // 执行聚合查询
+        List<VideoSearchHistory> videoSearchHistory = mongoTemplate.aggregate(aggregation, "video_search_history", VideoSearchHistory.class).getMappedResults();
+        // 结果集添加高亮标签
+
+        return videoSearchHistory.stream().map(VideoSearchHistory::getId).collect(Collectors.toList());
     }
 }
