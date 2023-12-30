@@ -4,35 +4,28 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
-import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.dto.UpdateVideoDTO;
-import com.niuyin.model.video.dto.VideoFeedDTO;
-import com.niuyin.model.video.dto.VideoPageDto;
-import com.niuyin.model.video.dto.VideoPublishDto;
+import com.niuyin.model.video.dto.*;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
-import com.niuyin.service.video.service.IVideoImageService;
-import com.niuyin.service.video.service.IVideoPositionService;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.service.InterestPushService;
 import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
+import com.niuyin.starter.video.service.FfmpegVideoService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -59,6 +52,9 @@ public class VideoController {
 
     @Resource
     private InterestPushService interestPushService;
+
+    @Resource
+    private FfmpegVideoService ffmpegVideoService;
 
     @GetMapping("/test-dubbo")
     public R<?> testDubbo() {
@@ -199,6 +195,15 @@ public class VideoController {
     @GetMapping("/videoCount")
     public R<Long> getUserVideoNum() {
         return R.ok(videoService.queryUserVideoCount());
+    }
+
+    /**
+     * 根据视频远程url获取视频详情
+     */
+    @PostMapping("/videoinfo")
+    public R<?> getVideoInfo(@RequestBody VideoInfoDTO videoInfoDTO) {
+        MultimediaInfo info = ffmpegVideoService.getVideoInfo(videoInfoDTO.getVideoUrl());
+        return R.ok(info);
     }
 
 }
