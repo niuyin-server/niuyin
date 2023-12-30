@@ -44,4 +44,14 @@ public class DubboVideoServiceImpl implements DubboVideoService {
     public Video apiGetVideoByVideoId(String videoId) {
         return videoService.getById(videoId);
     }
+
+    /**
+     * 通过id获取视频图文
+     *
+     * @param videoId
+     */
+    @Override
+    public String[] apiGetVideoImagesByVideoId(String videoId) {
+        return videoService.getVideoImages(videoId);
+    }
 }

@@ -22,4 +22,9 @@ public interface DubboVideoService {
      */
     Video apiGetVideoByVideoId(String videoId);
 
+    /**
+     * 通过id获取视频图文
+     */
+    String[] apiGetVideoImagesByVideoId(String videoId);
+
 }
