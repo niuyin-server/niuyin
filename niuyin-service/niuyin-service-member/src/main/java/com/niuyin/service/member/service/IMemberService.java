@@ -42,4 +42,8 @@ public interface IMemberService extends IService<Member> {
      */
     boolean updatePass(UpdatePasswordDTO dto);
 
+    /**
+     * 获取头像
+     */
+    String getAvatarById(Long userId);
 }
