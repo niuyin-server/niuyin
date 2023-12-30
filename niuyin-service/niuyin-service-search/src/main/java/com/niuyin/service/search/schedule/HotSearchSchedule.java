@@ -33,11 +33,10 @@ public class HotSearchSchedule {
     @Resource
     private VideoSearchHistoryService videoSearchHistoryService;
 
-
     @Resource
     private VideoSearchService videoSearchService;
 
-    @Scheduled(fixedRate = 1000 * 60 * 5)
+    @Scheduled(fixedRate = 1000 * 60 * 10)
     public void computeHotSearch() throws Exception {
         ArrayList<String> list = new ArrayList<>();
         List<Term> termList;
