@@ -146,4 +146,12 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     List<Video> listByVideoIds(List<String> videoIds);
+
+    /**
+     * 获取视频图文
+     *
+     * @param videoId
+     * @return
+     */
+    String[] getVideoImages(String videoId);
 }
