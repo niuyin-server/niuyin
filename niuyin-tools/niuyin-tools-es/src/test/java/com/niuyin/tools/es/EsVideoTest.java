@@ -1,13 +1,12 @@
 package com.niuyin.tools.es;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.tools.es.mapper.VideoMapper;
+import com.niuyin.tools.es.mapper.VideoTagRelationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -42,6 +41,9 @@ public class EsVideoTest {
     @Resource
     private VideoMapper videoMapper;
 
+    @Resource
+    private VideoTagRelationMapper videoTagRelationMapper;
+
     /**
      * 注意：数据量的导入，如果数据量过大，需要分页导入
      *
@@ -62,6 +64,10 @@ public class EsVideoTest {
             videoSearchVO.setVideoUrl(v.getVideoUrl());
             videoSearchVO.setPublishType(v.getPublishType());
             videoSearchVO.setUserId(v.getUserId());
+            // 视频标签
+            List<VideoTag> videoTagList = videoTagRelationMapper.selectTagNamesByVideoId(v.getVideoId());
+            String[] tags = videoTagList.stream().map(VideoTag::getTag).toArray(String[]::new);
+            videoSearchVO.setTags(tags);
             searchVOS.add(videoSearchVO);
         });
         //2.批量导入到es索引库
@@ -86,8 +92,6 @@ public class EsVideoTest {
         videoSearchVO.setCoverImage(video.getCoverImage());
         videoSearchVO.setVideoUrl(video.getVideoUrl());
         videoSearchVO.setUserId(2L);
-        videoSearchVO.setUserNickName("-");
-        videoSearchVO.setUserAvatar("-");
 
         IndexRequest indexRequest = new IndexRequest("search_video");
         indexRequest.id(videoSearchVO.getVideoId())

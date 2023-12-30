@@ -1,6 +1,8 @@
 package com.niuyin.dubbo.api;
 
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoTag;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -27,4 +29,29 @@ public interface DubboVideoService {
      */
     String[] apiGetVideoImagesByVideoId(String videoId);
 
+    /**
+     * 是否点赞某视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    boolean apiWeatherLikeVideo(String videoId, Long userId);
+
+    /**
+     * 是否收藏某视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    boolean apiWeatherFavoriteVideo(String videoId, Long userId);
+
+    /**
+     * 获取视频标签
+     *
+     * @param videoId
+     * @return
+     */
+    List<VideoTag> apiGetVideoTagStack(String videoId);
 }
