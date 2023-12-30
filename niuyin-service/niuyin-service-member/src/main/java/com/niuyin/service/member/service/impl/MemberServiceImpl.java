@@ -235,4 +235,16 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return this.updateById(updateUser);
     }
 
+    /**
+     * 获取头像
+     *
+     * @param userId
+     */
+    @Override
+    public String getAvatarById(Long userId) {
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(Member::getAvatar);
+        queryWrapper.eq(Member::getUserId, userId);
+        return this.getOne(queryWrapper).getAvatar();
+    }
 }
