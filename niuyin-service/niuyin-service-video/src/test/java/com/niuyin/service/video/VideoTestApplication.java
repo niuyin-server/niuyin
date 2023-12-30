@@ -32,6 +32,8 @@ import com.niuyin.service.video.service.IVideoService;
 import com.aliyun.oss.ClientException;
 
 import java.io.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -221,16 +223,6 @@ public class VideoTestApplication {
             videoSearchVO.setCoverImage("null");
             videoSearchVO.setVideoUrl(video.getVideoUrl());
             videoSearchVO.setUserId(userId);
-            // 获取用户信息
-            Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-            if (StringUtils.isNotNull(userCache)) {
-                videoSearchVO.setUserNickName(userCache.getNickName());
-                videoSearchVO.setUserAvatar(userCache.getAvatar());
-            } else {
-                Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-                videoSearchVO.setUserNickName(remoteUser.getNickName());
-                videoSearchVO.setUserAvatar(remoteUser.getAvatar());
-            }
         } else {
             throw new CustomException(null);
         }
@@ -320,11 +312,31 @@ public class VideoTestApplication {
     void getVideoInfo() {
         // 横屏视频
 //        String urlheng = "http://s4bi8902v.hb-bkt.clouddn.com/2023/11/27/9829cce9da304b66902fdd19c7cfbfc8.mp4";
-        String urlheng = "http://s4vq4byfr.hn-bkt.clouddn.com/2023/11/29/18d83770d4a2480b8bfe917b5388ab96.mp4";
+        String urlheng = "https://niuyin-server.oss-cn-shenzhen.aliyuncs.com/video/2023/12/30/d8dcdb16964c4b8ba2bb70a72d7451ff.mp4";
 
         MultimediaInfo info = ffmpegVideoService.getVideoInfo(urlheng);
         log.debug("视频详情：{}", info);
     }
+
+    @Test
+    @DisplayName("视频时长毫秒值转小时HH:mm:ss")
+    void videoInfoTransfer() {
+        long milliseconds = 291690L; // 毫秒数
+
+        // 使用 Duration 类将毫秒数转换为 Duration 对象
+        Duration duration = Duration.ofMillis(milliseconds);
+
+        // 使用 LocalTime.MIDNIGHT.plus() 方法将 Duration 对象与午夜时间相加得到小时时间
+        LocalTime time = LocalTime.MIDNIGHT.plus(duration);
+
+        // 使用 DateTimeFormatter 格式化 LocalTime 对象
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String formattedTime = time.format(formatter);
+
+        System.out.println(formattedTime);
+        log.debug("视频时长：{}", formattedTime);
+    }
+
 
     @Test
     @DisplayName("远程视频生成首帧截图")
