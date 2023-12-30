@@ -28,6 +28,16 @@ public class DubboMemberServiceImpl implements DubboMemberService {
     }
 
     /**
+     * 通过ID查询头像
+     *
+     * @param userId
+     */
+    @Override
+    public String apiGetAvatarById(Long userId) {
+        return memberService.getAvatarById(userId);
+    }
+
+    /**
      * 根据ids查询
      */
     @Override

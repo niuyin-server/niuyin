@@ -18,6 +18,11 @@ public interface DubboMemberService {
     Member apiGetById(Long userId);
 
     /**
+     * 通过ID查询头像
+     */
+    String apiGetAvatarById(Long userId);
+
+    /**
      * 根据ids查询
      */
     List<Member> apiGetInIds(List<Long> userIds);
