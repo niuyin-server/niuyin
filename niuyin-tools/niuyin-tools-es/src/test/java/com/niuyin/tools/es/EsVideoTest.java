@@ -62,15 +62,6 @@ public class EsVideoTest {
             videoSearchVO.setVideoUrl(v.getVideoUrl());
             videoSearchVO.setPublishType(v.getPublishType());
             videoSearchVO.setUserId(v.getUserId());
-            // 获取用户信息
-            Member userCache = redisService.getCacheObject("member:userinfo:" + v.getUserId());
-            if (StringUtils.isNotNull(userCache)) {
-                videoSearchVO.setUserNickName(userCache.getNickName());
-                videoSearchVO.setUserAvatar(userCache.getAvatar());
-            } else {
-                videoSearchVO.setUserNickName("-");
-                videoSearchVO.setUserAvatar("-");
-            }
             searchVOS.add(videoSearchVO);
         });
         //2.批量导入到es索引库

@@ -73,25 +73,23 @@ public class EsTest {
     void searchVideo() {
         // 构建查询请求
         VideoSearchKeywordDTO videoSearchKeywordDTO = new VideoSearchKeywordDTO();
-        videoSearchKeywordDTO.setKeyword("这次不卡了   地平线，启动！");
+        videoSearchKeywordDTO.setKeyword("日出云海");
         videoSearchKeywordDTO.setPageNum(1);
         videoSearchKeywordDTO.setPageSize(10);
 //        long todayStartLong = DateUtils.getTodayPlusStartLocalLong(-1); //今日数据
-//        long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-7); //本周数据
+        long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-7); //本周数据
+//        long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-30); //本月数据
 //        log.debug("todayStartLong:{}", dayStartLong);
-//        videoSearchKeywordDTO.setMinBehotTime(new Date(dayStartLong));
+        videoSearchKeywordDTO.setMinBehotTime(new Date(dayStartLong));
         SearchRequest searchRequest = buildSearchRequest(videoSearchKeywordDTO);
-
         try {
             // 执行查询请求
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-
             // 处理搜索结果
             processSearchResponse(searchResponse);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private static SearchRequest buildSearchRequest(VideoSearchKeywordDTO videoSearchKeywordDTO) {
