@@ -950,4 +950,16 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.in(Video::getVideoId, videoIds);
         return this.list(queryWrapper);
     }
+
+    /**
+     * 获取视频图文
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public String[] getVideoImages(String videoId) {
+        List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoId);
+        return videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+    }
 }

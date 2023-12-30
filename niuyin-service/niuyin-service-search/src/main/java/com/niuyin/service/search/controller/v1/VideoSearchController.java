@@ -3,6 +3,8 @@ package com.niuyin.service.search.controller.v1;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
@@ -10,6 +12,7 @@ import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +36,12 @@ public class VideoSearchController {
     @Resource
     private RemoteMemberService remoteMemberService;
 
+    @DubboReference
+    private DubboMemberService dubboMemberService;
+
+    @DubboReference
+    private DubboVideoService dubboVideoService;
+
     /**
      * 分页搜索视频
      *
@@ -46,13 +55,15 @@ public class VideoSearchController {
         if (StringUtils.isNull(videoSearchVOS) || videoSearchVOS.isEmpty()) {
             return R.ok();
         }
-        List<VideoSearchUserVO> res = new ArrayList<>();
+        List<VideoSearchUserVO> res = BeanCopyUtils.copyBeanList(videoSearchVOS, VideoSearchUserVO.class);
         // 封装用户，视频点赞量，喜欢量。。。
-        videoSearchVOS.forEach(v -> {
-            VideoSearchUserVO videoSearchUserVO = BeanCopyUtils.copyBean(v, VideoSearchUserVO.class);
-            Member user = remoteMemberService.userInfoById(v.getUserId()).getData();
-            videoSearchUserVO.setAvatar(user.getAvatar());
-            res.add(videoSearchUserVO);
+        res.forEach(v -> {
+            // 用户头像
+            Member member = dubboMemberService.apiGetById(v.getUserId());
+            v.setUserNickName(member.getNickName());
+            v.setUserAvatar(member.getAvatar());
+            // 图文视频
+            v.setImageList(dubboVideoService.apiGetVideoImagesByVideoId(v.getVideoId()));
         });
         return R.ok(res);
     }
@@ -70,7 +81,7 @@ public class VideoSearchController {
      * @return
      */
     @PostMapping("/search/hot")
-    @Cacheable(value = "hotSearchs", key = " 'hotSearchs' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
+    @Cacheable(value = "hotSearchs", key = "'hotSearchs' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public R<?> getSearchHot(@RequestBody PageDTO pageDTO) {
         return R.ok(videoSearchService.findSearchHot(pageDTO));
     }

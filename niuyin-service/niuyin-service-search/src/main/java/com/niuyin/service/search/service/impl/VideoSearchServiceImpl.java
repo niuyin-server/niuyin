@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
+import com.niuyin.model.search.enums.VideoSearchScreenPublishTime;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
@@ -85,8 +87,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         searchVO.setVideoUrl(video.getVideoUrl());
         searchVO.setPublishType(video.getPublishType());
         searchVO.setUserId(video.getUserId());
-        searchVO.setUserNickName(member.getNickName());
-        searchVO.setUserAvatar(member.getAvatar());
 
         IndexRequest indexRequest = new IndexRequest(ESIndexConstants.INDEX_VIDEO);
         indexRequest.id(searchVO.getVideoId())
@@ -146,10 +146,11 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     @Override
     public List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) {
         // 构建查询请求
-//        long todayStartLong = DateUtils.getTodayPlusStartLocalLong(-1); //今日数据
-//        long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-7); //本周数据
-//        log.debug("todayStartLong:{}", dayStartLong);
-//        dto.setMinBehotTime(new Date(dayStartLong));
+        String publishTimeLimit = dto.getPublishTimeLimit();
+        if (StringUtils.isNotNull(publishTimeLimit) && !publishTimeLimit.equals(VideoSearchScreenPublishTime.NO_LIMIT.getCode())) {
+            long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-Objects.requireNonNull(VideoSearchScreenPublishTime.findByCode(publishTimeLimit)).getLimit());
+            dto.setMinBehotTime(new Date(dayStartLong));
+        }
         SearchRequest searchRequest = buildSearchRequest(dto);
 
         try {
@@ -177,7 +178,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
         // 构建多字段匹配查询
-        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE, VideoSearchVO.USER_NICKNAME);
+        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE);
         boolQueryBuilder.must(multiMatchQueryBuilder);
 
         // 构建范围过滤器
@@ -192,7 +193,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         HighlightBuilder highlightBuilder = new HighlightBuilder()
                 .boundaryScannerLocale(zh_CN)
                 .field(VideoSearchVO.VIDEO_TITLE)
-                .field(VideoSearchVO.USER_NICKNAME)
                 .preTags(Highlight_preTags)
                 .postTags(Highlight_postTags);
         searchSourceBuilder.highlighter(highlightBuilder);
@@ -218,7 +218,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
             // 获取高亮字段
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
-            HighlightField nicknameHighlightField = highlightFields.get(VideoSearchVO.USER_NICKNAME);
 
             // 处理高亮显示的片段
             String highlightedTitle = "";
@@ -227,12 +226,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                 Text[] titleFragments = titleHighlightField.fragments();
                 for (Text fragment : titleFragments) {
                     highlightedTitle += fragment;
-                }
-            }
-            if (nicknameHighlightField != null) {
-                Text[] nicknameFragments = nicknameHighlightField.fragments();
-                for (Text fragment : nicknameFragments) {
-                    highlightedNickname += fragment;
                 }
             }
 
@@ -246,7 +239,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                 continue;
             }
             searchVO.setVideoTitle((highlightedTitle.equals("") || highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
-            searchVO.setUserNickName((highlightedNickname.equals("") || highlightedNickname.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME) : highlightedNickname));
 
 //            VideoSearchVO searchVO = new VideoSearchVO();
 //            searchVO.setVideoId((String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_ID));

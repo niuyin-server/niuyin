@@ -37,11 +37,5 @@ public class VideoSearchVO {
     // 用户id
     private Long userId;
     public static final String USER_ID = "userId";
-    // 用户昵称
-    private String userNickName;
-    public static final String USER_NICKNAME = "userNickName";
-    // 用户头像
-    private String userAvatar;
-    public static final String USER_AVATAR = "userAvatar";
 
 }
