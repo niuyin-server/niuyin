@@ -12,6 +12,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.enums.VideoSearchScreenPublishTime;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.service.VideoSearchService;
@@ -78,7 +79,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     @Override
     public void videoSync(String videoId) {
         Video video = dubboVideoService.apiGetVideoByVideoId(videoId);
-        Member member = dubboMemberService.apiGetById(video.getUserId());
         VideoSearchVO searchVO = new VideoSearchVO();
         searchVO.setVideoId(video.getVideoId());
         searchVO.setVideoTitle(video.getVideoTitle());
@@ -87,6 +87,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         searchVO.setVideoUrl(video.getVideoUrl());
         searchVO.setPublishType(video.getPublishType());
         searchVO.setUserId(video.getUserId());
+        searchVO.setTags(dubboVideoService.apiGetVideoTagStack(videoId).stream().map(VideoTag::getTag).toArray(String[]::new));
 
         IndexRequest indexRequest = new IndexRequest(ESIndexConstants.INDEX_VIDEO);
         indexRequest.id(searchVO.getVideoId())
@@ -145,6 +146,14 @@ public class VideoSearchServiceImpl implements VideoSearchService {
      */
     @Override
     public List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) {
+        if (StringUtils.isEmpty(dto.getKeyword())) {
+            return new ArrayList<>();
+        }
+        // 保存搜索记录到mongodb
+        Long userId = UserContext.getUserId();
+        if (StringUtils.isNotNull(userId) && dto.getFromIndex() == 0) {
+            videoSearchHistoryService.insert(dto.getKeyword(), userId);
+        }
         // 构建查询请求
         String publishTimeLimit = dto.getPublishTimeLimit();
         if (StringUtils.isNotNull(publishTimeLimit) && !publishTimeLimit.equals(VideoSearchScreenPublishTime.NO_LIMIT.getCode())) {
@@ -178,7 +187,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
         // 构建多字段匹配查询
-        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE);
+        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS);
         boolQueryBuilder.must(multiMatchQueryBuilder);
 
         // 构建范围过滤器
@@ -193,6 +202,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         HighlightBuilder highlightBuilder = new HighlightBuilder()
                 .boundaryScannerLocale(zh_CN)
                 .field(VideoSearchVO.VIDEO_TITLE)
+                .field(VideoSearchVO.TAGS)
                 .preTags(Highlight_preTags)
                 .postTags(Highlight_postTags);
         searchSourceBuilder.highlighter(highlightBuilder);
@@ -218,16 +228,25 @@ public class VideoSearchServiceImpl implements VideoSearchService {
             // 获取高亮字段
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
+            HighlightField tagsHighlightField = highlightFields.get(VideoSearchVO.TAGS);
 
             // 处理高亮显示的片段
             String highlightedTitle = "";
-            String highlightedNickname = "";
             if (titleHighlightField != null) {
                 Text[] titleFragments = titleHighlightField.fragments();
                 for (Text fragment : titleFragments) {
                     highlightedTitle += fragment;
                 }
             }
+
+            String highlightedTag = "";
+            if (tagsHighlightField != null) {
+                Text[] tagsFragments = tagsHighlightField.fragments();
+                for (Text fragment : tagsFragments) {
+                    highlightedTag += fragment;
+                }
+            }
+            log.debug("高亮标签: {}", highlightedTag);
 
             // 结果封装
             Map map = JSON.parseObject(hit.getSourceAsString(), Map.class);
@@ -238,18 +257,20 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                 ex.printStackTrace();
                 continue;
             }
-            searchVO.setVideoTitle((highlightedTitle.equals("") || highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
-
-//            VideoSearchVO searchVO = new VideoSearchVO();
-//            searchVO.setVideoId((String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_ID));
-//            searchVO.setVideoTitle((highlightedTitle.equals("") || highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
-//            searchVO.setPublishTime(new Date((Long) hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TIME)));
-//            searchVO.setCoverImage((String) hit.getSourceAsMap().get(VideoSearchVO.COVER_IMAGE));
-//            searchVO.setVideoUrl((String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_URL));
-//            searchVO.setPublishType((String) hit.getSourceAsMap().get(VideoSearchVO.PUBLISH_TYPE));
-//            searchVO.setUserId((Long) hit.getSourceAsMap().get(VideoSearchVO.USER_ID));
-//            searchVO.setUserNickName((String) hit.getSourceAsMap().get(VideoSearchVO.USER_NICKNAME));
-//            searchVO.setUserAvatar((String) hit.getSourceAsMap().get(VideoSearchVO.USER_AVATAR));
+            // 高亮标题
+            searchVO.setVideoTitle((highlightedTitle.isEmpty() ? (String) hit.getSourceAsMap().get(VideoSearchVO.VIDEO_TITLE) : highlightedTitle));
+            // 高亮标签
+            if (StringUtils.isNotEmpty(highlightedTag)) {
+                String[] tags = searchVO.getTags();
+                for (int i = 0; i < tags.length; i++) {
+                    String originalTag = tags[i];
+                    String replacedTag = highlightedTag.replace(Highlight_preTags, "").replace(Highlight_postTags, "");
+                    if (originalTag.equals(replacedTag)) {
+                        tags[i] = highlightedTag;
+                    }
+                }
+                searchVO.setTags(tags);
+            }
             res.add(searchVO);
         }
         return res;

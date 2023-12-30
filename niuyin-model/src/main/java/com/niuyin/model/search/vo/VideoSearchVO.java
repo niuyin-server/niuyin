@@ -27,5 +27,7 @@ public class VideoSearchVO {
     private String publishType;
     // 用户id
     private Long userId;
+    // 标签
+    private String[] tags;
 
 }

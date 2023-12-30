@@ -16,8 +16,8 @@ import lombok.EqualsAndHashCode;
 public class VideoSearchUserVO extends VideoSearchVO {
 
     private Long likeNum = 0L;
-    private Long favoriteNum = 0L;
     private Long commentNum = 0L;
+    private Long favoritesNum = 0L;
 
     private String userNickName;
     private String userAvatar;

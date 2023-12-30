@@ -1,8 +1,10 @@
 package com.niuyin.service.search.controller.v1;
 
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.feign.member.RemoteMemberService;
@@ -17,7 +19,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,6 +43,9 @@ public class VideoSearchController {
     @DubboReference
     private DubboVideoService dubboVideoService;
 
+    @DubboReference
+    private DubboBehaveService dubboBehaveService;
+
     /**
      * 分页搜索视频
      *
@@ -64,6 +68,15 @@ public class VideoSearchController {
             v.setUserAvatar(member.getAvatar());
             // 图文视频
             v.setImageList(dubboVideoService.apiGetVideoImagesByVideoId(v.getVideoId()));
+            // 是否点赞、是否收藏
+            v.setWeatherLike(dubboVideoService.apiWeatherLikeVideo(v.getVideoId(), UserContext.getUserId()));
+            v.setWeatherFavorite(dubboVideoService.apiWeatherFavoriteVideo(v.getVideoId(), UserContext.getUserId()));
+            // 行为数据：点赞数、评论数、收藏数
+            v.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(v.getVideoId()));
+            v.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(v.getVideoId()));
+            v.setFavoritesNum(dubboBehaveService.apiGetVideoFavoriteNum(v.getVideoId()));
+            // todo 社交数据、是否关注用户
+            v.setWeatherFollow(false);
         });
         return R.ok(res);
     }

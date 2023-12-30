@@ -37,5 +37,8 @@ public class VideoSearchVO {
     // 用户id
     private Long userId;
     public static final String USER_ID = "userId";
+    // 标签
+    private String[] tags;
+    public static final String TAGS = "tags";
 
 }
