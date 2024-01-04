@@ -112,7 +112,7 @@ public class UserFollowController {
      * @return
      */
     @GetMapping("/videoFeed")
-    public R followFeed(@RequestParam(required = false) Long lastTime) throws ParseException {
+    public R followFeed(@RequestParam(required = false) Long lastTime){
         return R.ok(userFollowService.followVideoFeed(lastTime));
     }
 

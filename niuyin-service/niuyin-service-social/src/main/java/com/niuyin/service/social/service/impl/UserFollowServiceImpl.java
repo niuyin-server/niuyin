@@ -228,7 +228,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 0,
                 lastTime == null ? new Date().getTime() : lastTime,
                 lastTime == null ? 0 : 1,
-                5);
+                10);
         if (ObjectUtils.isEmpty(videoIds)) {
             // 可能只是缓存中没有了,缓存只存储7天内的关注视频,继续往后查看关注的用户太少了,不做考虑 - feed流必然会产生的问题
             return new ArrayList<>();
