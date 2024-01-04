@@ -54,4 +54,12 @@ public interface DubboVideoService {
      * @return
      */
     List<VideoTag> apiGetVideoTagStack(String videoId);
+
+    /**
+     * 初始化用户关注收件箱
+     *
+     * @param userId
+     * @return
+     */
+    void apiInitFollowVideoFeed(Long userId,List<Long> followIds);
 }

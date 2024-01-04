@@ -296,6 +296,29 @@ public class RedisService {
         return redisTemplate.opsForZSet().score(key, zkey);
     }
 
+    /**
+     * 获取集合元素, 并且把score值也获取
+     *
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<ZSetOperations.TypedTuple<String>> zRangeWithScores(String key, long start, long end) {
+        return redisTemplate.opsForZSet().rangeWithScores(key, start, end);
+    }
+
+    /**
+     * 根据Score值查询集合元素
+     *
+     * @param key
+     * @param min 最小值
+     * @param max 最大值
+     * @return
+     */
+    public Set<String> zRangeByScore(String key, double min, double max) {
+        return redisTemplate.opsForZSet().rangeByScore(key, min, max);
+    }
 
     /**
      * 尝试获取分布式锁

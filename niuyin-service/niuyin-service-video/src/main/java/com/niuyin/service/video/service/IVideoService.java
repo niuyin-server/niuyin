@@ -154,4 +154,19 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     String[] getVideoImages(String videoId);
+
+    /**
+     * 获取用户所有视频
+     *
+     * @param userId
+     * @return
+     */
+    List<Video> getUserAllVideo(Long userId);
+
+    /**
+     * 获取所有未删除的视频
+     *
+     * @return
+     */
+    List<Video> getAllUnDeletedVideo();
 }

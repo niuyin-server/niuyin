@@ -10,6 +10,7 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;
@@ -18,20 +19,23 @@ import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.social.mapper.UserFollowMapper;
 import com.niuyin.service.social.service.IUserFollowService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static com.niuyin.model.constants.VideoConstants.IN_FOLLOW;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
 
@@ -56,6 +60,12 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @DubboReference
     private DubboMemberService dubboMemberService;
 
+    @DubboReference
+    private DubboVideoService dubboVideoService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
+
     @Override
     public boolean followUser(Long userId) {
         Long loginUserId = UserContext.getUserId();
@@ -79,7 +89,10 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             // 已关注
             throw new CustomException(HttpCodeEnum.ALREADY_FOLLOW);
         }
+        // 发送消息到mqq
         sendNotice2MQ(loginUserId, userId);
+        // 初始化用户关注视频收件箱
+        dubboVideoService.apiInitFollowVideoFeed(loginUserId, this.getFollowList(loginUserId).stream().map(UserFollow::getUserFollowId).collect(Collectors.toList()));
         return this.save(new UserFollow(loginUserId, userId, LocalDateTime.now()));
     }
 
@@ -185,5 +198,47 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         List<Long> fansUserIds = records.stream().map(UserFollow::getUserId).collect(Collectors.toList());
         List<Member> memberList = dubboMemberService.apiGetInIds(fansUserIds);
         return PageDataInfo.genPageData(memberList, page.getTotal());
+    }
+
+    @Override
+    public List<UserFollow> getFollowList(Long userId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId, userId);
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public void initFollowVideoFeed() {
+        Long loginUserId = UserContext.getUserId();
+        // 初始化用户关注视频收件箱
+        dubboVideoService.apiInitFollowVideoFeed(loginUserId, this.getFollowList(loginUserId).stream().map(UserFollow::getUserFollowId).collect(Collectors.toList()));
+    }
+
+    /**
+     * 关注流
+     *
+     * @param lastTime 滚动分页参数，首次为null，后续为上次的末尾视频时间
+     * @return
+     */
+    @Override
+    public List<Video> followVideoFeed(Long lastTime) {
+        Long userId = UserContext.getUserId();
+        // 是否存在
+        Set<Object> videoIds = redisTemplate.opsForZSet().reverseRangeByScore(IN_FOLLOW + userId,
+                0,
+                lastTime == null ? new Date().getTime() : lastTime,
+                lastTime == null ? 0 : 1,
+                5);
+        if (ObjectUtils.isEmpty(videoIds)) {
+            // 可能只是缓存中没有了,缓存只存储7天内的关注视频,继续往后查看关注的用户太少了,不做考虑 - feed流必然会产生的问题
+            return new ArrayList<>();
+        }
+        // 这里不会按照时间排序，需要手动排序
+        List<Video> videos = new ArrayList<>();
+        videoIds.forEach(id -> {
+            Video video = dubboVideoService.apiGetVideoByVideoId((String) id);
+            videos.add(video);
+        });
+        return videos;
     }
 }

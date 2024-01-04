@@ -962,4 +962,29 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoId);
         return videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
     }
+
+    /**
+     * 获取用户所有视频
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<Video> getUserAllVideo(Long userId) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, userId);
+        return this.list(queryWrapper);
+    }
+
+    /**
+     * 获取所有未删除的视频
+     *
+     * @return
+     */
+    @Override
+    public List<Video> getAllUnDeletedVideo() {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
+        return this.list(queryWrapper);
+    }
 }

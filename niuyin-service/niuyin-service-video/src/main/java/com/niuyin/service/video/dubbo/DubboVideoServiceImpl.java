@@ -7,6 +7,7 @@ import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.service.IVideoTagRelationService;
 import com.niuyin.service.video.service.InterestPushService;
+import com.niuyin.service.video.service.UserFollowVideoPushService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
@@ -32,6 +33,9 @@ public class DubboVideoServiceImpl implements DubboVideoService {
 
     @Resource
     private IVideoTagRelationService videoTagRelationService;
+
+    @Resource
+    private UserFollowVideoPushService userFollowVideoPushService;
 
     /**
      * 同步视频标签库
@@ -98,4 +102,16 @@ public class DubboVideoServiceImpl implements DubboVideoService {
     public List<VideoTag> apiGetVideoTagStack(String videoId) {
         return videoTagRelationService.queryVideoTagsByVideoId(videoId);
     }
+
+    /**
+     * 初始化用户关注收件箱
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public void apiInitFollowVideoFeed(Long userId, List<Long> followIds) {
+        userFollowVideoPushService.initFollowVideoFeed(userId, followIds);
+    }
+
 }

@@ -12,6 +12,7 @@ import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
 
 /**
  * 用户关注表(UserFollow)表控制层
@@ -93,6 +94,26 @@ public class UserFollowController {
     @PostMapping("/fans-page")
     public PageDataInfo getUserFansPage(@RequestBody PageDTO pageDTO) {
         return userFollowService.queryUserFansPage(pageDTO);
+    }
+
+    /**
+     * 初始化收件箱
+     */
+    @PostMapping("/initVideoFeed")
+    public R<?> initFollowFeed() {
+        userFollowService.initFollowVideoFeed();
+        return R.ok();
+    }
+
+    /**
+     * 推送关注的人视频 拉模式
+     *
+     * @param lastTime 滚动分页
+     * @return
+     */
+    @GetMapping("/videoFeed")
+    public R followFeed(@RequestParam(required = false) Long lastTime) throws ParseException {
+        return R.ok(userFollowService.followVideoFeed(lastTime));
     }
 
 }

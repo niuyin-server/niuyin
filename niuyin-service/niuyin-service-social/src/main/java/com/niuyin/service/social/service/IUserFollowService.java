@@ -5,6 +5,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.video.domain.Video;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 用户关注表(UserFollow)表服务接口
@@ -51,4 +55,16 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @return
      */
     PageDataInfo queryUserFansPage(PageDTO pageDTO);
+
+    List<UserFollow> getFollowList(Long userId);
+
+    void initFollowVideoFeed();
+
+    /**
+     * 关注流
+     *
+     * @param lastTime 滚动分页参数，首次为null，后续为上次的末尾视频时间
+     * @return
+     */
+    List<Video> followVideoFeed(Long lastTime);
 }

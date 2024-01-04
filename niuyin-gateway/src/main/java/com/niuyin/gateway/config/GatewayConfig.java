@@ -11,6 +11,10 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 public class GatewayConfig {
+
+    /**
+     * sentinel 熔断
+     */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SentinelFallbackHandler sentinelGatewayExceptionHandler() {
