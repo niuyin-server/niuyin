@@ -7,6 +7,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
+import com.niuyin.model.video.vo.UserModelField;
 import com.niuyin.service.video.service.IVideoTagRelationService;
 import com.niuyin.service.video.service.IVideoTagService;
 import com.niuyin.service.video.service.InterestPushService;
@@ -149,45 +150,53 @@ public class InterestPushServiceImpl implements InterestPushService {
     @Async
     @Override
     public void updateUserModel(UserModel userModel) {
-//        Long userId = userModel.getUserId();
-//        if (userId != null) {
-//            List<UserModelField> models = userModel.getModels();
-//            // 获取用户模型
-//            String key = "video:member:model" + userId;
-//            Map<Object, Object> modelMap = redisCacheUtil.hmget(key);
-//
-//            if (modelMap == null) {
-//                modelMap = new HashMap<>();
-//            }
-//            for (Model model : models) {
-//                // 修改用户模型
-//                if (modelMap.containsKey(model.getLabel())) {
-//                    modelMap.put(model.getLabel(), Double.parseDouble(modelMap.get(model.getLabel()).toString()) + model.getScore());
-//                    final Object o = modelMap.get(model.getLabel());
-//                    if (o == null || Double.parseDouble(o.toString()) > 0.0) {
-//                        modelMap.remove(o);
-//                    }
-//                } else {
-//                    modelMap.put(model.getLabel(), model.getScore());
-//                }
-//            }
-//
-//            // 每个标签概率同等加上标签数，再同等除以标签数  防止数据膨胀
-//            final int labelSize = modelMap.keySet().size();
-//            for (Object o : modelMap.keySet()) {
-//                modelMap.put(o, (Double.parseDouble(modelMap.get(o).toString()) + labelSize) / labelSize);
-//            }
-//            // 更新用户模型
-//            redisCacheUtil.hmset(key, modelMap);
-//        }
+        log.debug("userModel:{}", userModel);
+        Long userId = userModel.getUserId();
+        if (userId != null) {
+            List<UserModelField> models = userModel.getModels();
+            // 获取用户模型
+            String key = VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX + userId;
+            Map<Object, Object> modelMap = redisTemplate.opsForHash().entries(key);
+            log.debug("modelMap:{}", modelMap);
+            if (StringUtils.isNull(modelMap)) {
+                modelMap = new HashMap<>();
+            }
+            for (UserModelField model : models) {
+                // 修改用户模型
+                if (modelMap.containsKey(model.getTagId().toString())) {
+                    modelMap.put(model.getTagId().toString(), Double.parseDouble(modelMap.get(model.getTagId().toString()).toString()) + model.getScore());
+                    Object o = modelMap.get(model.getTagId().toString());
+                    if (o == null || Double.parseDouble(o.toString()) > 0.0) {
+                        modelMap.remove(o);
+                    }
+                } else {
+                    modelMap.put(model.getTagId().toString(), model.getScore());
+                }
+            }
+
+            // 每个标签概率同等加上标签数，再同等除以标签数  防止数据膨胀
+            int tagSize = modelMap.keySet().size();
+            for (Object o : modelMap.keySet()) {
+                modelMap.put(o.toString(), (Double.parseDouble(modelMap.get(o.toString()).toString()) + tagSize) / tagSize);
+            }
+            // 更新用户模型
+            log.debug("modelMap:{}", modelMap);
+            redisTemplate.opsForHash().putAll(key, modelMap);
+        }
 
     }
 
+    /**
+     * 从用户模型随机10个标签
+     *
+     * @param member
+     * @return
+     */
     public List<Long> random10TagIdsFromUserModel(Member member) {
         Long userId = member.getUserId();
         // 从模型中拿概率 获取hashKey对应的所有概率键值
         Map<String, Double> modelMap = redisService.getCacheMap(VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX + userId.toString());
-        // 标签ids数组
+        // 标签ids数组 【1，1，1，2，2，66，7，7，7，7】
         String[] probabilityArray = initProbabilityArray(modelMap);
         // 获取视频
         final Random random = new Random();
