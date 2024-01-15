@@ -7,40 +7,35 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
-import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IUserFavoriteVideoService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
-import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.*;
 
 /**
@@ -67,6 +62,9 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     @Resource
     @Lazy // 解决循环依赖问题
     private IVideoUserFavoritesService videoUserFavoritesService;
+
+    @DubboReference
+    private DubboVideoService dubboVideoService;
 
     /**
      * 收藏视频到收藏夹
@@ -131,6 +129,9 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
                 .filter(id -> !Arrays.asList(oldIds).contains(id))
                 .toArray(Long[]::new);
         if (StringUtils.isNotEmpty(newResult)) {
+            // 更新用户模型
+            List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(userFavoriteVideoDTO.getVideoId());
+            dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 2.0));
             ArrayList<UserFavoriteVideo> userFavoriteVideos = new ArrayList<>();
             for (Long aLong : newResult) {
                 UserFavoriteVideo userFavoriteVideo = new UserFavoriteVideo();
