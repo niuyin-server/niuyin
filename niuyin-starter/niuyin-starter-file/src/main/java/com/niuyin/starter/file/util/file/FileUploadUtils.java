@@ -1,5 +1,6 @@
 package com.niuyin.starter.file.util.file;
 
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,9 +14,9 @@ public class FileUploadUtils {
      */
     public static final long DEFAULT_IMAGE_MAX_SIZE = 5 * 1024 * 1024;
     /**
-     * 视频默认最大值 100M
+     * 视频默认最大值 200M
      */
-    public static final long DEFAULT_VIDEO_MAX_SIZE = 100 * 1024 * 1024;
+    public static final long DEFAULT_VIDEO_MAX_SIZE = 200 * 1024 * 1024;
 
     // 用户头像大小限制
     public static final long MEMBER_AVATAR_MAX_SIZE = 1024 * 1024;
@@ -28,7 +29,7 @@ public class FileUploadUtils {
     public static final void assertImageAllowed(MultipartFile file, String[] allowedExtension) {
         long size = file.getSize();
         if (size > DEFAULT_IMAGE_MAX_SIZE) {
-            throw new RuntimeException("图片大小超出限制：" + DEFAULT_IMAGE_MAX_SIZE / 1024 / 1024 + "M");
+            throw new MultipartException("图片大小超出限制：" + DEFAULT_IMAGE_MAX_SIZE / 1024 / 1024 + "M");
         }
     }
 
@@ -40,7 +41,7 @@ public class FileUploadUtils {
     public static final void assertVideoAllowed(MultipartFile file, String[] allowedExtension) {
         long size = file.getSize();
         if (size > DEFAULT_VIDEO_MAX_SIZE) {
-            throw new RuntimeException("视频大小超出限制：" + DEFAULT_VIDEO_MAX_SIZE / 1024 / 1024 + "M");
+            throw new MultipartException("视频大小超出限制：" + DEFAULT_VIDEO_MAX_SIZE / 1024 / 1024 + "M");
         }
     }
 
