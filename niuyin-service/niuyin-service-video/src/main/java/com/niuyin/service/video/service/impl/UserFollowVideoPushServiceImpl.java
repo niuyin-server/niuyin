@@ -142,7 +142,8 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
                         }
-                        connection.expire(key, 432000L);
+                        // 过期时间一个月
+                        connection.expire(key, 30 * 24 * 60 * 60L);
                     }
                 }
             }
