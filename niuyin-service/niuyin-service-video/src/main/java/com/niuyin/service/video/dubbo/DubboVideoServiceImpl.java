@@ -3,6 +3,7 @@ package com.niuyin.service.video.dubbo;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;
+import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.service.IVideoTagRelationService;
@@ -101,6 +102,27 @@ public class DubboVideoServiceImpl implements DubboVideoService {
     @Override
     public List<VideoTag> apiGetVideoTagStack(String videoId) {
         return videoTagRelationService.queryVideoTagsByVideoId(videoId);
+    }
+
+    /**
+     * 获取视频标签ids
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public List<Long> apiGetVideoTagIds(String videoId) {
+        return videoTagRelationService.queryVideoTagIdsByVideoId(videoId);
+    }
+
+    /**
+     * 更新用户模型
+     *
+     * @param userModel
+     */
+    @Override
+    public void apiUpdateUserModel(UserModel userModel) {
+        interestPushService.updateUserModel(userModel);
     }
 
     /**
