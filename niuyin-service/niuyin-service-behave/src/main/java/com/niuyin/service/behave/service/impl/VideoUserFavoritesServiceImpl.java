@@ -9,6 +9,7 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
@@ -17,8 +18,10 @@ import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
@@ -27,6 +30,7 @@ import com.niuyin.service.behave.service.IUserFavoriteVideoService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -70,6 +74,9 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     @Lazy // 解决循环依赖问题
     private IUserFavoriteVideoService userFavoriteVideoService;
 
+    @DubboReference
+    private DubboVideoService dubboVideoService;
+
     /**
      * 用户收藏
      */
@@ -93,6 +100,9 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
             favoriteNumIncrease(videoId);
             // 发送消息到通知
             sendNotice2MQ(videoId, userId);
+            // 更新用户模型
+            List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(videoId);
+            dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 2.0));
             return this.save(videoUserFavorites);
         }
         return false;

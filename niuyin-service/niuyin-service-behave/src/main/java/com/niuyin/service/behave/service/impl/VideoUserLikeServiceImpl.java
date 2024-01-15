@@ -9,6 +9,7 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;
@@ -19,14 +20,17 @@ import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.domain.VideoPosition;
+import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -64,6 +68,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     @Resource
     private RabbitTemplate rabbitTemplate;
 
+    @DubboReference
+    private DubboVideoService dubboVideoService;
+
     /**
      * 向视频点赞表插入点赞信息
      *
@@ -86,6 +93,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             likeNumIncrement(videoId);
             // 发送消息，创建通知
             sendNoticeWithLikeVideo(videoId, userId);
+            // 更新用户模型
+            List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(videoId);
+            dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 1.0));
             return this.save(videoUserLike);
         } else {
             // 取消点赞
