@@ -2,6 +2,7 @@ package com.niuyin.model.video.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,8 @@ import java.util.List;
  * @DATE: 2023/12/6
  **/
 @Data
-public class UserModel {
+public class UserModel implements Serializable {
+    private static final long serialVersionUID = 2L;
     private Long userId;
     private List<UserModelField> models;
 
@@ -21,18 +23,16 @@ public class UserModel {
      *
      * @param userId
      * @param tags
-     * @param videoId
      * @param score
      * @return
      */
-    public static UserModel buildUserModel(Long userId, List<String> tags, Long videoId, Double score) {
-        final UserModel userModel = new UserModel();
-        final ArrayList<UserModelField> models = new ArrayList<>();
+    public static UserModel buildUserModel(Long userId, List<Long> tags, Double score) {
+        UserModel userModel = new UserModel();
+        List<UserModelField> models = new ArrayList<>();
         userModel.setUserId(userId);
-        for (String tag : tags) {
-            final UserModelField model = new UserModelField();
-            model.setTag(tag);
-            model.setVideoId(videoId);
+        for (Long tag : tags) {
+            UserModelField model = new UserModelField();
+            model.setTagId(tag);
             model.setScore(score);
             models.add(model);
         }
