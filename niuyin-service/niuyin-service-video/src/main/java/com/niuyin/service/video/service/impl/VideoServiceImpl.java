@@ -32,6 +32,7 @@ import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.HotVideoVO;
+import com.niuyin.model.video.vo.RelateVideoVO;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
@@ -706,6 +707,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             // 删除别的用户对此视频点赞、收藏记录
             dubboBehaveService.removeOtherLikeVideoBehaveRecord(videoId);
             dubboBehaveService.removeOtherFavoriteVideoBehaveRecord(videoId);
+            // todo 删除 es 文档
         }
         return deleted;
     }
@@ -987,4 +989,17 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         queryWrapper.eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
         return this.list(queryWrapper);
     }
+
+    /**
+     * 相关视频推荐
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public List<RelateVideoVO> getRelateVideoList(String videoId) {
+
+        return null;
+    }
+
 }

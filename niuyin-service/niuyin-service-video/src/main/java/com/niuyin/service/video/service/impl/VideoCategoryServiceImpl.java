@@ -172,7 +172,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     @Async
     public void packageVideoBehaveData(VideoVO videoVO) {
         log.debug("packageVideoBehaveData开始");
-        // 封装观看量、点赞数、收藏量
+        // 封装观看量、点赞数、收藏量 todo java.lang.IllegalArgumentException: non null hash key required
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
         videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
         videoVO.setLikeNum(videoMapper.selectLikeCountByVideoId(videoVO.getVideoId()));

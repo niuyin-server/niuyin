@@ -206,4 +206,12 @@ public class VideoController {
         return R.ok(info);
     }
 
+    /**
+     * 相关视频推荐
+     */
+    @GetMapping("/relate/{videoId}")
+    public R<?> getRelateVideo(@PathVariable("videoId") String videoId) {
+        return R.ok(videoService.getRelateVideoList(videoId));
+    }
+
 }
