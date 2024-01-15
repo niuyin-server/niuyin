@@ -7,11 +7,9 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.dto.UpdateVideoDTO;
-import com.niuyin.model.video.dto.VideoFeedDTO;
-import com.niuyin.model.video.dto.VideoPageDto;
-import com.niuyin.model.video.dto.VideoPublishDto;
+import com.niuyin.model.video.dto.*;
 import com.niuyin.model.video.vo.HotVideoVO;
+import com.niuyin.model.video.vo.RelateVideoVO;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -169,4 +167,13 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     List<Video> getAllUnDeletedVideo();
+
+    /**
+     * 相关视频推荐
+     *
+     * @param videoId
+     * @return
+     */
+    List<RelateVideoVO> getRelateVideoList(String videoId);
+
 }
