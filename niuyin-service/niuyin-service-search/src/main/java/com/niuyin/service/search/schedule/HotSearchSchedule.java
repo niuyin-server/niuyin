@@ -9,6 +9,7 @@ import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import com.niuyin.service.search.service.VideoSearchService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,8 +37,12 @@ public class HotSearchSchedule {
     @Resource
     private VideoSearchService videoSearchService;
 
+    /**
+     * 计算热搜 定时任务 todo 添加分布式锁
+     */
+    @SneakyThrows
     @Scheduled(fixedRate = 1000 * 60 * 10)
-    public void computeHotSearch() throws Exception {
+    public void computeHotSearch() {
         ArrayList<String> list = new ArrayList<>();
         List<Term> termList;
 
@@ -74,7 +79,10 @@ public class HotSearchSchedule {
                 videoSearchKeywordDTO.setKeyword(s);
                 videoSearchKeywordDTO.setPageNum(0);
                 videoSearchKeywordDTO.setPageSize(1);
-                videoSearchVOS.addAll(videoSearchService.searchAllVideoFromES(videoSearchKeywordDTO));
+                List<VideoSearchVO> searchVOS = videoSearchService.searchAllVideoFromES(videoSearchKeywordDTO);
+                if (!searchVOS.isEmpty()) {
+                    videoSearchVOS.addAll(searchVOS);
+                }
                 i++;
             } else {
                 break;
