@@ -830,38 +830,62 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public PageDataInfo getHotVideos(PageDTO pageDTO) {
+//        int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
+//        int endIndex = startIndex + pageDTO.getPageSize() - 1;
+//        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
+//        Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
+//        List<VideoVO> videoVOList = new ArrayList<>();
+//        // 使用 parallelStream 并行流相较于 stream 流，性能更高
+//        List<CompletableFuture<Void>> futures = (List<CompletableFuture<Void>>) videoIds.parallelStream()
+//                .map(vid -> CompletableFuture.supplyAsync(() -> {
+//                    Video video = this.getById((String) vid);
+//                    Member user = new Member();
+//                    try {
+//                        // 作者信息批量查询，相较于单条查询性能更高
+//                        List<Member> authors = videoMapper.batchSelectVideoAuthor(Collections.singletonList(video.getUserId()));
+//                        if (!authors.isEmpty()) {
+//                            user = authors.get(0);
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                    VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
+//                    if (StringUtils.isNotNull(user)) {
+//                        videoVO.setUserNickName(user.getNickName());
+//                        videoVO.setUserAvatar(user.getAvatar());
+//                    }
+//                    // todo 是否关注
+//                    videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
+//                    videoVOList.add(videoVO);
+//                    return videoVO;
+//                })).collect(Collectors.toList());
+//        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+//        allFutures.join();
+//        return PageDataInfo.genPageData(videoVOList, hotCount);
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
+        Set<Object> videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
         Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
-        List<VideoVO> videoVOList = new ArrayList<>();
-        //使用parallelStream并行流相较于stream流，性能更高
-        List<CompletableFuture<Void>> futures = (List<CompletableFuture<Void>>) videoIds.parallelStream()
+
+        List<CompletableFuture<VideoVO>> futures = videoIds.parallelStream()
                 .map(vid -> CompletableFuture.supplyAsync(() -> {
                     Video video = this.getById((String) vid);
-                    Member user = new Member();
-                    try {
-                        //作者信息批量查询，相较于单条查询性能更高
-                        List<Member> authors = videoMapper.batchSelectVideoAuthor(Collections.singletonList(video.getUserId()));
-                        if (!authors.isEmpty()) {
-                            user = authors.get(0);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    List<Member> authors = videoMapper.batchSelectVideoAuthor(Collections.singletonList(video.getUserId()));
+                    Member user = authors.isEmpty() ? new Member() : authors.get(0);
                     VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
-                    if (StringUtils.isNotNull(user)) {
-                        videoVO.setUserNickName(user.getNickName());
-                        videoVO.setUserAvatar(user.getAvatar());
-                    }
+                    videoVO.setUserNickName(user.getNickName());
+                    videoVO.setUserAvatar(user.getAvatar());
                     // todo 是否关注
                     videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
-                    videoVOList.add(videoVO);
                     return videoVO;
                 })).collect(Collectors.toList());
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-        allFutures.join();
+
+        List<VideoVO> videoVOList = futures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+
         return PageDataInfo.genPageData(videoVOList, hotCount);
+
     }
 
     @Override
