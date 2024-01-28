@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.niuyin.starter.sms.service.impl.AliyunSmsServiceImpl
