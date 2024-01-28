@@ -15,6 +15,7 @@
     <modules>
         <module>niuyin-starter-file</module>
         <module>niuyin-starter-video</module>
+        <module>niuyin-starter-sms</module>
     </modules>
 
 </project>
