@@ -1,6 +1,8 @@
 package com.niuyin.starter.sms.service.impl;
 
 import cn.hutool.core.util.PhoneUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
@@ -9,6 +11,7 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.niuyin.starter.sms.config.AliyunSmsConfig;
 import com.niuyin.starter.sms.config.AliyunSmsConfigProperties;
+import com.niuyin.starter.sms.domain.model.AliyunSmsResponse;
 import com.niuyin.starter.sms.service.AliyunSmsService;
 import com.niuyin.starter.sms.enums.AliyunSmsTemplateType;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +45,7 @@ public class AliyunSmsServiceImpl implements AliyunSmsService {
      * 发送验证码
      */
     @Override
-    public String sendAuthCode(String phone, AliyunSmsTemplateType type, String code) {
+    public AliyunSmsResponse sendAuthCode(String phone, AliyunSmsTemplateType type, String code) {
         if (!PhoneUtil.isPhone(phone)) {
             log.error("短信发送失败，手机号码不正确！");
             throw new RuntimeException("手机号码不正确！");
@@ -72,7 +75,10 @@ public class AliyunSmsServiceImpl implements AliyunSmsService {
         } catch (Exception e) {
             log.error("短信发送失败：" + e.getMessage(), e);
         }
-        return data;
+        // 回调消息转换
+        JSONObject jsonObject = JSON.parseObject(data);
+        AliyunSmsResponse aliSmsResponse = JSON.toJavaObject(jsonObject, AliyunSmsResponse.class);
+        return aliSmsResponse;
     }
 
     public static void main(String[] args) {

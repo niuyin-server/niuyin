@@ -13,8 +13,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AliyunSmsTemplateType {
 
-    AUTH_CODE("1", "验证码"),
-    MESSAGE("2", "短信"),
     /**
      * 身份验证
      */

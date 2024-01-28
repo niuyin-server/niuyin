@@ -1,5 +1,6 @@
 package com.niuyin.starter.sms.service;
 
+import com.niuyin.starter.sms.domain.model.AliyunSmsResponse;
 import com.niuyin.starter.sms.enums.AliyunSmsTemplateType;
 
 /**
@@ -18,6 +19,6 @@ public interface AliyunSmsService {
      * @param code 随机数字二维码 6位
      * @return code
      */
-    String sendAuthCode(String phone, AliyunSmsTemplateType type, String code);
+    AliyunSmsResponse sendAuthCode(String phone, AliyunSmsTemplateType type, String code);
 
 }

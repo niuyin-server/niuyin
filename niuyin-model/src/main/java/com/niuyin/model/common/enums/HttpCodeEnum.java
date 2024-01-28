@@ -56,6 +56,8 @@ public enum HttpCodeEnum {
     VIDEO_TAG_NAME_FAIL(10010,"标签不得超过20字符"),
 
     FAVORITE_FAIL(10011,"收藏失败"),
+
+    TELEPHONE_NOT_EXIST(10012,"改手机号未注册"),
     ;
 
     int code;

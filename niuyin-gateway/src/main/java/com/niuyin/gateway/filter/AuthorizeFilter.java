@@ -32,8 +32,9 @@ public class AuthorizeFilter implements GlobalFilter {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
 
-        //2.判断是否是登录
+        //2.放行接口
         if (request.getURI().getPath().contains("/login")
+                || request.getURI().getPath().contains("/sms-login")
                 || request.getURI().getPath().contains("/register")
                 || request.getURI().getPath().contains("/swagger-ui")) {
             return chain.filter(exchange);//放行

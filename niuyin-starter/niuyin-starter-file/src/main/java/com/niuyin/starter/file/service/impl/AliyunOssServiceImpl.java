@@ -1,9 +1,6 @@
 package com.niuyin.starter.file.service.impl;
 
-import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClient;
-import com.niuyin.starter.file.config.QiniuOssConfig;
-import com.niuyin.starter.file.config.QiniuOssConfigProperties;
 import com.niuyin.starter.file.config.aliyun.AliyunOssConfig;
 import com.niuyin.starter.file.config.aliyun.AliyunOssConfigProperties;
 import com.niuyin.starter.file.service.AliyunOssService;
@@ -14,16 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.niuyin.starter.file.config.aliyun.AliyunOssConfigProperties.BUCKET_NAME;
 import static com.niuyin.starter.file.config.aliyun.AliyunOssConfigProperties.END_POINT;

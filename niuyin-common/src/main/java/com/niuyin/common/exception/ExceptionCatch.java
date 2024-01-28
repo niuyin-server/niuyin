@@ -24,9 +24,8 @@ public class ExceptionCatch {
      */
     @ExceptionHandler(Exception.class)
     public R<?> exception(Exception e) {
-        e.printStackTrace();
         log.error("catch exception:{}", e.getMessage());
-        return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), HttpCodeEnum.HAS_ERROR.getMsg());
+        return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), e.getMessage());
     }
 
     /**
