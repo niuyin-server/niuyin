@@ -12,6 +12,7 @@ import com.niuyin.model.video.vo.HotVideoVO;
 import com.niuyin.model.video.vo.RelateVideoVO;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.model.video.vo.app.VideoRecommendVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -175,5 +176,8 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     List<RelateVideoVO> getRelateVideoList(String videoId);
+
+
+    List<VideoRecommendVO> pushAppVideoList();
 
 }

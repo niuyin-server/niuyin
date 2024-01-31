@@ -31,10 +31,8 @@ import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
-import com.niuyin.model.video.vo.HotVideoVO;
-import com.niuyin.model.video.vo.RelateVideoVO;
-import com.niuyin.model.video.vo.VideoUploadVO;
-import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.model.video.vo.*;
+import com.niuyin.model.video.vo.app.VideoRecommendVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
@@ -1015,7 +1013,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     /**
-     * 相关视频推荐
+     * 相关视频推荐 todo
      *
      * @param videoId
      * @return
@@ -1024,6 +1022,84 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public List<RelateVideoVO> getRelateVideoList(String videoId) {
 
         return null;
+    }
+
+    @Override
+    public List<VideoRecommendVO> pushAppVideoList() {
+        Member member = dubboMemberService.apiGetById(UserContext.getUserId());
+        Collection<String> videoIdsByUserModel = interestPushService.getVideoIdsByUserModel(member);
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Video::getVideoId, videoIdsByUserModel);
+        List<Video> videoList = this.list(queryWrapper);
+        List<VideoRecommendVO> videoRecommendVOList = BeanCopyUtils.copyBeanList(videoList, VideoRecommendVO.class);
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoRecommendVOList
+                .stream()
+                .map(this::packageVideoRecommendVOAsync)
+                .toArray(CompletableFuture[]::new));
+        allFutures.join();
+        return videoRecommendVOList;
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoRecommendVOAsync(VideoRecommendVO vo) {
+        return CompletableFuture.runAsync(() -> packageVideoRecommendVO(vo));
+    }
+
+    @Async
+    public void packageVideoRecommendVO(VideoRecommendVO vo) {
+        CompletableFuture<Void> behaveDataFuture = packageVideoRecommendVOBehaveDataAsync(vo);
+        CompletableFuture<Void> memberDataFuture = packageVideoRecommendVODataAsync(vo);
+        CompletableFuture.allOf(
+                behaveDataFuture,
+                memberDataFuture
+        ).join();
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoRecommendVOBehaveDataAsync(VideoRecommendVO vo) {
+        return CompletableFuture.runAsync(() -> packageVideoRecommendVOBehaveData(vo));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageVideoRecommendVODataAsync(VideoRecommendVO vo) {
+        return CompletableFuture.runAsync(() -> packageVideoRecommendVOMemberData(vo));
+    }
+
+    /**
+     * 封装视频行为数据
+     */
+    @Async
+    public void packageVideoRecommendVOBehaveData(VideoRecommendVO vo) {
+        // 封装观看量、点赞数、收藏量
+        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, vo.getVideoId());
+        vo.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        vo.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId()));
+        vo.setFavoriteNum(dubboBehaveService.apiGetVideoFavoriteNum(vo.getVideoId()));
+        // 评论数
+        vo.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(vo.getVideoId()));
+    }
+
+    /**
+     * 封装作者数据
+     */
+    @Async
+    public void packageVideoRecommendVOMemberData(VideoRecommendVO vo) {
+        // 封装用户信息
+        Author author = new Author();
+        Member userCache = redisService.getCacheObject("member:userinfo:" + vo.getUserId());
+        if (StringUtils.isNotNull(userCache)) {
+            author.setUserId(vo.getUserId());
+            author.setUserName(userCache.getUserName());
+            author.setNickName(userCache.getNickName());
+            author.setAvatar(userCache.getAvatar());
+        } else {
+            Member publishUser = videoMapper.selectVideoAuthor(vo.getUserId());
+            author.setUserId(vo.getUserId());
+            author.setUserName(StringUtils.isNull(publishUser) ? "-" : publishUser.getUserName());
+            author.setNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
+            author.setAvatar(StringUtils.isNull(publishUser) ? "" : publishUser.getAvatar());
+        }
+        vo.setAuthor(author);
     }
 
 }
