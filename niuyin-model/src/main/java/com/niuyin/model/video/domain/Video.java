@@ -64,6 +64,10 @@ public class Video implements Serializable {
      */
     private String auditsStatus;
     /**
+     * 视频详情
+     */
+    private String videoInfo;
+    /**
      * 删除标志（0代表存在 1代表删除）
      */
     private String delFlag;
