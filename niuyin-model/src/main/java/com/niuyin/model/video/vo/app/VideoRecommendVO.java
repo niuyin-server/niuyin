@@ -22,6 +22,7 @@ public class VideoRecommendVO {
     private Long favoriteNum;  // 收藏量
     private Long commentNum; //评论量
     private String publishType; //发布类型（0视频，1图文）
+    private String videoInfo;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime; //发布时间
     private Long userId;

@@ -12,6 +12,7 @@ import java.util.List;
  * @author roydon
  * @since 2023-10-24 19:18:25
  * 超时与重试，预防网络抖动
+ * mock=true实现服务降级
  */
 @DubboService(timeout = 2000, retries = 4, weight = 1)
 public class DubboMemberServiceImpl implements DubboMemberService {

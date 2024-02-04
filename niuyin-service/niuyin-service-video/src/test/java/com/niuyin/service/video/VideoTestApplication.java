@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ws.schild.jave.info.MultimediaInfo;
@@ -52,8 +53,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
+import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
+import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
 import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
@@ -88,6 +92,9 @@ public class VideoTestApplication {
 
     @Resource
     FfmpegVideoService ffmpegVideoService;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
 //    void bindTest(){
 //        VideoBindDto videoBindDto = new VideoBindDto();
@@ -407,10 +414,10 @@ public class VideoTestApplication {
     }
 
     /**
-     *     endpoint: oss-cn-shenzhen.aliyuncs.com
-     *     bucketName: niuyin-server
-     *     accessKeyId: ***
-     *     accessKeySecret: ***
+     * endpoint: oss-cn-shenzhen.aliyuncs.com
+     * bucketName: niuyin-server
+     * accessKeyId: ***
+     * accessKeySecret: ***
      */
     @Test
     @DisplayName("测试视频分片上传")
@@ -544,12 +551,21 @@ public class VideoTestApplication {
     }
 
     @Test
-    void testConvertVideoInfo(){
+    void testConvertVideoInfo() {
         String jsonString = "{\"format\":\"mov\",\"duration\":6690,\"decoder\":\"h264 (High) (avc1 / 0x31637661)\",\"bitRate\":3172000,\"frameRate\":30.0,\"width\":1024,\"height\":576}";
 
         MediaVideoInfo videoInfo = new Gson().fromJson(jsonString, MediaVideoInfo.class);
 
         System.out.println("videoInfo = " + videoInfo);
+    }
+
+    @Test
+    void testVideoInfoAllSync() {
+        List<Video> videoList = videoService.list(null);
+        videoList.forEach(v -> {
+            rabbitTemplate.convertAndSend(EXCHANGE_VIDEO_DIRECT, DIRECT_KEY_INFO, v.getVideoId());
+            log.debug(" ==> {} 发送了一条消息 ==> {}", EXCHANGE_VIDEO_DIRECT, v.getVideoId());
+        });
     }
 
 

@@ -127,13 +127,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private InterestPushService interestPushService;
 
-    @DubboReference(loadbalance = "random")
+    @DubboReference(loadbalance = "random", mock = "return null")
     private DubboMemberService dubboMemberService;
 
     @Resource
     private IUserVideoCompilationRelationService userVideoCompilationRelationService;
 
-    @DubboReference
+    @DubboReference(mock = "return null")
     private DubboBehaveService dubboBehaveService;
 
     @Resource
@@ -1078,6 +1078,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             member.setUserId(2L);
         } else {
             member = dubboMemberService.apiGetById(userId);
+            if (Objects.isNull(member)) {
+                member = new Member();
+                member.setUserId(2L);
+            }
         }
         Collection<String> videoIdsByUserModel = interestPushService.getVideoIdsByUserModel(member);
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();

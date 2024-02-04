@@ -3,8 +3,8 @@ package com.niuyin.model.common.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public enum HttpCodeEnum {
     // 成功
     SUCCESS(200, "操作成功"),

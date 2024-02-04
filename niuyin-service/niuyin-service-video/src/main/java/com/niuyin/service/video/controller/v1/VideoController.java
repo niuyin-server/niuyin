@@ -47,7 +47,7 @@ public class VideoController {
     @Resource
     private AliyunOssService aliyunOssService;
 
-    @DubboReference
+    @DubboReference(mock = "return null")
     private DubboMemberService dubboMemberService;
 
     @Resource

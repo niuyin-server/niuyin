@@ -53,7 +53,7 @@ public class MqTest {
     @DisplayName("向video direct同步视频info发送消息")
     @Test
     void testDirectQueue() {
-        String msg = "11965630369874575369efae35e";
+        String msg = "1195178163873775616e0a90612";
         rabbitTemplate.convertAndSend(EXCHANGE_VIDEO_DIRECT, DIRECT_KEY_INFO, msg);
         log.debug(" ==> {} 发送了一条消息 ==> {}", EXCHANGE_VIDEO_DIRECT, msg);
     }
