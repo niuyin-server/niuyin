@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
@@ -32,14 +33,18 @@ import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.*;
+import com.niuyin.model.video.vo.app.MyVideoVO;
+import com.niuyin.model.video.vo.app.VideoInfoVO;
 import com.niuyin.model.video.vo.app.VideoRecommendVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.constants.VideoConstants;
+import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.*;
 import com.niuyin.starter.file.service.FileStorageService;
+import com.niuyin.starter.video.service.FfmpegVideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -48,6 +53,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
 import java.time.Duration;
@@ -59,6 +65,8 @@ import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
+import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
+import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
 import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT7;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
@@ -127,6 +135,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @DubboReference
     private DubboBehaveService dubboBehaveService;
+
+    @Resource
+    private FfmpegVideoService ffmpegVideoService;
 
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
@@ -245,7 +256,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, videoId);
                 // 同步视频标签库
                 interestPushService.cacheVideoToTagRedis(video.getVideoId(), Arrays.asList(videoPublishDto.getVideoTags()));
-
+                // 同步视频详情
+                rabbitTemplate.convertAndSend(EXCHANGE_VIDEO_DIRECT, DIRECT_KEY_INFO, videoId);
+                log.debug(" ==> {} 发送了一条消息 ==> {}", EXCHANGE_VIDEO_DIRECT, videoId);
                 return videoId;
             } else {
                 throw new CustomException(null);
@@ -366,6 +379,37 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public PageDataInfo queryMyVideoPage(VideoPageDto pageDto) {
         pageDto.setUserId(UserContext.getUserId());
         return getUserVideoPage(pageDto);
+    }
+
+    @Override
+    public PageDataInfo queryMyVideoPageForApp(VideoPageDto pageDto) {
+        pageDto.setUserId(UserContext.getUserId());
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, pageDto.getUserId());
+        queryWrapper.eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
+        queryWrapper.like(StringUtils.isNotEmpty(pageDto.getVideoTitle()), Video::getVideoTitle, pageDto.getVideoTitle());
+        queryWrapper.orderByDesc(Video::getCreateTime);
+        IPage<Video> videoIPage = this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
+        List<Video> records = videoIPage.getRecords();
+        if (StringUtils.isNull(records) || records.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<MyVideoVO> myVideoVOList = BeanCopyUtils.copyBeanList(records, MyVideoVO.class);
+        // 设置点赞量
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(myVideoVOList.stream()
+                .map(this::packageMyVideoVOAsync).toArray(CompletableFuture[]::new));
+        allFutures.join();
+        return PageDataInfo.genPageData(myVideoVOList, videoIPage.getTotal());
+    }
+
+    @Async
+    public CompletableFuture<Void> packageMyVideoVOAsync(MyVideoVO vo) {
+        return CompletableFuture.runAsync(() -> packageMyUserVideoVO(vo));
+    }
+
+    @Async
+    public void packageMyUserVideoVO(MyVideoVO vo) {
+        vo.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId()));
     }
 
     @Override
@@ -750,7 +794,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 hotVideoVOList.add(hotVideoVO);
             });
         } else {
-            return null;
+            return new ArrayList<>();
         }
         return hotVideoVOList;
     }
@@ -1026,7 +1070,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public List<VideoRecommendVO> pushAppVideoList() {
-        Member member = dubboMemberService.apiGetById(UserContext.getUserId());
+        Long userId = UserContext.getUserId();
+        Member member;
+        if (userId == 0L) {
+            // 游客登陆
+            member = new Member();
+            member.setUserId(2L);
+        } else {
+            member = dubboMemberService.apiGetById(userId);
+        }
         Collection<String> videoIdsByUserModel = interestPushService.getVideoIdsByUserModel(member);
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Video::getVideoId, videoIdsByUserModel);
@@ -1102,4 +1154,62 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         vo.setAuthor(author);
     }
 
+    @Override
+    public VideoInfoVO getVideoInfoForApp(String videoId) {
+        // 视频浏览量加一
+        viewNumIncrement(videoId);
+        Long loginUserId = UserContext.getUserId();
+        Member member = dubboMemberService.apiGetById(loginUserId);
+        Video video = this.getById(videoId);
+        VideoInfoVO videoInfoVO = BeanCopyUtils.copyBean(video, VideoInfoVO.class);
+        // 视频作者
+        Author author = BeanCopyUtils.copyBean(dubboMemberService.apiGetById(videoInfoVO.getUserId()), Author.class);
+        videoInfoVO.setAuthor(author);
+        // 社交-是否关注
+        videoInfoVO.setWeatherFollow(videoMapper.userWeatherAuthor(loginUserId, videoInfoVO.getUserId()) > 0);
+        // 行为-观看、点赞、收藏、评论量；是否点赞、收藏
+        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoInfoVO.getVideoId());
+        videoInfoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        videoInfoVO.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(videoInfoVO.getVideoId()));
+        videoInfoVO.setFavoriteNum(dubboBehaveService.apiGetVideoFavoriteNum(videoInfoVO.getVideoId()));
+        videoInfoVO.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(videoInfoVO.getVideoId()));
+        videoInfoVO.setWeatherLike(videoMapper.selectUserLikeVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
+        videoInfoVO.setWeatherFavorite(videoMapper.userWeatherFavoriteVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
+        // 视频标签
+        String[] tags = videoTagRelationService.queryVideoTags(videoInfoVO.getVideoId());
+        videoInfoVO.setTags(tags);
+        // 图文视频
+        if (videoInfoVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoInfoVO.getVideoId());
+            String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+            videoInfoVO.setImageList(imgs);
+        }
+        // 位置信息
+        if (videoInfoVO.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
+            VideoPosition videoPosition = videoPositionService.queryPositionByVideoId(videoInfoVO.getVideoId());
+            videoInfoVO.setPosition(videoPosition);
+        }
+        return videoInfoVO;
+    }
+
+    /**
+     * 同步视频详情到db
+     *
+     * @param videoId
+     */
+    @Override
+    public void updateVideoInfo(String videoId) {
+        Video video = this.getById(videoId);
+        if (Objects.isNull(video.getVideoUrl()) || video.getVideoUrl().isEmpty()) {
+            log.debug("该视频url为空");
+            return;
+        }
+        MultimediaInfo info = ffmpegVideoService.getVideoInfo(video.getVideoUrl());
+        MediaVideoInfo mediaVideoInfo = new MediaVideoInfo(info);
+        log.debug("视频详情：{}", mediaVideoInfo);
+        Video videoUpdate = new Video();
+        videoUpdate.setVideoId(videoId);
+        videoUpdate.setVideoInfo(new Gson().toJson(mediaVideoInfo));
+        this.updateById(videoUpdate);
+    }
 }

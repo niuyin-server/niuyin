@@ -214,17 +214,4 @@ public class VideoController {
         return R.ok(videoService.getRelateVideoList(videoId));
     }
 
-    //  *********************************************************   app
-
-//    /**
-//     * 首页推送视频
-//     *
-//     * @return
-//     */
-//    @GetMapping("/app/pushVideo")
-//    public R<?> appPushVideo() {
-//        return R.ok(videoService.pushVideoList());
-//    }
-
-
 }

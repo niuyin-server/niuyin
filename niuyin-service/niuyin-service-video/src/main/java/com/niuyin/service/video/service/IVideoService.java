@@ -12,6 +12,7 @@ import com.niuyin.model.video.vo.HotVideoVO;
 import com.niuyin.model.video.vo.RelateVideoVO;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.model.video.vo.app.VideoInfoVO;
 import com.niuyin.model.video.vo.app.VideoRecommendVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,6 +50,8 @@ public interface IVideoService extends IService<Video> {
      * @return
      */
     PageDataInfo queryMyVideoPage(VideoPageDto pageDto);
+
+    PageDataInfo queryMyVideoPageForApp(VideoPageDto pageDto);
 
     /**
      * 分页用户视频
@@ -122,7 +125,6 @@ public interface IVideoService extends IService<Video> {
      */
     IPage<Video> queryMemberVideoPage(VideoPageDto pageDto);
 
-
     /**
      * 热门视频查询
      *
@@ -180,4 +182,12 @@ public interface IVideoService extends IService<Video> {
 
     List<VideoRecommendVO> pushAppVideoList();
 
+    VideoInfoVO getVideoInfoForApp(String videoId);
+
+    /**
+     * 同步视频详情到db
+     *
+     * @param videoId
+     */
+    void updateVideoInfo(String videoId);
 }

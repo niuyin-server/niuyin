@@ -47,6 +47,9 @@ public class HotVideoTask {
                 List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(VIDEO_BEFORE_DAT7));
                 log.info("==> 从redis获取视频点赞量，观看量，收藏量");
                 List<HotVideoVO> hotVideoVOList = videoService.computeHotVideoScore(videoList);
+                if(hotVideoVOList.isEmpty()){
+                    return;
+                }
                 hotVideoVOList.forEach(h -> {
                     if (h.getScore() == 0) {
                         log.info("0.o");

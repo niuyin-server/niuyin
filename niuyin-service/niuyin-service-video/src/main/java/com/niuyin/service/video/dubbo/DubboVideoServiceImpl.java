@@ -12,6 +12,7 @@ import com.niuyin.service.video.service.UserFollowVideoPushService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,6 +58,16 @@ public class DubboVideoServiceImpl implements DubboVideoService {
     @Override
     public Video apiGetVideoByVideoId(String videoId) {
         return videoService.getById(videoId);
+    }
+
+    /**
+     * 通过ids获取视频
+     *
+     * @param videoIds
+     */
+    @Override
+    public List<Video> apiGetVideoListByVideoIds(List<String> videoIds) {
+        return videoService.listByIds(videoIds);
     }
 
     /**

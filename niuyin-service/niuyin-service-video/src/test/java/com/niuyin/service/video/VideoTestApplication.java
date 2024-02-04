@@ -7,6 +7,7 @@ import com.aliyun.oss.internal.Mimetypes;
 import com.aliyun.oss.model.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import com.niuyin.common.utils.video.FfmpegUtil;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.exception.CustomException;
@@ -21,6 +22,7 @@ import com.niuyin.model.video.domain.VideoSensitive;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.mapper.VideoSensitiveMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
@@ -37,6 +39,7 @@ import java.util.List;
 
 import com.niuyin.starter.video.service.FfmpegVideoService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -308,12 +311,22 @@ public class VideoTestApplication {
     @Test
     @DisplayName("获取视频详情")
     void getVideoInfo() {
+        long startTime = System.currentTimeMillis();
+
         // 横屏视频
 //        String urlheng = "http://s4bi8902v.hb-bkt.clouddn.com/2023/11/27/9829cce9da304b66902fdd19c7cfbfc8.mp4";
         String urlheng = "https://niuyin-server.oss-cn-shenzhen.aliyuncs.com/video/2023/12/30/d8dcdb16964c4b8ba2bb70a72d7451ff.mp4";
 
         MultimediaInfo info = ffmpegVideoService.getVideoInfo(urlheng);
-        log.debug("视频详情：{}", info);
+        MediaVideoInfo mediaVideoInfo = new MediaVideoInfo(info);
+        log.debug("视频详情：{}", mediaVideoInfo);
+
+        long endTime = System.currentTimeMillis();
+
+        // 计算方法的执行时间
+        long duration = endTime - startTime;
+
+        System.out.println("方法执行时间：" + duration + " 毫秒");
     }
 
     @Test
@@ -528,6 +541,15 @@ public class VideoTestApplication {
         }
         log.debug("结束分片上传视频");
 
+    }
+
+    @Test
+    void testConvertVideoInfo(){
+        String jsonString = "{\"format\":\"mov\",\"duration\":6690,\"decoder\":\"h264 (High) (avc1 / 0x31637661)\",\"bitRate\":3172000,\"frameRate\":30.0,\"width\":1024,\"height\":576}";
+
+        MediaVideoInfo videoInfo = new Gson().fromJson(jsonString, MediaVideoInfo.class);
+
+        System.out.println("videoInfo = " + videoInfo);
     }
 
 
