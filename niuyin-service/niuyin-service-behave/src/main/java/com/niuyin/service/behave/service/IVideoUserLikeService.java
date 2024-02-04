@@ -26,6 +26,7 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @return
      */
     PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto);
+    PageDataInfo queryMyLikeVideoPageForApp(VideoPageDto pageDto);
 
     /**
      * 查询用户的点赞列表

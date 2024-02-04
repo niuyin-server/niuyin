@@ -1,6 +1,7 @@
 package com.niuyin.service.member.service.impl;
 
 import cn.hutool.core.util.PhoneUtil;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.utils.IpUtils;
@@ -91,6 +92,15 @@ public class LoginServiceImpl implements LoginService {
      */
     @Override
     public String smsLogin(SmsLoginDTO smsLoginDTO) {
+        // 获取手机验证码
+//        String verifyKey = SMS_LOGIN_AUTH_CODE_KEY + smsLoginDTO.getTelephone();
+//        String verifyPhoneCode = redisTemplate.opsForValue().get(verifyKey);
+//        if (Objects.isNull(verifyPhoneCode)) {
+//            throw new RuntimeException("验证码已失效");
+//        }
+//        if (!verifyPhoneCode.equals(smsLoginDTO.getSmsCode())) {
+//            throw new RuntimeException("验证码错误");
+//        }
         // 查询用户
         Member dbUser = memberService.getOne(Wrappers.<Member>lambdaQuery().eq(Member::getTelephone, smsLoginDTO.getTelephone()));
         if (Objects.isNull(dbUser)) {
@@ -98,6 +108,8 @@ public class LoginServiceImpl implements LoginService {
         }
         // 登陆成功
         recordLoginUserInfo(dbUser.getUserId());
+        // 删除key
+//        redisTemplate.delete(verifyKey);
         return JwtUtil.getToken(dbUser.getUserId());
     }
 

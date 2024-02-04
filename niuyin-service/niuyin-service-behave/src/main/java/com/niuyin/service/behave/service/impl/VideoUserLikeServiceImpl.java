@@ -11,6 +11,7 @@ import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.VideoUserLike;
+import com.niuyin.model.behave.vo.app.MyLikeVideoVO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.enums.ShowStatusEnum;
@@ -187,6 +188,27 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     @Async
     public CompletableFuture<Void> packageVideoImageDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoImageData(videoVO));
+    }
+
+    @Override
+    public PageDataInfo queryMyLikeVideoPageForApp(VideoPageDto pageDto) {
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        pageDto.setUserId(UserContext.getUserId());
+        List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
+        List<MyLikeVideoVO> videoVOList = BeanCopyUtils.copyBeanList(records, MyLikeVideoVO.class);
+        CompletableFuture.allOf(videoVOList.stream().map(this::packageMyLikeVideoPageAsync).toArray(CompletableFuture[]::new)).join();
+        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+    }
+
+
+    @Async
+    public CompletableFuture<Void> packageMyLikeVideoPageAsync(MyLikeVideoVO vo) {
+        return CompletableFuture.runAsync(() -> packageMyLikeVideoPage(vo));
+    }
+
+    @Async
+    public void packageMyLikeVideoPage(MyLikeVideoVO vo) {
+        vo.setLikeNum(getVideoLikeNum(vo.getVideoId()));
     }
 
     /**

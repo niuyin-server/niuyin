@@ -26,6 +26,11 @@ public interface DubboVideoService {
     Video apiGetVideoByVideoId(String videoId);
 
     /**
+     * 通过ids获取视频
+     */
+    List<Video> apiGetVideoListByVideoIds(List<String> videoIds);
+
+    /**
      * 通过id获取视频图文
      */
     String[] apiGetVideoImagesByVideoId(String videoId);

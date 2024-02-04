@@ -47,7 +47,7 @@ public class LoginController {
     /**
      * 手机短信登录
      */
-    @ApiOperation("登录")
+    @ApiOperation("手机短信登录")
     @PostMapping("/sms-login")
     public R<Map<String, String>> smsLogin(@Validated @RequestBody SmsLoginDTO smsLoginDTO) {
         String token = loginService.smsLogin(smsLoginDTO);

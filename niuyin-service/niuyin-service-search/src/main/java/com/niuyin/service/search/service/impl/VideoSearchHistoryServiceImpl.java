@@ -6,6 +6,7 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.model.common.enums.VideoPlatformEnum;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import org.springframework.data.domain.Sort;
@@ -46,7 +47,7 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
     @Override
     public void insert(String keyword, Long userId) {
         // 此关联词存在就覆盖
-        Query query = Query.query(Criteria.where("userId").is(userId).and("keyword").is(keyword));
+        Query query = Query.query(Criteria.where("userId").is(userId).and("keyword").is(keyword).and("platform").is(VideoPlatformEnum.WEB.getCode()));
         VideoSearchHistory getOne = mongoTemplate.findOne(query, VideoSearchHistory.class);
         if (StringUtils.isNotNull(getOne)) {
             // 存在就更新时间
@@ -58,19 +59,54 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
         getOne = new VideoSearchHistory();
         getOne.setKeyword(keyword);
         getOne.setUserId(userId);
+        getOne.setPlatform(VideoPlatformEnum.WEB.getCode());
         getOne.setCreatedTime(LocalDateTime.now());
-
-        Query query2 = Query.query(Criteria.where("userId").is(userId));
+        // 查询搜索记录总条数
+        Query query2 = Query.query(Criteria.where("userId").is(userId).and("platform").is(VideoPlatformEnum.WEB.getCode()));
         query2.with(Sort.by(Sort.Direction.DESC, "createdTime"));
         List<VideoSearchHistory> list = mongoTemplate.find(query2, VideoSearchHistory.class);
-
         if (list.size() < 10) {
             mongoTemplate.save(getOne);
         } else {
             // 替换后一个元素
             mongoTemplate.findAndReplace(Query.query(Criteria.where("id").is(list.get(list.size() - 1).getId())), getOne);
         }
+    }
 
+    /**
+     * 根据平台插入数据
+     *
+     * @param keyword
+     * @param userId
+     * @param platform
+     */
+    @Override
+    public void insertPlatform(Long userId, String keyword, VideoPlatformEnum platform) {
+        // 此关联词存在就覆盖
+        Query query = Query.query(Criteria.where("userId").is(userId).and("keyword").is(keyword).and("platform").is(platform.getCode()));
+        VideoSearchHistory getOne = mongoTemplate.findOne(query, VideoSearchHistory.class);
+        if (StringUtils.isNotNull(getOne)) {
+            // 存在就更新时间
+            getOne.setCreatedTime(LocalDateTime.now());
+            mongoTemplate.save(getOne);
+            return;
+        }
+        // 不存在则插入
+        getOne = new VideoSearchHistory();
+        getOne.setKeyword(keyword);
+        getOne.setUserId(userId);
+        getOne.setPlatform(platform.getCode());
+        getOne.setCreatedTime(LocalDateTime.now());
+        // 查询搜索记录总条数
+        Query query2 = Query.query(Criteria.where("userId").is(userId).and("platform").is(platform.getCode()));
+        query2.with(Sort.by(Sort.Direction.DESC, "createdTime"));
+        List<VideoSearchHistory> list = mongoTemplate.find(query2, VideoSearchHistory.class);
+        if (list.size() < 10) {
+            mongoTemplate.save(getOne);
+        } else {
+            // 替换后一个元素
+            mongoTemplate.findAndReplace(Query.query(Criteria.where("id").is(list.get(list.size() - 1).getId())), getOne);
+        }
     }
 
     /**
@@ -80,7 +116,14 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
     public List<VideoSearchHistory> findAllSearch() {
         Long userId = UserContext.getUserId();
         // 根据用户id查询数据，按照时间倒序
-        return mongoTemplate.find(Query.query(Criteria.where("userId").is(userId)).with(Sort.by(Sort.Direction.DESC, "createdTime")), VideoSearchHistory.class);
+        return mongoTemplate.find(Query.query(Criteria.where("userId").is(userId).and("platform").is(VideoPlatformEnum.WEB.getCode())).with(Sort.by(Sort.Direction.DESC, "createdTime")), VideoSearchHistory.class);
+    }
+
+    @Override
+    public List<VideoSearchHistory> findAppSearchHistory() {
+        Long userId = UserContext.getUserId();
+        // 根据用户id查询数据，按照时间倒序
+        return mongoTemplate.find(Query.query(Criteria.where("userId").is(userId).and("platform").is(VideoPlatformEnum.APP.getCode())).with(Sort.by(Sort.Direction.DESC, "createdTime")), VideoSearchHistory.class);
     }
 
     /**

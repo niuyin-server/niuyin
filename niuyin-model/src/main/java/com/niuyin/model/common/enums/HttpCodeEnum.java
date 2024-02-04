@@ -57,7 +57,7 @@ public enum HttpCodeEnum {
 
     FAVORITE_FAIL(10011,"收藏失败"),
 
-    TELEPHONE_NOT_EXIST(10012,"改手机号未注册"),
+    TELEPHONE_NOT_EXIST(10012,"该手机号未注册"),
     ;
 
     int code;

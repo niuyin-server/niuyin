@@ -8,11 +8,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
+import com.niuyin.model.behave.vo.app.MyFavoriteVideoVO;
+import com.niuyin.model.behave.vo.app.MyLikeVideoVO;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
@@ -28,6 +31,7 @@ import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IUserFavoriteVideoService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
+import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -76,6 +80,9 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
 
     @DubboReference
     private DubboVideoService dubboVideoService;
+
+    @Resource
+    private IVideoUserLikeService videoUserLikeService;
 
     /**
      * 用户收藏
@@ -210,6 +217,36 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
         return PageDataInfo.genPageData(videos, count);
     }
+
+    @Override
+    public PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto) {
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
+        pageDto.setUserId(UserContext.getUserId());
+        // 查询用户收藏的视频列表（包含分页）
+        List<String> videoIds = videoUserFavoritesMapper.selectUserFavoriteVideoIds(pageDto);
+        if(videoIds.isEmpty()){
+            return PageDataInfo.emptyPage();
+        }
+        // 查询视频
+        List<Video> videos = dubboVideoService.apiGetVideoListByVideoIds(videoIds);
+        List<MyFavoriteVideoVO> myFavoriteVideoVOList = BeanCopyUtils.copyBeanList(videos, MyFavoriteVideoVO.class);
+        // 设置点赞量
+        CompletableFuture.allOf(myFavoriteVideoVOList.stream().map(this::packageMyLikeVideoPageAsync).toArray(CompletableFuture[]::new)).join();
+        // 查询用户收藏的视频总数
+        Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
+        return PageDataInfo.genPageData(myFavoriteVideoVOList, count);
+    }
+
+    @Async
+    public CompletableFuture<Void> packageMyLikeVideoPageAsync(MyFavoriteVideoVO vo) {
+        return CompletableFuture.runAsync(() -> packageMyLikeVideoPage(vo));
+    }
+
+    @Async
+    public void packageMyLikeVideoPage(MyFavoriteVideoVO vo) {
+        vo.setLikeNum(videoUserLikeService.getVideoLikeNum(vo.getVideoId()));
+    }
+
 
     @Async
     protected void favoriteNumIncrease(String videoId) {

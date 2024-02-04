@@ -24,7 +24,6 @@
         </if>
         ORDER BY vuf.create_time DESC
         LIMIT #{pageNum}, #{pageSize}
-
     </select>
 
     <select id="selectUserFavoriteVideosCount" resultType="java.lang.Long">
@@ -42,6 +41,13 @@
         select ifnull(count(1), 0) as count
         from video_user_favorites
         where video_id = #{videoId}
+    </select>
+    <select id="selectUserFavoriteVideoIds" resultType="java.lang.String">
+        SELECT video_id
+        FROM  video_user_favorites
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+        LIMIT #{pageNum}, #{pageSize}
     </select>
 </mapper>
 

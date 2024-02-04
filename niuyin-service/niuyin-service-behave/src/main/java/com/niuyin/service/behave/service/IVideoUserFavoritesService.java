@@ -33,6 +33,7 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      * @return
      */
     PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
+    PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto);
 
     /**
      * 删除说有用户收藏此视频记录 ！！！

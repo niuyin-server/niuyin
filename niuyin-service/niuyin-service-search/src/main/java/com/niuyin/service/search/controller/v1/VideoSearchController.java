@@ -90,7 +90,7 @@ public class VideoSearchController {
     }
 
     /**
-     * 热搜标签展示
+     * 牛音热搜
      *
      * @param pageDTO
      * @return

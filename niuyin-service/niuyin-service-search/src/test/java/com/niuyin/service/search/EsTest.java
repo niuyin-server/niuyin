@@ -5,7 +5,6 @@ import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.domain.VideoSearchVO;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -30,7 +29,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.time.*;
 import java.util.Date;
 import java.util.HashSet;

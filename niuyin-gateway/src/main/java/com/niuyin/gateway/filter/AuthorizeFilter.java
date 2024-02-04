@@ -36,7 +36,15 @@ public class AuthorizeFilter implements GlobalFilter {
         if (request.getURI().getPath().contains("/login")
                 || request.getURI().getPath().contains("/sms-login")
                 || request.getURI().getPath().contains("/register")
-                || request.getURI().getPath().contains("/swagger-ui")) {
+                || request.getURI().getPath().contains("/swagger-ui")
+                || request.getURI().getPath().contains("/api/v1/app/recommend")
+        ) {
+            // 请求头 userId制空
+            ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> {
+                httpHeaders.add("userId", "0");
+            }).build();
+            //重置请求
+            exchange.mutate().request(serverHttpRequest);
             return chain.filter(exchange);//放行
         }
 

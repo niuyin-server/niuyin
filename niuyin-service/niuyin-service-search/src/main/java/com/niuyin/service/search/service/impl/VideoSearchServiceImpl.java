@@ -2,18 +2,23 @@ package com.niuyin.service.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.niuyin.common.context.UserContext;
+import com.niuyin.common.domain.R;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
+import com.niuyin.model.common.enums.VideoPlatformEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
 import com.niuyin.model.search.enums.VideoSearchScreenPublishTime;
+import com.niuyin.model.search.vo.app.AppVideoSearchVO;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;
+import com.niuyin.model.video.vo.Author;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.domain.VideoSearchHistory;
@@ -237,22 +242,17 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         List<VideoSearchVO> res = new ArrayList<>();
         for (SearchHit hit : hits) {
             // 处理每个搜索结果
-
             // 获取高亮字段
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
             HighlightField tagsHighlightField = highlightFields.get(VideoSearchVO.TAGS);
-
-// 处理高亮显示的片段
+            // 处理高亮显示的片段
             String highlightedTitle = getHighlightedText(titleHighlightField);
             String[] highlightedTags = getHighlightedTags(tagsHighlightField);
-            log.debug("高亮标签: {}", Arrays.toString(highlightedTags));
-
-// 结果封装
+            // 结果封装
             Map<String, Object> sourceMap = hit.getSourceAsMap();
             VideoSearchVO searchVO = JSON.parseObject(JSON.toJSONString(sourceMap), VideoSearchVO.class);
             searchVO.setVideoTitle(highlightedTitle.isEmpty() ? searchVO.getVideoTitle() : highlightedTitle);
-
             if (highlightedTags.length > 0) {
                 String[] tags = searchVO.getTags();
                 for (int i = 0; i < tags.length; i++) {
@@ -284,7 +284,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         return "";
     }
 
-
     private String[] getHighlightedTags(HighlightField field) {
         if (field != null) {
             Text[] fragments = field.fragments();
@@ -296,7 +295,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         }
         return new String[0];
     }
-
 
     /**
      * @param dto
@@ -412,4 +410,132 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
         return videoSearchHistory.stream().map(VideoSearchHistory::getId).collect(Collectors.toList());
     }
+
+    @SneakyThrows
+    @Override
+    public PageDataInfo searchVideoFromESForApp(VideoSearchKeywordDTO dto) {
+        if (StringUtils.isEmpty(dto.getKeyword())) {
+            return PageDataInfo.emptyPage();
+        }
+        // 保存搜索记录到 mongodb
+        Long userId = UserContext.getUserId();
+        if (StringUtils.isNotNull(userId) && userId != 0L && dto.getFromIndex() == 0) {
+            videoSearchHistoryService.insertPlatform(userId, dto.getKeyword(), VideoPlatformEnum.APP);
+        }
+        // 构建查询请求
+        String publishTimeLimit = dto.getPublishTimeLimit();
+        if (StringUtils.isNotNull(publishTimeLimit) && !publishTimeLimit.equals(VideoSearchScreenPublishTime.NO_LIMIT.getCode())) {
+            long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-Objects.requireNonNull(VideoSearchScreenPublishTime.findByCode(publishTimeLimit)).getLimit());
+            dto.setMinBehotTime(new Date(dayStartLong));
+        }
+        SearchRequest searchRequest = buildAppVideoSearchRequest(dto);
+        // 执行查询请求
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        // 处理搜索结果
+        return processAppVideoSearchResponse(searchResponse);
+    }
+
+    /**
+     * 构建app视频搜索请求（仅搜索视频标题
+     *
+     * @param videoSearchKeywordDTO
+     * @return
+     */
+    private SearchRequest buildAppVideoSearchRequest(VideoSearchKeywordDTO videoSearchKeywordDTO) {
+        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        // 设置分页
+        searchSourceBuilder.from((videoSearchKeywordDTO.getPageNum() - 1) * videoSearchKeywordDTO.getPageSize());
+        searchSourceBuilder.size(videoSearchKeywordDTO.getPageSize());
+
+        // 构建查询条件
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+
+        // 构建多字段匹配查询
+        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS);
+        boolQueryBuilder.must(multiMatchQueryBuilder);
+
+        // 构建范围过滤器
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(VideoSearchVO.PUBLISH_TIME)
+                .gte(videoSearchKeywordDTO.getMinBehotTime())
+                .lte(new Date().getTime());
+        boolQueryBuilder.filter(rangeQueryBuilder);
+
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        // 设置高亮显示
+        HighlightBuilder highlightBuilder = new HighlightBuilder()
+                .boundaryScannerLocale(zh_CN)
+                .field(VideoSearchVO.VIDEO_TITLE)
+                .field(VideoSearchVO.TAGS)
+                .preTags(Highlight_preTags_RED)
+                .postTags(Highlight_postTags_RED);
+        searchSourceBuilder.highlighter(highlightBuilder);
+
+        // 设置排序
+        ScoreSortBuilder scoreSortField = SortBuilders.scoreSort().order(SortOrder.DESC);
+        FieldSortBuilder publishTimeSortField = SortBuilders.fieldSort(VideoSearchVO.PUBLISH_TIME).order(SortOrder.DESC).sortMode(SortMode.MAX);
+        searchSourceBuilder.sort(scoreSortField);
+        searchSourceBuilder.sort(publishTimeSortField);
+
+        searchRequest.source(searchSourceBuilder);
+
+        return searchRequest;
+    }
+
+    private PageDataInfo processAppVideoSearchResponse(SearchResponse searchResponse) {
+        // 处理搜索结果
+        long totalValue = searchResponse.getHits().getTotalHits().value;
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        List<VideoSearchVO> originVo = new ArrayList<>();
+        for (SearchHit hit : hits) {
+            // 处理每个搜索结果
+
+            // 获取高亮字段
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
+            HighlightField tagsHighlightField = highlightFields.get(VideoSearchVO.TAGS);
+            // 处理高亮显示的片段
+            String highlightedTitle = getHighlightedText(titleHighlightField);
+            String[] highlightedTags = getHighlightedTags(tagsHighlightField);
+            // 结果封装
+            Map<String, Object> sourceMap = hit.getSourceAsMap();
+            VideoSearchVO searchVO = JSON.parseObject(JSON.toJSONString(sourceMap), VideoSearchVO.class);
+            searchVO.setVideoTitle(highlightedTitle.isEmpty() ? searchVO.getVideoTitle() : highlightedTitle);
+            if (highlightedTags.length > 0) {
+                String[] tags = searchVO.getTags();
+                for (int i = 0; i < tags.length; i++) {
+                    String originalTag = tags[i];
+                    for (String highlightedTag : highlightedTags) {
+                        String replacedTag = highlightedTag.replace(Highlight_preTags_RED, "").replace(Highlight_postTags_RED, "");
+                        if (originalTag.equals(replacedTag)) {
+                            tags[i] = highlightedTag;
+                            break;
+                        }
+                    }
+                }
+                searchVO.setTags(tags);
+            }
+            originVo.add(searchVO);
+        }
+        if (originVo.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<AppVideoSearchVO> res = BeanCopyUtils.copyBeanList(originVo, AppVideoSearchVO.class);
+        // 封装用户，视频点赞量，喜欢量。。。
+        res.forEach(v -> {
+            // 作者
+            Member member = dubboMemberService.apiGetById(v.getUserId());
+            Author author = BeanCopyUtils.copyBean(member, Author.class);
+            v.setAuthor(author);
+            v.setCreateTime(DateUtils.date2LocalDateTime(v.getPublishTime()));
+            v.setPublishTime(null);
+            Integer cacheViewNum = redisService.getCacheMapValue("video:view:num", v.getVideoId());
+            v.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        });
+        return PageDataInfo.genPageData(res, totalValue);
+    }
+
 }

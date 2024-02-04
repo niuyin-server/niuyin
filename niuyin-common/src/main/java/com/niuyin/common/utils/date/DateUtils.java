@@ -293,6 +293,10 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return localDateTime2Long(getTodayPlusStartLocalDateTime(day));
     }
 
+    public static LocalDateTime date2LocalDateTime(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
     public static void main(String[] args) throws ParseException {
 
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
