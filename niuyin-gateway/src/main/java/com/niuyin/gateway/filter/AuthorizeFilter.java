@@ -9,18 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Order(-100) //优先级设置  值越小  优先级越高
@@ -37,6 +33,7 @@ public class AuthorizeFilter implements GlobalFilter {
                 || request.getURI().getPath().contains("/sms-login")
                 || request.getURI().getPath().contains("/register")
                 || request.getURI().getPath().contains("/swagger-ui")
+                || request.getURI().getPath().contains("/api/v1/feed")
                 || request.getURI().getPath().contains("/api/v1/app/recommend")
         ) {
             // 请求头 userId制空

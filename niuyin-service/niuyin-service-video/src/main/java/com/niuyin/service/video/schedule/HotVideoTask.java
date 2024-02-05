@@ -1,15 +1,13 @@
 package com.niuyin.service.video.schedule;
 
-import cn.hutool.core.util.BooleanUtil;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.HotVideoVO;
 import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +43,6 @@ public class HotVideoTask {
             if (tryLock) {
                 log.info("==> 开始计算热门视频，首先查询最近7天的视频记录");
                 List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(VIDEO_BEFORE_DAT7));
-                log.info("==> 从redis获取视频点赞量，观看量，收藏量");
                 List<HotVideoVO> hotVideoVOList = videoService.computeHotVideoScore(videoList);
                 if(hotVideoVOList.isEmpty()){
                     return;
@@ -58,8 +55,8 @@ public class HotVideoTask {
                         redisService.setCacheZSet(VideoCacheConstants.VIDEO_HOT, video.getVideoId(), h.getScore());
                     }
                 });
-                // 缓存热门视频过期事件30天
-                redisService.expire(VideoCacheConstants.VIDEO_HOT, 30, TimeUnit.DAYS);
+                // 缓存热门视频过期事件1天
+                redisService.expire(VideoCacheConstants.VIDEO_HOT, 1, TimeUnit.DAYS);
                 log.info("==> 热门视频缓存到redis完成");
             }
         } finally {

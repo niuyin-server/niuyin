@@ -21,5 +21,15 @@
         from video_category_relation
         where category_id = #{categoryId};
     </select>
+    <select id="selectVideoPageByCategoryId" resultType="com.niuyin.model.video.domain.Video">
+        SELECT v.*
+        FROM video v
+                 INNER JOIN video_category_relation vcr ON v.video_id = vcr.video_id
+        where vcr.category_id =  #{id}
+          and v.del_flag = '0'
+        ORDER BY v.create_time DESC
+        LIMIT #{pageNum}, #{pageSize};
+
+    </select>
 </mapper>
 

@@ -569,10 +569,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         // 封装观看量、点赞数、收藏量
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
         videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        videoVO.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(videoVO.getVideoId()));
-        videoVO.setFavoritesNum(dubboBehaveService.apiGetVideoFavoriteNum(videoVO.getVideoId()));
+        Long likeNum = dubboBehaveService.apiGetVideoLikeNum(videoVO.getVideoId());
+        videoVO.setLikeNum(likeNum == null ? 0L : likeNum);
+        Long favoriteNum = dubboBehaveService.apiGetVideoFavoriteNum(videoVO.getVideoId());
+        videoVO.setFavoritesNum(favoriteNum == null ? 0L : favoriteNum);
         // 评论数
-        videoVO.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(videoVO.getVideoId()));
+        Long commentNum = dubboBehaveService.apiGetVideoCommentNum(videoVO.getVideoId());
+        videoVO.setCommentNum(commentNum == null ? 0L : commentNum);
         log.debug("packageVideoBehaveData结束");
     }
 
@@ -775,6 +778,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         // 视频发布时间大于ctime的数据
         queryWrapper.ge(Video::getCreateTime, ctime);
+        queryWrapper.eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
         return this.list(queryWrapper);
     }
 

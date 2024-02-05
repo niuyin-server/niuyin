@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -17,9 +19,9 @@ import java.time.LocalDateTime;
  * @author lzq
  * @since 2023-10-30 19:41:13
  */
+@ApiModel("视频分类表")
 @Data
 @TableName("video_category")
-@ApiModel("视频分类表")
 public class VideoCategory implements Serializable {
     private static final long serialVersionUID = 449072917820489412L;
     /**
@@ -32,20 +34,34 @@ public class VideoCategory implements Serializable {
      * 视频分类名称
      */
     @ApiModelProperty("视频分类名称")
+    @NotBlank
+    @Size(max = 100, message = "视频分类名称不能超过100个字符")
     private String name;
     private String categoryImage;  //分类图片，推荐64*64的icon图标
     /**
      * 视频分类描述
      */
     @ApiModelProperty("视频分类描述")
+    @Size(max = 200, message = "视频分类描述不能超过200个字符")
     private String description;
+    /**
+     * 显示状态，0：显示，1：隐藏
+     */
     private String visible;
     /**
      * 分类状态：(0:可用,1:禁用)
      */
     private String status;
 
+    /**
+     * 父id
+     */
     private Long parentId;
+
+    /**
+     * 祖先id
+     */
+    private String ancestors;
 
     private Integer orderNum;
 

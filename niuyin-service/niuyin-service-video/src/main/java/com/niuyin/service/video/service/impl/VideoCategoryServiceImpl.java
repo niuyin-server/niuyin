@@ -5,47 +5,42 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.dubbo.api.DubboMemberService;
-import com.niuyin.feign.member.RemoteMemberService;
-import com.niuyin.model.member.domain.Member;
-import com.niuyin.model.video.domain.VideoImage;
-import com.niuyin.model.video.enums.PublishType;
-import com.niuyin.model.video.vo.Author;
-import com.niuyin.model.video.vo.VideoPushVO;
-import com.niuyin.model.video.vo.VideoVO;
-import com.niuyin.service.video.mapper.VideoMapper;
-import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategory;
+import com.niuyin.model.video.domain.VideoImage;
+import com.niuyin.model.video.dto.CategoryVideoPageDTO;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
-import com.niuyin.model.video.vo.VideoCategoryVo;
+import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.enums.VideoCategoryStatus;
+import com.niuyin.model.video.vo.*;
+import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
+import com.niuyin.model.video.vo.app.CategoryVideoVo;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.mapper.VideoCategoryMapper;
+import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
+import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import static com.niuyin.service.video.constants.InterestPushConstant.*;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
@@ -78,7 +73,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
-    @DubboReference
+    @DubboReference(mock = "return null", interfaceClass = DubboMemberService.class, timeout = 2000)
     private DubboMemberService dubboMemberService;
 
     @Override
@@ -247,7 +242,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         Long totalCount = redisTemplate.opsForSet().size(categoryKey);
         Long pushedCount = redisTemplate.opsForSet().size(pushedKey);
         if (StringUtils.isNull(totalCount) || totalCount < 1) {
-           log.debug("没有分类视频");
+            log.debug("没有分类视频");
         }
         Long subCount = totalCount - pushedCount;
         if (subCount < 1) {
@@ -317,6 +312,159 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
                 redisService.setCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoPushVO.getVideoId(), imgs);
                 redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoPushVO.getVideoId(), 1, TimeUnit.DAYS);
             }
+        }
+    }
+
+    /**
+     * 获取视频分类树
+     */
+    @Override
+    public List<VideoCategoryTree> getCategoryTree() {
+        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategory::getStatus, VideoCategoryStatus.NORMAL.getCode());
+        queryWrapper.orderByAsc(VideoCategory::getOrderNum);
+        List<VideoCategory> videoCategoryList = this.list(queryWrapper);
+        List<VideoCategoryTree> videoCategoryTrees = BeanCopyUtils.copyBeanList(videoCategoryList, VideoCategoryTree.class);
+        return buildVideoCategoryTree(videoCategoryTrees);
+    }
+
+    /**
+     * 构造树
+     *
+     * @param videoCategoryTrees
+     * @return
+     */
+    public List<VideoCategoryTree> buildVideoCategoryTree(List<VideoCategoryTree> videoCategoryTrees) {
+        List<VideoCategoryTree> rootCategories = new ArrayList<>();
+
+        // 使用 Map 存储分类 ID 和对应的分类树节点
+        Map<Long, VideoCategoryTree> categoryMap = new HashMap<>();
+        for (VideoCategoryTree categoryTree : videoCategoryTrees) {
+            categoryMap.put(categoryTree.getId(), categoryTree);
+        }
+
+        for (VideoCategoryTree categoryTree : videoCategoryTrees) {
+            Long parentId = categoryTree.getParentId();
+            if (parentId == null || parentId == 0) {
+                // 根节点
+                rootCategories.add(categoryTree);
+            } else {
+                // 非根节点，将当前节点添加到父节点的 children 列表中
+                VideoCategoryTree parentCategory = categoryMap.get(parentId);
+                if (parentCategory != null) {
+                    List<VideoCategory> children = parentCategory.getChildren();
+                    if (children == null) {
+                        children = new ArrayList<>();
+                        parentCategory.setChildren(children);
+                    }
+                    children.add(categoryTree);
+                }
+            }
+        }
+
+        return rootCategories;
+    }
+
+    /**
+     * 获取所有可用视频父分类
+     */
+    @Override
+    public List<AppVideoCategoryVo> getNormalParentCategory() {
+        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategory::getStatus, VideoCategoryStatus.NORMAL.getCode());
+        queryWrapper.eq(VideoCategory::getParentId, 0L);
+        queryWrapper.orderByAsc(VideoCategory::getOrderNum);
+        List<VideoCategory> videoCategoryList = this.list(queryWrapper);
+        return BeanCopyUtils.copyBeanList(videoCategoryList, AppVideoCategoryVo.class);
+    }
+
+    /**
+     * 获取一级子分类
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public List<AppVideoCategoryVo> getNormalChildrenCategory(Long id) {
+        VideoCategory byId = getById(id);
+        if (byId.getStatus().equals(VideoCategoryStatus.DISABLE.getCode())) {
+            throw new RuntimeException("已" + VideoCategoryStatus.DISABLE.getCode());
+        }
+        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategory::getStatus, VideoCategoryStatus.NORMAL.getCode());
+        queryWrapper.eq(VideoCategory::getParentId, id);
+        queryWrapper.orderByAsc(VideoCategory::getOrderNum);
+        List<VideoCategory> videoCategoryList = this.list(queryWrapper);
+        return BeanCopyUtils.copyBeanList(videoCategoryList, AppVideoCategoryVo.class);
+    }
+
+    /**
+     * 根据分类id分页获取视频
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo getVideoPageByCategoryId(CategoryVideoPageDTO pageDTO) {
+        pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
+        List<Video> videoList = videoCategoryMapper.selectVideoPageByCategoryId(pageDTO);
+        List<CategoryVideoVo> categoryVideoVoList = BeanCopyUtils.copyBeanList(videoList, CategoryVideoVo.class);
+        // 设置属性
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(categoryVideoVoList.stream()
+                .map(this::packageCategoryVideoVoAsync).toArray(CompletableFuture[]::new));
+        allFutures.join();
+        return PageDataInfo.genPageData(categoryVideoVoList, videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getId()));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageCategoryVideoVoAsync(CategoryVideoVo vo) {
+        return CompletableFuture.runAsync(() -> packageCategoryVideoVo(vo));
+    }
+
+    @Async
+    public void packageCategoryVideoVo(CategoryVideoVo vo) {
+        // 点赞量
+        CompletableFuture<Void> behaveDataFuture = packageCategoryVideoVoBehaveDataAsync(vo);
+        // 作者
+        CompletableFuture<Void> memberDataFuture = packageCategoryVideoVoMemberDataAsync(vo);
+        CompletableFuture.allOf(
+                behaveDataFuture,
+                memberDataFuture
+        ).join();
+    }
+
+
+    @Async
+    public CompletableFuture<Void> packageCategoryVideoVoBehaveDataAsync(CategoryVideoVo vo) {
+        return CompletableFuture.runAsync(() -> packageCategoryVideoVoBehaveData(vo));
+    }
+
+    @Async
+    public CompletableFuture<Void> packageCategoryVideoVoMemberDataAsync(CategoryVideoVo vo) {
+        return CompletableFuture.runAsync(() -> packageCategoryVideoVoMemberData(vo));
+    }
+
+    /**
+     * 封装视频行为数据
+     */
+    @Async
+    public void packageCategoryVideoVoBehaveData(CategoryVideoVo vo) {
+        // 封装观看量、点赞数、收藏量 todo java.lang.IllegalArgumentException: non null hash key required
+        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, vo.getVideoId());
+        vo.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+        vo.setLikeNum(videoMapper.selectLikeCountByVideoId(vo.getVideoId()));
+    }
+
+    /**
+     * 封装用户数据
+     */
+    @Async
+    public void packageCategoryVideoVoMemberData(CategoryVideoVo vo) {
+        // 封装用户信息
+        Member member = dubboMemberService.apiGetById(vo.getUserId());
+        if (!Objects.isNull(member)) {
+            Author author = BeanCopyUtils.copyBean(member, Author.class);
+            vo.setAuthor(author);
         }
     }
 

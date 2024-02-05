@@ -42,7 +42,5 @@ build/
 **/.bin/**
 
 ### Spring Boot Properties ###
-niuyin-gateway/src/main/resources/bootstrap.yml
-niuyin-service/**/src/main/resources/bootstrap.yml
-
+**/bootstrap.yml
 
