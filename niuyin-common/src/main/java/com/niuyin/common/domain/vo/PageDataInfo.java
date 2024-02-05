@@ -49,4 +49,11 @@ public class PageDataInfo implements Serializable {
         return new PageDataInfo(R.SUCCESS, "OK", rows, total);
     }
 
+    /**
+     * 返回空数据
+     */
+    public static PageDataInfo emptyPage() {
+        return new PageDataInfo(R.SUCCESS, "OK", null, 0);
+    }
+
 }

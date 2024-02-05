@@ -33,6 +33,7 @@ public class VideoRabbitListener {
             key = VideoDelayedQueueConstant.ESSYNC_ROUTING_KEY
     ))
     public void listenVideoDelayMessage(String msg) {
+        // 接收到的为videoId
         log.info("search 接收到同步视频到es的延迟消息：{}", msg);
         videoSearchService.videoSync(msg);
     }

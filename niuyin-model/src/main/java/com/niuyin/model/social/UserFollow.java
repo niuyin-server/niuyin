@@ -1,10 +1,12 @@
 package com.niuyin.model.social;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 用户关注表(UserFollow)实体类
@@ -25,6 +27,9 @@ public class UserFollow implements Serializable {
      * 被关注用户ID
      */
     private Long userFollowId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 
 }
 

@@ -2,20 +2,117 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.behave.mapper.VideoUserLikeMapper">
 
+    <resultMap type="Video" id="VideoResult">
+        <id property="videoId" column="video_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="videoTitle" column="video_title"/>
+        <result property="videoDesc" column="video_desc"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="viewNum" column="view_num"/>
+        <result property="likeNum" column="like_num"/>
+        <result property="favoritesNum" column="favorites_num"/>
+        <result property="createTime" column="create_time"/>
+        <result property="coverImage" column="cover_image"/>
+    </resultMap>
+
+    <resultMap id="videoImageResultMap" type="com.niuyin.model.video.domain.VideoImage">
+        <id property="id" column="id"/>
+        <result property="videoId" column="video_id"/>
+        <result property="imageUrl" column="image_url"/>
+    </resultMap>
+
+    <sql id="VideoVo">
+        select v.video_id,
+               v.user_id,
+               v.video_title,
+               v.video_desc,
+               v.video_url,
+               v.view_num,
+               v.like_num,
+               v.favorites_num,
+               v.create_time,
+               v.cover_image
+        from video v
+    </sql>
+
     <select id="selectAllLikeNumForUser">
 
     </select>
+
     <select id="selectPersonLikePage" resultType="com.niuyin.model.video.domain.Video">
+        <!--        WITH VideoUserLikeCTE AS (-->
+        <!--        SELECT *, ROW_NUMBER() OVER (ORDER BY create_time DESC) AS RowNum-->
+        <!--        FROM video_user_like-->
+        <!--        WHERE user_id =  #{userId}-->
+        <!--        )-->
+        <!--        SELECT v.*-->
+        <!--        FROM video v-->
+        <!--        RIGHT JOIN VideoUserLikeCTE vul ON v.video_id = vul.video_id-->
+        <!--        WHERE vul.RowNum BETWEEN  #{pageNum} * #{pageSize} + 1 AND #{pageNum} * #{pageSize} + #{pageSize}-->
+        <!--        <if test="videoTitle != null">-->
+        <!--            AND v.video_title like concat ('%', #{videoTitle},'%')-->
+        <!--        </if>-->
+        <!--        ORDER BY vul.create_time DESC;-->
+
         SELECT v.*
         FROM video v
-                 JOIN (SELECT video_id
-                       FROM video_user_like
-                       WHERE user_id = #{userId} LIMIT #{pageSize}
-                       OFFSET #{pageNum}) AS liked_videos
-                      ON v.video_id = liked_videos.video_id;
+        RIGHT JOIN (SELECT * FROM video_user_like WHERE user_id = #{userId}) vul
+        ON v.video_id = vul.video_id
+        WHERE 1
+        <if test="videoTitle != null">
+            AND v.video_title like concat ('%', #{videoTitle},'%')
+        </if>
+        ORDER BY vul.create_time DESC
+        LIMIT #{pageNum},#{pageSize}
+    </select>
+    <select id="selectPersonLikeCount" resultType="java.lang.Long">
+        SELECT count(1)
+        from video_user_like vul
+        right join video v on vul.video_id = v.video_id
+        where vul.user_id = #{userId}
+        <if test="videoTitle != null">
+            AND v.video_title like concat ('%', #{videoTitle},'%')
+        </if>
     </select>
     <select id="selectPersonLikeShowStatus" resultType="com.niuyin.model.member.domain.MemberInfo">
-        select mi.like_show_status  from member_info mi where mi.user_id = #{userId}
+        select *
+        from member_info mi
+        where mi.user_id = #{userId}
+    </select>
+
+    <!--    通过videoId获取视频-->
+    <select id="selectVideoByVideoId" resultType="com.niuyin.model.video.domain.Video">
+        <include refid="VideoVo"/>
+        where v.video_id = #{videoId}
+    </select>
+    <select id="selectImagesByVideoId" resultType="com.niuyin.model.video.domain.VideoImage">
+        select image_url
+        from video_image
+        where video_id = #{videoId}
+    </select>
+    <select id="selectPositionByVideoId" resultType="com.niuyin.model.video.domain.VideoPosition">
+        select *
+        from video_position
+        where video_id = #{videoId}
+    </select>
+    <select id="selectImagesByVideoIds" parameterType="java.util.List" resultType="com.niuyin.model.video.domain.VideoImage">
+            SELECT *
+            FROM video_image
+        <where>
+            <if test="list != null and list.size() > 0">
+                AND video_id IN
+                <foreach collection="list" item="videoId" open="(" separator="," close=")">
+                    #{videoId}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectVideoLikeCount" resultType="java.lang.Long">
+        select ifnull(count(1), 0) as count
+        from video_user_like
+        where video_id = #{videoId}
     </select>
 
 </mapper>

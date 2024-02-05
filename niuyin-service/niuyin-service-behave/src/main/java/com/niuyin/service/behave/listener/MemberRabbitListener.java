@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.listener;
 
 import com.niuyin.model.behave.mq.BehaveQueueConstant;
-import com.niuyin.model.social.UserFavorite;
+import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.Exchange;

@@ -23,7 +23,7 @@ import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 public class VideoDelayedMessageConfig {
 
     @Bean
-    public Queue directQueue() {
+    public Queue esSyncQueue() {
         return new Queue(ESSYNC_DIRECT_QUEUE,true);
     }
 
@@ -40,7 +40,7 @@ public class VideoDelayedMessageConfig {
 
     @Bean
     public Binding delayOrderBinding() {
-        return BindingBuilder.bind(directQueue()).to(orderDelayedExchange()).with(ESSYNC_ROUTING_KEY).noargs();
+        return BindingBuilder.bind(esSyncQueue()).to(orderDelayedExchange()).with(ESSYNC_ROUTING_KEY).noargs();
     }
 
 }

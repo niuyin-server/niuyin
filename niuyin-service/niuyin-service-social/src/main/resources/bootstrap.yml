@@ -1,5 +1,5 @@
 server:
-  port: 9509
+  port: 9501
 spring:
   application:
     name: niuyin-social

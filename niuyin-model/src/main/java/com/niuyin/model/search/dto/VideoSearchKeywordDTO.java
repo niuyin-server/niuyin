@@ -1,6 +1,7 @@
 package com.niuyin.model.search.dto;
 
 import lombok.Data;
+
 import java.util.Date;
 
 /**
@@ -22,9 +23,19 @@ public class VideoSearchKeywordDTO {
     private Integer pageSize;
 
     /**
-     * 最小时间
+     * 最小时间 todo 单位：天
      */
     private Date minBehotTime;
+
+    /**
+     * 排序依据过滤
+     */
+    private String sortLimit;
+
+    /**
+     * 时间过滤 0不限1一天内2一周内3一月内
+     */
+    private String publishTimeLimit;
 
     public int getFromIndex() {
         if (this.pageNum < 1) {

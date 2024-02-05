@@ -21,11 +21,4 @@ public interface IMemberInfoService extends IService<MemberInfo> {
      */
     MemberInfo queryInfoByUserId(Long userId);
 
-    /**
-     * 上传背景图片
-     *
-     * @param file
-     * @return
-     */
-    String uploadBackGround(MultipartFile file);
 }

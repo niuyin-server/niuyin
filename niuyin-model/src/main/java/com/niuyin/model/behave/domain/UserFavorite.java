@@ -1,9 +1,13 @@
-package com.niuyin.model.social;
+package com.niuyin.model.behave.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -20,6 +24,7 @@ public class UserFavorite implements Serializable {
     /**
      * 收藏夹id
      */
+    @TableId(value = "favorite_id", type = IdType.AUTO)
     private Long favoriteId;
     /**
      * 用户id
@@ -28,7 +33,7 @@ public class UserFavorite implements Serializable {
     /**
      * 收藏夹名称
      */
-    @Length(max = 10, message = "标题长度不能超过10")
+    @Size(min = 1, max = 10, message = "标题长度需在1~10范围内")
     private String title;
     /**
      * 收藏夹描述
@@ -42,6 +47,7 @@ public class UserFavorite implements Serializable {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
     /**
      * 0:别人可见，1:陌生人不可见

@@ -1,30 +1,32 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.feign.member.RemoteMemberService;
+import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.dto.VideoPublishDto;
-import com.niuyin.model.video.dto.VideoFeedDTO;
-import com.niuyin.model.video.dto.VideoPageDto;
+import com.niuyin.model.video.dto.*;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.service.video.service.InterestPushService;
+import com.niuyin.starter.file.service.AliyunOssService;
+import com.niuyin.starter.file.service.FileStorageService;
+import com.niuyin.starter.video.service.FfmpegVideoService;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 视频表(Video)表控制层
@@ -40,10 +42,45 @@ public class VideoController {
     private IVideoService videoService;
 
     @Resource
-    private RedisService redisService;
+    private FileStorageService fileStorageService;
 
     @Resource
-    private RemoteMemberService remoteMemberService;
+    private AliyunOssService aliyunOssService;
+
+    @DubboReference(mock = "return null")
+    private DubboMemberService dubboMemberService;
+
+    @Resource
+    private InterestPushService interestPushService;
+
+    @Resource
+    private FfmpegVideoService ffmpegVideoService;
+
+    @GetMapping("/test-dubbo")
+    public R<?> testDubbo() {
+        return R.ok(dubboMemberService.apiGetById(UserContext.getUserId()));
+    }
+
+    /**
+     * 上传视频到aliyun oss测试
+     *
+     * @param file
+     * @return
+     */
+    @PostMapping("/test-upload-video")
+    public R<String> testUploadVideo(@RequestParam("file") MultipartFile file) {
+        return R.ok(aliyunOssService.uploadVideoFile(file, "video"));
+    }
+
+    /**
+     * 首页推送视频
+     *
+     * @return
+     */
+    @GetMapping("/pushVideo")
+    public R<?> pushVideo() {
+        return R.ok(videoService.pushVideoList());
+    }
 
     /**
      * 热门视频
@@ -52,34 +89,13 @@ public class VideoController {
      * @return
      */
     @PostMapping("/hot")
+    @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
-        int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
-        int endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
-        Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
-        List<VideoVO> videoVOList = new ArrayList<>();
-        videoIds.forEach(vid -> {
-            Video video = videoService.selectById((String) vid);
-            VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
-            Member user = new Member();
-            try {
-                user = remoteMemberService.userInfoById(video.getUserId()).getData();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (StringUtils.isNotNull(user)) {
-                videoVO.setUserNickName(user.getNickName());
-                videoVO.setUserAvatar(user.getAvatar());
-            }
-            // todo 是否关注
-            videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
-            videoVOList.add(videoVO);
-        });
-        return PageDataInfo.genPageData(videoVOList, hotCount);
+        return videoService.getHotVideos(pageDTO);
     }
 
     /**
-     * 视频流接口,默认返回5条数据 todo 点赞数、评论数、收藏数单独封装
+     * 视频流接口,默认返回10条数据
      */
     @PostMapping("/feed")
     public R<List<VideoVO>> feed(@RequestBody VideoFeedDTO videoFeedDTO) {
@@ -87,7 +103,7 @@ public class VideoController {
     }
 
     /**
-     * 视频上传
+     * 视频上传 todo 上传视频业务转移到creator创作者中心
      */
     @PostMapping("/upload")
     public R<VideoUploadVO> uploadVideo(@RequestParam("file") MultipartFile file) {
@@ -95,10 +111,30 @@ public class VideoController {
     }
 
     /**
+     * 图片上传
+     */
+    @Deprecated
+    @PostMapping("/upload/image")
+    public R<String> uploadImages(@RequestParam("file") MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isNull(originalFilename)) {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+        //对原始文件名进行判断
+        if (originalFilename.endsWith(".png")
+                || originalFilename.endsWith(".jpg")
+                || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".webp")) {
+            String filePath = PathUtils.generateFilePath(originalFilename);
+            String url = fileStorageService.uploadImgFile(file, QiniuVideoOssConstants.VIDEO_ORIGIN_PREFIX_URL, filePath);
+            return R.ok(url);
+        } else {
+            throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
+        }
+    }
+
+    /**
      * 将用户上传的视频和用户信息绑定到一起
-     *
-     * @param videoPublishDto
-     * @return
      */
     @PostMapping("/publish")
     public R<?> videoPublish(@RequestBody VideoPublishDto videoPublishDto) {
@@ -107,51 +143,46 @@ public class VideoController {
 
     /**
      * 分页查询我的视频
-     *
-     * @param pageDto
-     * @return
      */
     @PostMapping("/mypage")
     public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.queryMyVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        return videoService.queryMyVideoPage(pageDto);
     }
 
     /**
      * 分页查询用户视频
-     *
-     * @param pageDto
-     * @return
      */
     @PostMapping("/userpage")
     public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.queryUserVideoPage(pageDto);
-        // 封装vo
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+        return videoService.queryUserVideoPage(pageDto);
     }
 
     /**
      * 通过ids获取video集合
-     *
-     * @param videoIds
-     * @return
      */
     @GetMapping("{videoIds}")
     public R<List<Video>> queryVideoByVideoIds(@PathVariable("videoIds") List<String> videoIds) {
         return R.ok(videoService.queryVideoByVideoIds(videoIds));
     }
 
+    /**
+     * 更新视频
+     */
+    @PutMapping("/update")
+    public R<?> updateVideo(@RequestBody UpdateVideoDTO updateVideoDTO) {
+        return R.ok(videoService.updateVideo(updateVideoDTO));
+    }
+
+    /**
+     * 删除视频
+     */
     @DeleteMapping("/{videoId}")
     public R<?> deleteVideoByVideoIds(@PathVariable("videoId") String videoId) {
-        videoService.deleteVideoByVideoId(videoId);
-        return null;
+        return R.ok(videoService.deleteVideoByVideoId(videoId));
     }
 
     /**
      * 用户视频总获赞量
-     *
-     * @param userId
-     * @return
      */
     @GetMapping("/likeNums/{userId}")
     public R<Long> getVideoLikeAllNumByUserId(@PathVariable("userId") Long userId) {
@@ -167,15 +198,20 @@ public class VideoController {
     }
 
     /**
-     * todo 查询用户的作品，整到userpage 第126行
-     *
-     * @param pageDto
-     * @return
+     * 根据视频远程url获取视频详情
      */
-    @PostMapping("/personVideoPage")
-    public PageDataInfo memberInfoPage(@RequestBody VideoPageDto pageDto) {
-        IPage<Video> videoIPage = videoService.queryMemberVideoPage(pageDto);
-        return PageDataInfo.genPageData(videoIPage.getRecords(), videoIPage.getTotal());
+    @PostMapping("/videoinfo")
+    public R<?> getVideoInfo(@RequestBody VideoInfoDTO videoInfoDTO) {
+        MultimediaInfo info = ffmpegVideoService.getVideoInfo(videoInfoDTO.getVideoUrl());
+        return R.ok(info);
+    }
+
+    /**
+     * 相关视频推荐
+     */
+    @GetMapping("/relate/{videoId}")
+    public R<?> getRelateVideo(@PathVariable("videoId") String videoId) {
+        return R.ok(videoService.getRelateVideoList(videoId));
     }
 
 }

@@ -2,5 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.tools.es.mapper.VideoMapper">
 
+    <select id="selectExistVideoList" resultType="com.niuyin.model.video.domain.Video">
+        select *
+        from video
+        where del_flag = '0'
+    </select>
+
 </mapper>
 

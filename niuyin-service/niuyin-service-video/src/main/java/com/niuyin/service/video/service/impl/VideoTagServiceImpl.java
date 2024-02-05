@@ -1,6 +1,7 @@
 package com.niuyin.service.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.exception.CustomException;
@@ -12,6 +13,7 @@ import com.niuyin.service.video.service.IVideoTagService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 视频标签表(VideoTag)表服务实现类
@@ -55,5 +57,15 @@ public class VideoTagServiceImpl extends ServiceImpl<VideoTagMapper, VideoTag> i
         LambdaQueryWrapper<VideoTag> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoTag::getTag, tag.trim());
         return getOne(queryWrapper);
+    }
+
+    /**
+     * 随机获取标签 todo 获取热门的标签，且可动态指定数量
+     *
+     * @return
+     */
+    @Override
+    public List<VideoTag> random10VideoTags() {
+        return this.page(new Page<>(1, 10), null).getRecords();
     }
 }

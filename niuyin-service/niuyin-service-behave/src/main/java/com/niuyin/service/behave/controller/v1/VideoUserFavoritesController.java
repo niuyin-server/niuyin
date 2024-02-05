@@ -6,7 +6,9 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.feign.video.RemoteVideoService;
+import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
+import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
@@ -28,20 +30,20 @@ public class VideoUserFavoritesController {
     @Resource
     private IVideoUserFavoritesService videoUserFavoritesService;
 
-    @Resource
-    private RemoteVideoService remoteVideoService;
-
-
     /**
-     * 用户收藏
-     *
-     * @param videoId
-     * @return
+     * 用户仅收藏视频
      */
     @GetMapping("/{videoId}")
-    public R<Boolean> getDetails(@PathVariable("videoId") String videoId) {
+    public R<Boolean> userFavoriteOnlyVideo(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserFavoritesService.userOnlyFavoriteVideo(videoId));
+    }
 
-        return R.ok(videoUserFavoritesService.videoFavorites(videoId));
+    /**
+     * 取消收藏视频
+     */
+    @PutMapping("/unFavorite/{videoId}")
+    public R<Boolean> userUnFavoriteVideo(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserFavoritesService.userUnFavoriteVideo(videoId));
     }
 
     /**
@@ -50,14 +52,9 @@ public class VideoUserFavoritesController {
      * @param pageDto
      * @return
      */
-    @PostMapping("/myfavoritepage")
+    @PostMapping("/mypage")
     public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
-        IPage<VideoUserFavorites> favoritesPage = videoUserFavoritesService.queryFavoritePage(pageDto);
-        List<String> videoIds = favoritesPage.getRecords().stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
-        if (videoIds.isEmpty()) {
-            return PageDataInfo.genPageData(null, 0);
-        }
-        return PageDataInfo.genPageData(remoteVideoService.queryVideoByVideoIds(videoIds).getData(), favoritesPage.getTotal());
+        return videoUserFavoritesService.queryUserFavoriteVideoPage(pageDto);
     }
 
     @DeleteMapping("/{videoId}")

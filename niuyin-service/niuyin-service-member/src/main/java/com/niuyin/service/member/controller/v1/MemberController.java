@@ -21,6 +21,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
+import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,9 @@ public class MemberController {
 
     @Resource
     private IMemberInfoService memberInfoService;
+
+    @Resource
+    private AliyunOssService aliyunOssService;
 
     /**
      * 登录
@@ -184,13 +188,10 @@ public class MemberController {
                 || originalFilename.endsWith(".jpg")
                 || originalFilename.endsWith(".jpeg")
                 || originalFilename.endsWith(".webp")) {
-            String filePath = PathUtils.generateFilePath(originalFilename);
-            String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
-            return R.ok(url);
+            return R.ok(aliyunOssService.uploadFile(file, "member"));
         } else {
             throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
         }
     }
-
 
 }

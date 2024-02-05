@@ -2,10 +2,12 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * (VideoUserComment)表服务接口
@@ -54,4 +56,21 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @return
      */
     Long queryCommentCountByVideoId(String videoId);
+
+    /**
+     * 分页查询评论树
+     *
+     * @param pageDTO
+     * @return
+     * @throws InterruptedException
+     */
+    PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO);
+
+    /**
+     * 删除视频所有评论
+     *
+     * @param videoId
+     * @return
+     */
+    boolean removeCommentByVideoId(String videoId);
 }

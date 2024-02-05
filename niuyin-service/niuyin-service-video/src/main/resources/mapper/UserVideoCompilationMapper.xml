@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niuyin.service.video.mapper.UserVideoCompilationMapper">
+
+    <resultMap type="com.niuyin.model.video.domain.UserVideoCompilation" id="UserVideoCompilationMap">
+        <result property="compilationId" column="compilation_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="UserVideoCompilationVo">
+        select uvc.compilation_id,
+               uvc.user_id,
+               uvc.title,
+               uvc.description,
+               uvc.cover_image,
+               uvc.create_time,
+               uvc.update_time
+        from user_video_compilation uvc
+    </sql>
+
+    <select id="selectCompilationViewCount" resultType="java.lang.Long">
+        select sum(v.view_num) as count
+        from user_video_compilation_relation uvcr
+                 left join video v on uvcr.video_id = v.video_id
+        where uvcr.compilation_id = #{compilationId};
+    </select>
+
+    <select id="selectCompilationLikeCount" resultType="java.lang.Long">
+        select sum(v.like_num) as count
+        from user_video_compilation_relation uvcr
+                 left join video v on uvcr.video_id = v.video_id
+        where uvcr.compilation_id = #{compilationId};
+    </select>
+
+    <select id="selectCompilationVideoCount" resultType="java.lang.Long">
+        select count(1) as count
+        from user_video_compilation_relation
+        where compilation_id = 1;
+    </select>
+
+</mapper>
+

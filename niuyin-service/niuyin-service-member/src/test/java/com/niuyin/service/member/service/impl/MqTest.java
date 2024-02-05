@@ -1,7 +1,9 @@
 package com.niuyin.service.member.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.niuyin.starter.sms.enums.AliyunSmsTemplateType;
+import com.niuyin.starter.sms.service.AliyunSmsService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;

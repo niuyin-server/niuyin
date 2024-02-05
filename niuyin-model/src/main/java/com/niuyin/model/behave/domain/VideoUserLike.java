@@ -17,15 +17,15 @@ import java.io.Serializable;
  * @since 2023-10-30 14:32:59
  */
 @Data
-@TableName("video_user_like")
 @ApiModel("视频点赞表")
+@TableName("video_user_like")
 public class VideoUserLike implements Serializable {
     private static final long serialVersionUID = 366516787359335038L;
     /**
      * 点赞表id，记录总数即为点赞总数
      */
-    @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty("点赞表id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 视频id

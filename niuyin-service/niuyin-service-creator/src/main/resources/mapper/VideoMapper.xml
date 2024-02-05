@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niuyin.service.creator.mapper.VideoMapper">
+
+    <!--    分页查询视频-->
+    <select id="selectVideoPage" resultType="com.niuyin.model.video.domain.Video">
+        select *
+        from video
+        where user_id = #{userId} and del_flag = '0'
+        <if test="videoTitle != null and videoTitle != ''">
+            and video_title LIKE CONCAT('%', #{videoTitle}, '%')
+        </if>
+        <if test="publishType != null and publishType != ''">
+            and publish_type = #{publishType}
+        </if>
+        <if test="showType != null and showType != ''">
+            and show_type = #{showType}
+        </if>
+        <if test="positionFlag != null and positionFlag != ''">
+            and position_flag = #{positionFlag}
+        </if>
+        <if test="auditsStatus != null and auditsStatus != ''">
+            and audits_status = #{auditsStatus}
+        </if>
+        order by create_time desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="selectVideoPageCount" resultType="java.lang.Long">
+        select count(1) as count
+        from video
+        where user_id = #{userId} and del_flag = '0'
+        <if test="videoTitle != null and videoTitle != ''">
+            and video_title LIKE CONCAT('%', #{videoTitle}, '%')
+        </if>
+        <if test="publishType != null and publishType != ''">
+            and publish_type = #{publishType}
+        </if>
+        <if test="showType != null and showType != ''">
+            and show_type = #{showType}
+        </if>
+        <if test="positionFlag != null and positionFlag != ''">
+            and position_flag = #{positionFlag}
+        </if>
+        <if test="auditsStatus != null and auditsStatus != ''">
+            and audits_status = #{auditsStatus}
+        </if>
+    </select>
+    <!--    分页查询视频合集-->
+    <select id="selectVideoCompilationPage" resultType="com.niuyin.model.video.domain.UserVideoCompilation">
+        select *
+        from user_video_compilation
+        where user_id = #{userId}
+        <if test="title != null and title != ''">
+            and title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        order by create_time desc
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="selectVideoCompilationPageCount" resultType="java.lang.Long">
+        select count(1) as count
+        from user_video_compilation
+        where user_id = #{userId}
+        <if test="title != null and title != ''">
+            and title LIKE CONCAT('%', #{title}, '%')
+        </if>
+    </select>
+    <select id="selectVideoPlayAmount" resultType="java.lang.Long">
+        select sum(view_num) as count
+        from video
+        where user_id = #{userId} and del_flag = '0';
+    </select>
+    <select id="selectFansAmount" resultType="java.lang.Long">
+        select count(1) as count
+        from user_follow
+        where user_follow_id = #{userId};
+    </select>
+    <select id="selectVideoLikeAmount" resultType="java.lang.Long">
+        select sum(like_num) as count
+        from video
+        where user_id = #{userId} and del_flag = '0';
+    </select>
+    <select id="selectVideoCommentAmount" resultType="java.lang.Long">
+        select count(*) as count
+        from video_user_comment vuc
+        where video_id in (select v.video_id from video v where v.user_id = #{userId});
+    </select>
+    <select id="selectVideoPlayAmount7Day" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(video.view_num), 0) AS total_views
+        FROM (SELECT CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS day
+              FROM (SELECT 0 AS a
+                    UNION ALL
+                    SELECT 1
+                    UNION ALL
+                    SELECT 2
+                    UNION ALL
+                    SELECT 3
+                    UNION ALL
+                    SELECT 4
+                    UNION ALL
+                    SELECT 5
+                    UNION ALL
+                    SELECT 6
+                    UNION ALL
+                    SELECT 7
+                    UNION ALL
+                    SELECT 8
+                    UNION ALL
+                    SELECT 9) AS a
+                       CROSS JOIN (SELECT 0 AS a
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6
+                                   UNION ALL
+                                   SELECT 7
+                                   UNION ALL
+                                   SELECT 8
+                                   UNION ALL
+                                   SELECT 9) AS b
+                       CROSS JOIN (SELECT 0 AS a
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6
+                                   UNION ALL
+                                   SELECT 7
+                                   UNION ALL
+                                   SELECT 8
+                                   UNION ALL
+                                   SELECT 9) AS c) AS dates
+                 LEFT JOIN video ON DATE(video.create_time) = dates.day AND video.user_id = #{userId} and video.del_flag = '0'
+        WHERE dates.day BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
+        GROUP BY dates.day
+        ORDER BY dates.day;
+    </select>
+    <select id="selectVideoPlayAmountAdd" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(CASE
+                                WHEN DATE(video.create_time) > DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                                    THEN video.view_num END), 0) AS view_growth
+        FROM video
+        WHERE video.user_id = #{userId} and video.del_flag = '0';
+    </select>
+    <select id="selectFansAmountAdd" resultType="java.lang.Long">
+        SELECT COUNT(*) AS follower_growth
+        FROM user_follow
+        WHERE user_follow_id = 2
+          AND create_time between CURDATE() - INTERVAL 7 DAY and CURDATE();
+    </select>
+    <select id="selectFansAmount7Day" resultType="java.lang.Long">
+        SELECT COALESCE(COUNT(user_follow.user_id), 0) AS follower_growth
+        FROM (SELECT CURDATE() - INTERVAL 6 DAY AS day
+              UNION ALL
+              SELECT CURDATE() - INTERVAL 5 DAY
+              UNION ALL
+              SELECT CURDATE() - INTERVAL 4 DAY
+              UNION ALL
+              SELECT CURDATE() - INTERVAL 3 DAY
+              UNION ALL
+              SELECT CURDATE() - INTERVAL 2 DAY
+              UNION ALL
+              SELECT CURDATE() - INTERVAL 1 DAY
+              UNION ALL
+              SELECT CURDATE()) AS date_table
+                 LEFT JOIN
+             user_follow ON date_table.day = DATE(user_follow.create_time) AND user_follow.user_follow_id = 2
+        GROUP BY date_table.day
+        ORDER BY date_table.day;
+    </select>
+    <select id="selectVideoLikeAmountAdd" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(CASE
+                                WHEN DATE(video.create_time) > DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                                    THEN video.like_num END), 0) AS view_growth
+        FROM video
+        WHERE video.user_id = #{userId} and video.del_flag = '0'
+    </select>
+    <select id="selectVideoLikeAmount7Day" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(video.like_num), 0) AS total_views
+        FROM (SELECT CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS day
+              FROM (SELECT 0 AS a
+                    UNION ALL
+                    SELECT 1
+                    UNION ALL
+                    SELECT 2
+                    UNION ALL
+                    SELECT 3
+                    UNION ALL
+                    SELECT 4
+                    UNION ALL
+                    SELECT 5
+                    UNION ALL
+                    SELECT 6
+                    UNION ALL
+                    SELECT 7
+                    UNION ALL
+                    SELECT 8
+                    UNION ALL
+                    SELECT 9) AS a
+                       CROSS JOIN (SELECT 0 AS a
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6
+                                   UNION ALL
+                                   SELECT 7
+                                   UNION ALL
+                                   SELECT 8
+                                   UNION ALL
+                                   SELECT 9) AS b
+                       CROSS JOIN (SELECT 0 AS a
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6
+                                   UNION ALL
+                                   SELECT 7
+                                   UNION ALL
+                                   SELECT 8
+                                   UNION ALL
+                                   SELECT 9) AS c) AS dates
+                 LEFT JOIN video ON DATE(video.create_time) = dates.day AND video.user_id = #{userId} and video.del_flag = '0'
+        WHERE dates.day BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
+        GROUP BY dates.day
+        ORDER BY dates.day;
+    </select>
+    <select id="selectVideoCommentAmountAdd" resultType="java.lang.Long">
+        SELECT COUNT(*) as count
+        FROM video_user_comment
+        WHERE user_id = #{userId}
+          AND create_time between CURDATE() - INTERVAL 7 DAY and CURDATE();
+    </select>
+    <select id="selectVideoCommentAmount7Day" resultType="java.lang.Long">
+        SELECT IFNULL(comment_counts.comment_count, 0) AS comment_count
+        FROM (SELECT CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS day
+              FROM (SELECT 0 AS a
+                    UNION ALL
+                    SELECT 1
+                    UNION ALL
+                    SELECT 2
+                    UNION ALL
+                    SELECT 3
+                    UNION ALL
+                    SELECT 4
+                    UNION ALL
+                    SELECT 5
+                    UNION ALL
+                    SELECT 6
+                    UNION ALL
+                    SELECT 7
+                    UNION ALL
+                    SELECT 8
+                    UNION ALL
+                    SELECT 9) AS a
+                       CROSS JOIN (SELECT 0 AS a
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6
+                                   UNION ALL
+                                   SELECT 7
+                                   UNION ALL
+                                   SELECT 8
+                                   UNION ALL
+                                   SELECT 9) AS b
+                       CROSS JOIN (SELECT 0 AS a
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6
+                                   UNION ALL
+                                   SELECT 7
+                                   UNION ALL
+                                   SELECT 8
+                                   UNION ALL
+                                   SELECT 9) AS c) AS dates
+                 LEFT JOIN
+             (SELECT DATE(create_time) AS day,
+                     COUNT(*)          AS comment_count
+              FROM video_user_comment
+              WHERE user_id = #{userId}
+              GROUP BY DATE(create_time)) AS comment_counts ON dates.day = comment_counts.day
+        WHERE dates.day >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        ORDER BY dates.day;
+    </select>
+</mapper>
+

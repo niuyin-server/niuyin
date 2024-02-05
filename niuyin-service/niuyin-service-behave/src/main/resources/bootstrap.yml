@@ -1,5 +1,5 @@
 server:
-  port: 9609
+  port: 9601
 spring:
   application:
     name: niuyin-behave

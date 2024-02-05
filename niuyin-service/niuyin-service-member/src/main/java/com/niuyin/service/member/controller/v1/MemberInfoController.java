@@ -8,6 +8,7 @@ import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.service.member.constants.QiniuUserOssConstants;
 import com.niuyin.service.member.service.IMemberInfoService;
+import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,9 @@ public class MemberInfoController {
     @Resource
     private FileStorageService fileStorageService;
 
+    @Resource
+    private AliyunOssService aliyunOssService;
+
     /**
      * 上传用户背景图片
      */
@@ -43,17 +47,19 @@ public class MemberInfoController {
         if (originalFilename.endsWith(".png")
                 || originalFilename.endsWith(".jpg")
                 || originalFilename.endsWith(".jpeg")
+                || originalFilename.endsWith(".gif")
                 || originalFilename.endsWith(".webp")) {
-            String filePath = PathUtils.generateFilePath(originalFilename);
-            String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
-            return R.ok(url);
+//            String filePath = PathUtils.generateFilePath(originalFilename);
+//            String url = fileStorageService.uploadImgFile(file, QiniuUserOssConstants.PREFIX_URL, filePath);
+            return R.ok(aliyunOssService.uploadFile(file, "member/backImage"));
         } else {
             throw new CustomException(HttpCodeEnum.IMAGE_TYPE_FOLLOW);
         }
     }
 
     @PutMapping("/update")
-    public R<Boolean> updateMemberInfo(@RequestBody MemberInfo memberInfo) {;
+    public R<Boolean> updateMemberInfo(@RequestBody MemberInfo memberInfo) {
+        ;
         return R.ok(memberInfoService.saveOrUpdate(memberInfo));
     }
 

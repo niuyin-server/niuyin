@@ -2,5 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.notice.mapper.NoticeMapper">
 
+<!--    根据视频id查询记录-->
+    <select id="selectVideoById" resultType="com.niuyin.model.video.domain.Video">
+        select * from video where video_id = #{videoId}
+    </select>
+    <select id="batchSelectVideoAuthor" parameterType="java.util.List" resultType="com.niuyin.model.member.domain.Member">
+        SELECT m.nick_name,m.avatar FROM member m WHERE m.user_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>;
+    </select>
+
 </mapper>
 

@@ -4,6 +4,21 @@
 
 # springCloud微服务架构
 
+
+# 运行效果
+
+首页
+
+![index.png](docs/images/niuyin-index.png)
+
+用户页面
+
+![user.png](docs/images/niuyin-user.png)
+
+热门视频
+
+![hot.png](docs/images/niuyin-hot.png)
+
 # 项目开发文档
 
 [《三人行 汇总文档》](https://threesome-qiniu.yuque.com/org-wiki-threesome-qiniu-dzgh92/gdry98/wourvk591a6wmht1)

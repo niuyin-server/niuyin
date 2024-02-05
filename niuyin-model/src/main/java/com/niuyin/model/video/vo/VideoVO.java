@@ -1,8 +1,8 @@
 package com.niuyin.model.video.vo;
 
 import com.niuyin.model.video.domain.Video;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.niuyin.model.video.domain.VideoPosition;
+import lombok.*;
 
 /**
  * VideoVO
@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VideoVO extends Video {
+
     private Long commentNum;
     private String userNickName;
     private String userAvatar;
@@ -24,7 +25,12 @@ public class VideoVO extends Video {
     private boolean weatherFollow;
     // 标签数组
     private String[] tags;
+    // 图片集合
+    private String[] imageList;
+    // 位置信息
+    private VideoPosition position;
 
     // 热力值
     private Double hotScore;
+
 }

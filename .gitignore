@@ -37,3 +37,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### hanlp ###
+**/.bin/**
+
+### Spring Boot Properties ###
+**/bootstrap.yml
+

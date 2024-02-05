@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.niuyin.starter.video.service.impl.FfmpegVideoServiceImpl

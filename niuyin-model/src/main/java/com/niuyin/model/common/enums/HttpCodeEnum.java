@@ -3,8 +3,8 @@ package com.niuyin.model.common.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public enum HttpCodeEnum {
     // 成功
     SUCCESS(200, "操作成功"),
@@ -50,10 +50,14 @@ public enum HttpCodeEnum {
 
     UPLOAD_FAIL(10001, "上传失败"),
     BIND_FAIL(10002,"绑定失败"),
-    BIND_CONTENT_TITLE_FAIL(10003,"视频标题需在30字符以内"),
+    BIND_CONTENT_TITLE_FAIL(10003,"视频标题需在100字符以内"),
     BIND_CONTENT_DESC_FAIL(10004,"视频描述需在200字符以内"),
 
     VIDEO_TAG_NAME_FAIL(10010,"标签不得超过20字符"),
+
+    FAVORITE_FAIL(10011,"收藏失败"),
+
+    TELEPHONE_NOT_EXIST(10012,"该手机号未注册"),
     ;
 
     int code;

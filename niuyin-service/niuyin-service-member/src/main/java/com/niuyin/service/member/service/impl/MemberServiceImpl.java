@@ -16,14 +16,17 @@ import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.domain.UserSensitive;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
 import com.niuyin.service.member.constants.UserCacheConstants;
 import com.niuyin.service.member.mapper.MemberMapper;
+import com.niuyin.service.member.service.IMemberInfoService;
 import com.niuyin.service.member.service.IUserSensitiveService;
 import com.niuyin.service.member.service.IMemberService;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -64,6 +67,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     RemoteVideoService remoteVideoService;
 
     @Resource
+    IMemberInfoService memberInfoService;
+
+    @Resource
     private RabbitTemplate rabbitTemplate;
 
     /**
@@ -75,6 +81,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Member queryById(Long userId) {
         return this.getById(userId);
+    }
+
+    @Override
+    public List<Member> queryInIds(List<Long> userIds) {
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Member::getUserId, userIds);
+        return this.list(queryWrapper);
     }
 
     @Override
@@ -149,6 +162,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if (save) {
             String msg = user.getUserId().toString();
             rabbitTemplate.convertAndSend(BEHAVE_EXCHANGE, CREATE_ROUTING_KEY, msg);
+            // 创建用户详情表member_info
+            MemberInfo memberInfo = new MemberInfo();
+            memberInfo.setUserId(user.getUserId());
+            memberInfoService.save(memberInfo);
             return save;
         } else {
             throw new CustomException(null);
@@ -218,4 +235,16 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return this.updateById(updateUser);
     }
 
+    /**
+     * 获取头像
+     *
+     * @param userId
+     */
+    @Override
+    public String getAvatarById(Long userId) {
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(Member::getAvatar);
+        queryWrapper.eq(Member::getUserId, userId);
+        return this.getOne(queryWrapper).getAvatar();
+    }
 }

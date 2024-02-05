@@ -12,6 +12,12 @@
     <artifactId>niuyin-service-search</artifactId>
 
     <dependencies>
+        <!--分词器-->
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.7.6</version>
+        </dependency>
         <!--elasticsearch-->
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
@@ -37,15 +43,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
-        <!-- swagger2.0集成 -->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-        </dependency>
         <!-- SpringCloud Alibaba Sentinel Gateway -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -64,6 +61,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <!-- spring cloud alibaba dubbo -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-dubbo</artifactId>
+        </dependency>
+        <!--        dubbo api-->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-dubbo</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

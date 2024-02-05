@@ -1,12 +1,10 @@
 package com.niuyin.common.service;
 
+import cn.hutool.core.util.BooleanUtil;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.BoundSetOperations;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -261,7 +259,7 @@ public class RedisService {
      * @param score
      * @param <T>
      */
-    public <T> void setCacheZSet(String key, T t, long score) {
+    public <T> void setCacheZSet(String key, T t, double score) {
         redisTemplate.opsForZSet().add(key, t, score);
     }
 
@@ -297,4 +295,57 @@ public class RedisService {
     public Double getZSetScore(String key, String zkey) {
         return redisTemplate.opsForZSet().score(key, zkey);
     }
+
+    /**
+     * 获取集合元素, 并且把score值也获取
+     *
+     * @param key
+     * @param start
+     * @param end
+     * @return
+     */
+    public Set<ZSetOperations.TypedTuple<String>> zRangeWithScores(String key, long start, long end) {
+        return redisTemplate.opsForZSet().rangeWithScores(key, start, end);
+    }
+
+    /**
+     * 根据Score值查询集合元素
+     *
+     * @param key
+     * @param min 最小值
+     * @param max 最大值
+     * @return
+     */
+    public Set<String> zRangeByScore(String key, double min, double max) {
+        return redisTemplate.opsForZSet().rangeByScore(key, min, max);
+    }
+
+    /**
+     * 尝试获取分布式锁
+     *
+     * @param key
+     * @return
+     */
+    public boolean tryLock(String key, long timeout, TimeUnit unit) {
+        Boolean flag = redisTemplate.opsForValue().setIfAbsent(key, "1", timeout, unit);
+        return BooleanUtil.isTrue(flag);
+    }
+
+    /**
+     * 释放分布式锁
+     *
+     * @param key
+     */
+    public void unLock(String key) {
+        redisTemplate.delete(key);
+    }
+
+    /**
+     * redis 管道操作
+     */
+    public List pipeline(RedisCallback redisCallback) {
+        return redisTemplate.executePipelined(redisCallback);
+    }
+
+
 }

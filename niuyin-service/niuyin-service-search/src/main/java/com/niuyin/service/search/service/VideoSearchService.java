@@ -1,9 +1,13 @@
 package com.niuyin.service.search.service;
 
+import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
+import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
 import com.niuyin.service.search.domain.VideoSearchVO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * VideoSyncEsService
@@ -16,9 +20,9 @@ public interface VideoSearchService {
     /**
      * 视频同步新增到es
      *
-     * @param json videoSearchVO json
+     * @param videoId
      */
-    void videoSync(String json);
+    void videoSync(String videoId);
 
     /**
      * 更新视频索引文档
@@ -31,10 +35,35 @@ public interface VideoSearchService {
     void deleteVideoDoc(String videoId);
 
     /**
-     * es分页搜索视频
+     * es分页搜索视频 、保存搜索记录，查询搜索记录
      *
      * @param dto
      */
-    List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) throws Exception;
+    List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto);
 
+    PageDataInfo searchVideoFromESForApp(VideoSearchKeywordDTO dto);
+
+    /**
+     * 查询当天所有的搜索记录
+     *
+     * @param dto
+     * @return
+     * @throws Exception
+     */
+    List<VideoSearchVO> searchAllVideoFromES(VideoSearchKeywordDTO dto) throws Exception;
+
+    /**
+     * 从redis中获取热搜排行榜
+     *
+     * @return
+     */
+    Set findSearchHot(PageDTO pageDTO);
+
+    /**
+     * 视频搜索推荐
+     *
+     * @param videoSearchSuggestDTO
+     * @return
+     */
+    List<String> pushVideoSearchSuggest(VideoSearchSuggestDTO videoSearchSuggestDTO);
 }

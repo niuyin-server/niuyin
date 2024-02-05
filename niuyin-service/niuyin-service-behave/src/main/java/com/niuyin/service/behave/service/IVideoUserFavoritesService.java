@@ -2,6 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 
@@ -13,7 +14,34 @@ import com.niuyin.model.video.dto.VideoPageDto;
  */
 public interface IVideoUserFavoritesService extends IService<VideoUserFavorites> {
 
-    boolean videoFavorites(String videoId);
+    /**
+     * 收藏视频
+     */
+    boolean userOnlyFavoriteVideo(String videoId);
+
+    /**
+     * 取消收藏视频
+     */
+    boolean userUnFavoriteVideo(String videoId);
 
     IPage<VideoUserFavorites> queryFavoritePage(VideoPageDto pageDto);
+
+    /**
+     * 分页查询用户收藏的视频
+     *
+     * @param pageDto
+     * @return
+     */
+    PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
+    PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto);
+
+    /**
+     * 删除说有用户收藏此视频记录 ！！！
+     *
+     * @param videoId
+     * @return
+     */
+    boolean removeFavoriteRecordByVideoId(String videoId);
+
+    Long getFavoriteCountByVideoId(String videoId);
 }

@@ -24,11 +24,10 @@ public class VideoSearchVO {
     private String coverImage;
     // 视频地址
     private String videoUrl;
+    private String publishType;
     // 用户id
     private Long userId;
-    // 用户昵称
-    private String userNickName;
-    // 用户头像
-    private String userAvatar;
+    // 标签
+    private String[] tags;
 
 }

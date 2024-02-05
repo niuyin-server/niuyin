@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.behave.mapper.UserFavoriteMapper">
+
+    <select id="selectVideoCountByFavoriteId" resultType="Long">
+        SELECT count(1) as count
+        from user_favorite_video ufv
+        where ufv.favorite_id = #{favoriteId};
+    </select>
+
+    <select id="selectFavoriteVideoCoverLimit" resultType="String">
+        SELECT v.cover_image
+        FROM video v
+        WHERE v.video_id IN
+              (SELECT ufv.video_id
+               FROM (SELECT video_id
+                     FROM user_favorite_video
+                     WHERE favorite_id = #{favoriteId}
+                     ORDER BY create_time DESC
+                     LIMIT #{limit})
+                        AS ufv);
+    </select>
+
 </mapper>
 

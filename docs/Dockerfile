@@ -1,7 +1,7 @@
 # 设置JAVA版本
-FROM java:8
+FROM openjdk:8-jdk-alpine
 # 指定存储卷, 任何向/qiniu写入的信息都不会记录到容器存储层
-VOLUME /qiniu
+VOLUME /niuyin
 # 拷贝运行JAR包
 ARG JAR_FILE
 COPY ${JAR_FILE} app.jar

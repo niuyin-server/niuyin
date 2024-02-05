@@ -3,6 +3,8 @@ package com.niuyin.service.video.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.video.domain.VideoTag;
 
+import java.util.List;
+
 /**
  * 视频标签表(VideoTag)表服务接口
  *
@@ -26,5 +28,12 @@ public interface IVideoTagService extends IService<VideoTag> {
      * @return
      */
     VideoTag queryByTag(String tag);
+
+    /**
+     * 随机获取标签
+     *
+     * @return
+     */
+    List<VideoTag> random10VideoTags();
 
 }

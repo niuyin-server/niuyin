@@ -3,6 +3,7 @@ package com.niuyin.service.video;
 import com.alibaba.fastjson.JSON;
 import com.niuyin.model.video.domain.Video;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.ESSYNC_ROUTING_KEY;
+import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.*;
 
 /**
  * MqTest
@@ -46,6 +48,14 @@ public class MqTest {
             return message;
         });
         log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
+    }
+
+    @DisplayName("向video direct同步视频info发送消息")
+    @Test
+    void testDirectQueue() {
+        String msg = "1195178163873775616e0a90612";
+        rabbitTemplate.convertAndSend(EXCHANGE_VIDEO_DIRECT, DIRECT_KEY_INFO, msg);
+        log.debug(" ==> {} 发送了一条消息 ==> {}", EXCHANGE_VIDEO_DIRECT, msg);
     }
 
 }

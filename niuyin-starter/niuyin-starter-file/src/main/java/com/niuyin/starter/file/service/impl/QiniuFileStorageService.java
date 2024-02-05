@@ -66,16 +66,8 @@ public class QiniuFileStorageService implements FileStorageService {
     }
 
     @Override
-    public String uploadVideo(MultipartFile file) {
+    public String uploadVideo(MultipartFile file,String filePath) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
-            String datePath = sdf.format(new Date());
-            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-            //后缀和文件后缀一致
-            int index = file.getOriginalFilename().lastIndexOf(".");
-            // test.jpg -> .jpg
-            String fileType = file.getOriginalFilename().substring(index);
-            String filePath = datePath + uuid + fileType;
             InputStream inputStream = file.getInputStream();
             String upToken = Auth.create(qiniuOssConfigProperties.getAccessKey(), qiniuOssConfigProperties.getSecretKey())
                     .uploadToken(qiniuOssConfigProperties.getBucket());
@@ -88,7 +80,7 @@ public class QiniuFileStorageService implements FileStorageService {
                 // 视频转码
 //                QiniuUtils.transcoding(putRet.key, qiniuOssConfigProperties.getAccessKey(),
 //                        qiniuOssConfigProperties.getSecretKey(), qiniuOssConfigProperties.getBucket());
-                return "niuyin" + uuid + "video" + fileType;
+                return  filePath;
             } catch (QiniuException ex) {
                 Response r = ex.response;
                 System.err.println(r.toString());
