@@ -462,10 +462,8 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     public void packageCategoryVideoVoMemberData(CategoryVideoVo vo) {
         // 封装用户信息
         Member member = dubboMemberService.apiGetById(vo.getUserId());
-        if (!Objects.isNull(member)) {
-            Author author = BeanCopyUtils.copyBean(member, Author.class);
-            vo.setAuthor(author);
-        }
+        Author author = BeanCopyUtils.copyBean(Objects.isNull(member) ? new Member() : member, Author.class);
+        vo.setAuthor(author);
     }
 
 }
