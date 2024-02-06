@@ -409,7 +409,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Async
     public void packageMyUserVideoVO(MyVideoVO vo) {
-        vo.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId()));
+        Long likeNum = dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId());
+        vo.setLikeNum(Objects.isNull(likeNum) ? 0L : likeNum);
     }
 
     @Override
@@ -1133,10 +1134,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         // 封装观看量、点赞数、收藏量
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, vo.getVideoId());
         vo.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        vo.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId()));
-        vo.setFavoriteNum(dubboBehaveService.apiGetVideoFavoriteNum(vo.getVideoId()));
+        Long likeNum = dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId());
+        vo.setLikeNum(Objects.isNull(likeNum) ? 0L : likeNum);
+        Long favoriteNum = dubboBehaveService.apiGetVideoFavoriteNum(vo.getVideoId());
+        vo.setFavoriteNum(Objects.isNull(favoriteNum) ? 0L : favoriteNum);
         // 评论数
-        vo.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(vo.getVideoId()));
+        Long commentNum = dubboBehaveService.apiGetVideoCommentNum(vo.getVideoId());
+        vo.setCommentNum(Objects.isNull(commentNum) ? 0L : commentNum);
     }
 
     /**
@@ -1167,20 +1171,23 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         // 视频浏览量加一
         viewNumIncrement(videoId);
         Long loginUserId = UserContext.getUserId();
-        Member member = dubboMemberService.apiGetById(loginUserId);
         Video video = this.getById(videoId);
         VideoInfoVO videoInfoVO = BeanCopyUtils.copyBean(video, VideoInfoVO.class);
         // 视频作者
-        Author author = BeanCopyUtils.copyBean(dubboMemberService.apiGetById(videoInfoVO.getUserId()), Author.class);
+        Member member = dubboMemberService.apiGetById(videoInfoVO.getUserId());
+        Author author = BeanCopyUtils.copyBean(Objects.isNull(member) ? new Member() : member, Author.class);
         videoInfoVO.setAuthor(author);
         // 社交-是否关注
         videoInfoVO.setWeatherFollow(videoMapper.userWeatherAuthor(loginUserId, videoInfoVO.getUserId()) > 0);
         // 行为-观看、点赞、收藏、评论量；是否点赞、收藏
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoInfoVO.getVideoId());
         videoInfoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        videoInfoVO.setLikeNum(dubboBehaveService.apiGetVideoLikeNum(videoInfoVO.getVideoId()));
-        videoInfoVO.setFavoriteNum(dubboBehaveService.apiGetVideoFavoriteNum(videoInfoVO.getVideoId()));
-        videoInfoVO.setCommentNum(dubboBehaveService.apiGetVideoCommentNum(videoInfoVO.getVideoId()));
+        Long likeNum = dubboBehaveService.apiGetVideoLikeNum(videoInfoVO.getVideoId());
+        videoInfoVO.setLikeNum(Objects.isNull(likeNum) ? 0L : likeNum);
+        Long favoriteNum = dubboBehaveService.apiGetVideoFavoriteNum(videoInfoVO.getVideoId());
+        videoInfoVO.setFavoriteNum(Objects.isNull(favoriteNum) ? 0L : favoriteNum);
+        Long commentNum = dubboBehaveService.apiGetVideoCommentNum(videoInfoVO.getVideoId());
+        videoInfoVO.setCommentNum(Objects.isNull(commentNum) ? 0L : commentNum);
         videoInfoVO.setWeatherLike(videoMapper.selectUserLikeVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
         videoInfoVO.setWeatherFavorite(videoMapper.userWeatherFavoriteVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
         // 视频标签
