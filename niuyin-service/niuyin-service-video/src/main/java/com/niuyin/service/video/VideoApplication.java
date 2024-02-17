@@ -1,10 +1,10 @@
 package com.niuyin.service.video;
 
 import com.niuyin.common.annotations.EnableRedisConfig;
-import com.niuyin.common.swagger.Swagger2Configuration;
-import com.niuyin.feign.config.FeignConfig;
 import com.niuyin.common.annotations.EnableUserTokenInterceptor;
 import com.niuyin.common.config.MybatisPlusConfig;
+import com.niuyin.common.swagger.Swagger2Configuration;
+import com.niuyin.feign.config.FeignConfig;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -15,7 +15,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -30,7 +29,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableUserTokenInterceptor
 @EnableRedisConfig
 @EnableScheduling
-@EnableAsync
 @EnableCaching
 @EnableDubbo
 @Import({MybatisPlusConfig.class, Swagger2Configuration.class})

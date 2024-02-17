@@ -1,11 +1,10 @@
 package com.niuyin.service.video.schedule;
 
 import com.niuyin.common.service.RedisService;
-import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -69,7 +68,7 @@ public class UpdateVideoTask {
     /**
      * 从redis更新视频浏览量
      */
-    @Scheduled(fixedRate = 1000 * 60 * 10)
+//    @Scheduled(fixedRate = 1000 * 60 * 10)
     public void updateViewCount() {
         log.info("开始从redis更新视频浏览量==>");
         //获取redis中的浏览量

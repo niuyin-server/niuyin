@@ -2,6 +2,7 @@ package com.niuyin.service.notice.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
 
@@ -20,4 +21,17 @@ public interface INoticeService extends IService<Notice> {
      * @return
      */
     IPage<Notice> queryUserNoticePage(NoticePageDTO pageDTO);
+
+    /**
+     * 获取未读消息数量
+     */
+    Long getUnreadNoticeCount();
+
+    /**
+     * 分页行为通知
+     *
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo getBehaveNoticePage(NoticePageDTO pageDTO);
 }
