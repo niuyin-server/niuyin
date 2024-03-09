@@ -30,6 +30,9 @@ public abstract class AbstractLoginStrategyService<T> implements LoginStrategy<T
      */
     protected abstract Long verifyCredentials(T loginDto);
 
+    /**
+     * 记录登录信息
+     */
     protected abstract void recordLoginUserInfo(Long userId);
 
     /**
@@ -41,6 +44,7 @@ public abstract class AbstractLoginStrategyService<T> implements LoginStrategy<T
     @Override
     public String login(T loginDto) {
         Long userId = verifyCredentials(loginDto);
+        recordLoginUserInfo(userId);
         return JwtUtil.getToken(userId);
     }
 }

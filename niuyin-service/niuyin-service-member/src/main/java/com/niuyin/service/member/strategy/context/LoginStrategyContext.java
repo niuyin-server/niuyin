@@ -15,8 +15,8 @@ public class LoginStrategyContext {
      * 登录策略
      */
     public <T> String executeLoginStrategy(T loginDto, LoginTypeEnum loginTypeEnum) {
-        AbstractLoginStrategyService<T> loginByName = LoginStrategyFactory.getLoginService(loginTypeEnum.getStrategy());
-        return loginByName.login(loginDto);
+        AbstractLoginStrategyService<T> loginService = LoginStrategyFactory.getLoginService(loginTypeEnum.getStrategy());
+        return loginService.login(loginDto);
     }
 
 }
