@@ -35,6 +35,7 @@ public class AuthorizeFilter implements GlobalFilter {
                 || request.getURI().getPath().contains("/swagger-ui")
                 || request.getURI().getPath().contains("/api/v1/feed")
                 || request.getURI().getPath().contains("/api/v1/app/recommend")
+                || request.getURI().getPath().contains("/websocket")
         ) {
             // 请求头 userId制空
             ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> {

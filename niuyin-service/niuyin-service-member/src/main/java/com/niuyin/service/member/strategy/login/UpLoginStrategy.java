@@ -73,6 +73,7 @@ public class UpLoginStrategy extends AbstractLoginStrategyService<LoginUserDTO> 
         Member user = new Member();
         user.setUserId(userId);
         user.setLoginIp(IpUtils.getIpAddr(ServletUtils.getRequest()));
+        user.setLoginLocation(IpUtils.getIpLocation(ServletUtils.getRequest()));
         user.setLoginDate(LocalDateTime.now());
         memberService.updateById(user);
     }
