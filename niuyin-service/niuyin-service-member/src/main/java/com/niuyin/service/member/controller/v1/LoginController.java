@@ -3,7 +3,9 @@ package com.niuyin.service.member.controller.v1;
 import com.niuyin.common.constant.Constants;
 import com.niuyin.common.domain.R;
 import com.niuyin.model.member.dto.SmsLoginDTO;
+import com.niuyin.model.member.enums.LoginTypeEnum;
 import com.niuyin.service.member.service.LoginService;
+import com.niuyin.service.member.strategy.context.LoginStrategyContext;
 import com.niuyin.starter.sms.domain.model.SmsCode;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,9 @@ public class LoginController {
     @Resource
     private LoginService loginService;
 
+    @Resource
+    LoginStrategyContext loginStrategyContext;
+
     /**
      * 发送登录验证码
      *
@@ -47,7 +52,8 @@ public class LoginController {
     @ApiOperation("手机短信登录")
     @PostMapping("/sms-login")
     public R<Map<String, String>> smsLogin(@Validated @RequestBody SmsLoginDTO smsLoginDTO) {
-        String token = loginService.smsLogin(smsLoginDTO);
+//        String token = loginService.smsLogin(smsLoginDTO);
+        String token = loginStrategyContext.executeLoginStrategy(smsLoginDTO, LoginTypeEnum.SMS);
         Map<String, String> map = new HashMap<>();
         map.put(Constants.TOKEN, token);
         return R.ok(map);
