@@ -11,6 +11,7 @@ import lombok.Getter;
  **/
 @Getter
 @AllArgsConstructor
+@Deprecated
 public enum NoticeTypeEnum {
 
     LIKE("0", "点赞"),

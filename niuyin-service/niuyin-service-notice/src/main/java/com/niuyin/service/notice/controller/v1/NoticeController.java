@@ -1,4 +1,4 @@
-package com.niuyin.service.notice.controller;
+package com.niuyin.service.notice.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -8,7 +8,6 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
@@ -41,9 +40,6 @@ public class NoticeController {
 
     @Resource
     private RedisService redisService;
-
-    @Resource
-    RemoteMemberService remoteMemberService;
 
     @Resource
     NoticeMapper noticeMapper;

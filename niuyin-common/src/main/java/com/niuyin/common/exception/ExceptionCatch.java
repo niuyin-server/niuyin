@@ -5,9 +5,7 @@ import com.niuyin.model.common.enums.HttpCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -22,10 +20,22 @@ public class ExceptionCatch {
      * @param e
      * @return
      */
-    @ExceptionHandler(Exception.class)
-    public R<?> exception(Exception e) {
+    @ExceptionHandler(Throwable.class)
+    public R<?> exception(Throwable e) {
         log.error("catch exception:{}", e.getMessage());
         return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), e.getMessage());
+    }
+
+    /**
+     * 处理可控异常  RuntimeException
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public R<?> exception(RuntimeException e) {
+        log.error("Catch RuntimeException: {}", e.getMessage());
+        return R.fail(e.getMessage());
     }
 
     /**
@@ -36,7 +46,7 @@ public class ExceptionCatch {
      */
     @ExceptionHandler(CustomException.class)
     public R<?> exception(CustomException e) {
-        log.error("catch exception:{}", e.getMessage());
+        log.error("Catch CustomException: code: {} msg: {}", e.getHttpCodeEnum().getCode(), e.getHttpCodeEnum().getMsg());
         return R.fail(e.getHttpCodeEnum().getCode(), e.getHttpCodeEnum().getMsg());
     }
 
@@ -48,7 +58,7 @@ public class ExceptionCatch {
      */
     @ExceptionHandler(MultipartException.class)
     public R<?> handleBusinessException(MaxUploadSizeExceededException e) {
-        log.error("catch exception:{}", e.getMessage());
+        log.error("Catch MultipartException:{}", e.getMessage());
         String msg;
         if (e.getCause().getCause() instanceof FileUploadBase.FileSizeLimitExceededException) {
             msg = "上传文件过大[单文件大小不得超过1M]";

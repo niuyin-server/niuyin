@@ -8,19 +8,19 @@ import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.EmailUtils;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
-import com.niuyin.model.member.domain.MemberInfo;
-import com.niuyin.model.member.vo.MemberInfoVO;
-import com.niuyin.service.member.constants.QiniuUserOssConstants;
-import com.niuyin.service.member.constants.UserCacheConstants;
-import com.niuyin.service.member.service.IMemberInfoService;
-import com.niuyin.service.member.service.IMemberService;
 import com.niuyin.model.member.domain.Member;
+import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
+import com.niuyin.model.member.enums.LoginTypeEnum;
+import com.niuyin.model.member.vo.MemberInfoVO;
+import com.niuyin.service.member.constants.UserCacheConstants;
+import com.niuyin.service.member.service.IMemberInfoService;
+import com.niuyin.service.member.service.IMemberService;
+import com.niuyin.service.member.strategy.context.LoginStrategyContext;
 import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
 import io.swagger.annotations.ApiOperation;
@@ -59,6 +59,9 @@ public class MemberController {
     @Resource
     private AliyunOssService aliyunOssService;
 
+    @Resource
+    LoginStrategyContext loginStrategyContext;
+
     /**
      * 登录
      *
@@ -69,7 +72,8 @@ public class MemberController {
     @PostMapping("/login")
     public R<Map<String, String>> login(@RequestBody LoginUserDTO loginUserDTO) {
         log.debug("登录用户：{}", loginUserDTO);
-        String token = memberService.login(loginUserDTO);
+//        String token = memberService.login(loginUserDTO);
+        String token = loginStrategyContext.executeLoginStrategy(loginUserDTO, LoginTypeEnum.UP);
         Map<String, String> map = new HashMap<>();
         map.put(Constants.TOKEN, token);
         return R.ok(map);
