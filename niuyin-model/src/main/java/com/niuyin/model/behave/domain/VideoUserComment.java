@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -25,8 +26,9 @@ public class VideoUserComment implements Serializable {
     @TableId(value = "comment_id", type = IdType.AUTO)
     private Long commentId;
     /**
-     * 新闻id
+     * 视频id
      */
+    @NotNull
     private String videoId;
     /**
      * 用户id
