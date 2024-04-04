@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -45,6 +47,8 @@ public class VideoUserComment implements Serializable {
     /**
      * 评论内容
      */
+    @NotBlank
+    @Size(max = 300, message = "评论内容不能超过300字符")
     private String content;
     /**
      * 状态：0默认1禁止

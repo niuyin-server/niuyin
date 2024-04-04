@@ -1,8 +1,8 @@
 package com.niuyin.model.behave.dto;
 
-import com.niuyin.model.behave.domain.VideoUserComment;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * VideoUserCommentPageDTO
@@ -10,9 +10,10 @@ import lombok.EqualsAndHashCode;
  * @AUTHOR: roydon
  * @DATE: 2023/10/30
  **/
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class VideoUserCommentPageDTO extends VideoUserComment {
+public class VideoUserCommentPageDTO {
+    @NotNull
+    private String videoId;
     private Integer pageNum = 1;
     private Integer pageSize = 10;
 }
