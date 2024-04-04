@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
@@ -18,6 +17,7 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 import com.niuyin.model.behave.vo.VideoUserCommentVO;
+import com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
@@ -38,7 +38,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -204,8 +203,8 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
      */
     @Override
     public PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO) {
-        String newsId = pageDTO.getVideoId();
-        if (StringUtil.isEmpty(newsId)) {
+        String videoId = pageDTO.getVideoId();
+        if (StringUtil.isEmpty(videoId)) {
             return PageDataInfo.emptyPage();
         }
         IPage<VideoUserComment> iPage = this.getRootListByVideoId(pageDTO);
@@ -245,7 +244,9 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
                     appNewsCommentVO.setChildren(childrenVOS);
                     voList.add(appNewsCommentVO);
                 })).toArray(CompletableFuture[]::new)).join();
-        return PageDataInfo.genPageData(voList, iPage.getTotal());
+        // 获取总评论数
+        Long queryCommentCountByVideoId = this.queryCommentCountByVideoId(videoId);
+        return PageDataInfo.genPageData(voList, queryCommentCountByVideoId);
     }
 
     /**
@@ -259,5 +260,20 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         LambdaQueryWrapper<VideoUserComment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserComment::getVideoId, videoId);
         return this.remove(queryWrapper);
+    }
+
+    /**
+     * 分页视频父评论
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO) {
+        pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
+        List<AppVideoUserCommentParentVO> appVideoUserCommentParentVOS = videoUserCommentMapper.selectCommentParentPage(pageDTO);
+        // 获取总评论数
+        Long queryCommentCountByVideoId = this.queryCommentCountByVideoId(pageDTO.getVideoId());
+        return PageDataInfo.genPageData(appVideoUserCommentParentVOS, queryCommentCountByVideoId);
     }
 }
