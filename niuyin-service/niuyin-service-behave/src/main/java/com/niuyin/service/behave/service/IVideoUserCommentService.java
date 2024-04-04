@@ -7,7 +7,6 @@ import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * (VideoUserComment)表服务接口
@@ -73,4 +72,12 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @return
      */
     boolean removeCommentByVideoId(String videoId);
+
+    /**
+     * 分页视频父评论
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO);
+
 }
