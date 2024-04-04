@@ -75,9 +75,17 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
 
     /**
      * 分页视频父评论
+     *
      * @param pageDTO
      * @return
      */
     PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO);
 
+    /**
+     * 评论视频
+     *
+     * @param videoUserComment
+     * @return
+     */
+    boolean commentVideo(VideoUserComment videoUserComment);
 }
