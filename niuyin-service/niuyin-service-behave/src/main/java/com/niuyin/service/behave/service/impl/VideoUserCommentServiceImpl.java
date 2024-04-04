@@ -276,4 +276,53 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         Long queryCommentCountByVideoId = this.queryCommentCountByVideoId(pageDTO.getVideoId());
         return PageDataInfo.genPageData(appVideoUserCommentParentVOS, queryCommentCountByVideoId);
     }
+
+    /**
+     * 评论视频
+     *
+     * @param videoUserComment
+     * @return
+     */
+    @Override
+    public boolean commentVideo(VideoUserComment videoUserComment) {
+        videoUserComment.setCreateTime(LocalDateTime.now());
+        videoUserComment.setUserId(UserContext.getUser().getUserId());
+        boolean save = this.save(videoUserComment);
+        if (save) {
+            commentVideoSendNotice2MQ(videoUserComment.getVideoId(), videoUserComment.getContent(), UserContext.getUser().getUserId());
+        }
+        return true;
+    }
+
+    /**
+     * 用户评论视频，通知mq
+     *
+     * @param videoId
+     * @param operateUserId
+     */
+    private void commentVideoSendNotice2MQ(String videoId, String content, Long operateUserId) {
+        // 根据视频获取发布者id
+        Video video = videoUserLikeMapper.selectVideoByVideoId(videoId);
+        if (StringUtils.isNull(video)) {
+            return;
+        }
+        if (operateUserId.equals(video.getUserId())) {
+            return;
+        }
+        // 封装notice实体
+        Notice notice = new Notice();
+        notice.setOperateUserId(operateUserId);
+        notice.setNoticeUserId(video.getUserId());
+        notice.setVideoId(videoId);
+        notice.setContent(content);
+        notice.setRemark("评论了");
+        notice.setNoticeType(NoticeType.COMMENT_ADD.getCode());
+        notice.setReceiveFlag(ReceiveFlag.WAIT.getCode());
+        notice.setCreateTime(LocalDateTime.now());
+        // notice消息转换为json
+        String msg = JSON.toJSONString(notice);
+        rabbitTemplate.convertAndSend(NOTICE_DIRECT_EXCHANGE, NOTICE_CREATE_ROUTING_KEY, msg);
+        log.debug(" ==> {} 发送了一条消息 ==> {}", NOTICE_DIRECT_EXCHANGE, msg);
+    }
+
 }
