@@ -51,6 +51,10 @@ public class VideoUserComment implements Serializable {
     @Size(max = 300, message = "评论内容不能超过300字符")
     private String content;
     /**
+     * 点赞量
+     */
+    private Long likeNum;
+    /**
      * 状态：0默认1禁止
      */
     private String status;
