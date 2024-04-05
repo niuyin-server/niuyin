@@ -249,12 +249,12 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
 
 
     @Async
-    protected void favoriteNumIncrease(String videoId) {
+    public void favoriteNumIncrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, 1);
     }
 
     @Async
-    protected void favoriteNumDecrease(String videoId) {
+    public void favoriteNumDecrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, -1);
     }
 
