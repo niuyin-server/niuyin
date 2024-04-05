@@ -15,6 +15,41 @@
         where video_id = #{videoId}
           and origin_id = 0
           and m.status = '0'
+        order by ${orderBy} desc
+        limit #{pageNum},#{pageSize};
+    </select>
+    <select id="selectCommentParentPageOrderByCreateTime"
+            resultType="com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO">
+        select vuc.*,
+               m.nick_name,
+               m.avatar,
+               (SELECT COUNT(*)
+                FROM video_user_comment vuc2
+                WHERE vuc2.origin_id = vuc.comment_id
+                  and vuc2.status = '0') AS childrenCount
+        from video_user_comment vuc
+                 left join member m on vuc.user_id = m.user_id
+        where video_id = #{videoId}
+          and origin_id = 0
+          and m.status = '0'
+        order by vuc.create_time desc
+        limit #{pageNum},#{pageSize};
+    </select>
+    <select id="selectCommentParentPageOrderByLikeNum"
+            resultType="com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO">
+        select vuc.*,
+               m.nick_name,
+               m.avatar,
+               (SELECT COUNT(*)
+                FROM video_user_comment vuc2
+                WHERE vuc2.origin_id = vuc.comment_id
+                  and vuc2.status = '0') AS childrenCount
+        from video_user_comment vuc
+                 left join member m on vuc.user_id = m.user_id
+        where video_id = #{videoId}
+          and origin_id = 0
+          and m.status = '0'
+        order by vuc.like_num desc
         limit #{pageNum},#{pageSize};
     </select>
 
