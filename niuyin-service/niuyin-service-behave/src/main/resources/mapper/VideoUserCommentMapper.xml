@@ -53,4 +53,20 @@
         limit #{pageNum},#{pageSize};
     </select>
 
+    <select id="selectCommentReplayPageByOriginId" resultType="com.niuyin.model.behave.domain.VideoUserComment">
+        select vuc.*
+        from video_user_comment vuc
+        where vuc.origin_id = #{commentId}
+          and vuc.status = '0'
+        order by ${orderBy} desc
+        limit #{pageNum},#{pageSize};
+    </select>
+
+    <select id="selectCommentReplayPageCountByOriginId" resultType="java.lang.Long">
+        select count(*)
+        from video_user_comment vuc
+        where vuc.origin_id = #{commentId}
+          and vuc.status = '0'
+    </select>
+
 </mapper>
