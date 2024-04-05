@@ -271,6 +271,17 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     @Override
     public PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO) {
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
+        switch (pageDTO.getOrderBy()) {
+            case "0":
+                pageDTO.setOrderBy("create_time");
+                break;
+            case "1":
+                pageDTO.setOrderBy("like_num");
+                break;
+            default:
+                pageDTO.setOrderBy("create_time");
+                break;
+        }
         List<AppVideoUserCommentParentVO> appVideoUserCommentParentVOS = videoUserCommentMapper.selectCommentParentPage(pageDTO);
         // 获取总评论数
         Long queryCommentCountByVideoId = this.queryCommentCountByVideoId(pageDTO.getVideoId());
