@@ -15,9 +15,11 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 import com.niuyin.model.behave.vo.VideoUserCommentVO;
 import com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO;
+import com.niuyin.model.behave.vo.app.VideoCommentReplayVO;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
@@ -66,7 +68,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     @Resource
     private RedisService redisService;
 
-    @DubboReference
+    @DubboReference(mock = "fail:return null")
     private DubboMemberService dubboMemberService;
 
     /**
@@ -336,4 +338,45 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         log.debug(" ==> {} 发送了一条消息 ==> {}", NOTICE_DIRECT_EXCHANGE, msg);
     }
 
+    /**
+     * 视频评论回复分页
+     */
+    @Override
+    public PageDataInfo getCommentReplyPage(VideoCommentReplayPageDTO pageDTO) {
+        pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
+        switch (pageDTO.getOrderBy()) {
+            case "0":
+                pageDTO.setOrderBy("create_time");
+                break;
+            case "1":
+                pageDTO.setOrderBy("like_num");
+                break;
+            default:
+                pageDTO.setOrderBy("create_time");
+                break;
+        }
+        List<VideoUserComment> videoUserComments = videoUserCommentMapper.selectCommentReplayPageByOriginId(pageDTO);
+        Long total = videoUserCommentMapper.selectCommentReplayPageCountByOriginId(pageDTO);
+        // 封装回复
+        List<VideoCommentReplayVO> videoCommentReplayVOS = BeanCopyUtils.copyBeanList(videoUserComments, VideoCommentReplayVO.class);
+        videoCommentReplayVOS.forEach(c -> {
+            Member cUser = dubboMemberService.apiGetById(c.getUserId());
+            if (StringUtils.isNotNull(cUser)) {
+                c.setNickName(cUser.getNickName());
+                c.setAvatar(StringUtils.isEmpty(cUser.getAvatar()) ? "" : cUser.getAvatar());
+            }
+            // 回复
+            if (!c.getParentId().equals(c.getOriginId())) {
+                // 回复了回复
+                VideoUserComment byReplayComment = this.getById(c.getParentId());
+                Long byReplayUserId = byReplayComment.getUserId();
+                c.setReplayUserId(byReplayComment.getUserId());
+                Member byReplayUser = dubboMemberService.apiGetById(byReplayUserId);
+                if (StringUtils.isNotNull(byReplayUser)) {
+                    c.setReplayUserNickName(byReplayUser.getNickName());
+                }
+            }
+        });
+        return PageDataInfo.genPageData(videoCommentReplayVOS, total);
+    }
 }

@@ -3,6 +3,7 @@ package com.niuyin.service.behave.controller.app;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +41,14 @@ public class AppVideoUserCommentController {
     @PostMapping
     public R<Boolean> commentVideo(@Validated @RequestBody VideoUserComment videoUserComment) {
         return R.ok(videoUserCommentService.commentVideo(videoUserComment));
+    }
+
+    /**
+     * 分页评论回复
+     */
+        @PostMapping("/replyPage")
+    public PageDataInfo queryCommentReplyPage(@Validated @RequestBody VideoCommentReplayPageDTO pageDTO) {
+        return videoUserCommentService.getCommentReplyPage(pageDTO);
     }
 
 }

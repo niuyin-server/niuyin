@@ -2,6 +2,7 @@ package com.niuyin.service.behave.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 import com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO;
 import org.apache.ibatis.annotations.Mapper;
@@ -26,5 +27,8 @@ public interface VideoUserCommentMapper extends BaseMapper<VideoUserComment> {
     List<AppVideoUserCommentParentVO> selectCommentParentPageOrderByCreateTime(VideoUserCommentPageDTO pageDTO);
     List<AppVideoUserCommentParentVO> selectCommentParentPageOrderByLikeNum(VideoUserCommentPageDTO pageDTO);
 
+    List<VideoUserComment> selectCommentReplayPageByOriginId(VideoCommentReplayPageDTO pageDTO);
+
+    Long selectCommentReplayPageCountByOriginId(VideoCommentReplayPageDTO pageDTO);
 }
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
 import java.util.List;
@@ -88,4 +89,10 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @return
      */
     boolean commentVideo(VideoUserComment videoUserComment);
+
+    /**
+     * 视频评论回复分页
+     */
+    PageDataInfo getCommentReplyPage(VideoCommentReplayPageDTO pageDTO);
+
 }
