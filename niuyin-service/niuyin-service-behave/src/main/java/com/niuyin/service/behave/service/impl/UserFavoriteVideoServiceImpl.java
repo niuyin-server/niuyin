@@ -99,7 +99,7 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
         List<VideoUserFavorites> videoUserFavorites = videoUserFavoritesService.list(vufQW);
         if (dbList.isEmpty() && videoUserFavorites.isEmpty()) {
             //将本条收藏信息存储到redis（key为videoId,value为videoUrl）
-            favoriteNumIncrease(userFavoriteVideoDTO.getVideoId());
+//            favoriteNumIncrease(userFavoriteVideoDTO.getVideoId());
             // 发送消息到通知
             sendNotice2MQ(userFavoriteVideoDTO.getVideoId(), userId);
         }
@@ -107,7 +107,7 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
         Long[] oldIds = dbList.stream().map(UserFavoriteVideo::getFavoriteId).toArray(Long[]::new);
         Long[] newIds = userFavoriteVideoDTO.getFavorites();
         if (StringUtils.isNull(newIds)) {
-            favoriteNumDecrease(userFavoriteVideoDTO.getVideoId());
+//            favoriteNumDecrease(userFavoriteVideoDTO.getVideoId());
         }
         // 合并新老收藏夹并去重
         Long[] mergedIds = Stream.concat(Arrays.stream(oldIds), Arrays.stream(newIds)).distinct().toArray(Long[]::new);
@@ -179,12 +179,12 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     }
 
     @Async
-    protected void favoriteNumIncrease(String videoId) {
+    public void favoriteNumIncrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, 1);
     }
 
     @Async
-    protected void favoriteNumDecrease(String videoId) {
+    public void favoriteNumDecrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, -1);
     }
 }
