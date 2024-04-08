@@ -24,6 +24,8 @@ public enum HttpCodeEnum {
     LOGIN_ERROR(505, "用户名或密码错误"),
     PASSWORD_ERROR(510, "密码错误"),
 
+    SYSTEM_FALLBACK(600, "系统繁忙，请稍后重试"),
+
     USER_NOT_EXISTS(1000, "用户名不存在"),
     USERNAME_NOT_NULL(1001, "用户名不能为空"),
     NICKNAME_NOT_NULL(1002, "昵称不能为空"),
