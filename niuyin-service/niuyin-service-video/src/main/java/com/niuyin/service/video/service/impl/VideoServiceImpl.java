@@ -14,6 +14,7 @@ import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.audit.SensitiveWordUtil;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
@@ -139,6 +140,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Resource
     private FfmpegVideoService ffmpegVideoService;
 
+    @Resource
+    private UserFollowVideoPushService userFollowVideoPushService;
+
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
      */
@@ -173,6 +177,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     /**
      * 发布视频
+     * todo 分布式锁解决幂等性
+     * todo 优化使用异步完成各个步骤
      *
      * @param videoPublishDto
      * @return
@@ -226,30 +232,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 }
                 // 发布成功添加缓存
                 redisService.setCacheObject(VIDEO_INFO_PREFIX + video.getVideoId(), video);
-                // 1.发送整个video对象发送消息，
-                // 待添加视频封面
-//                VideoSearchVO videoSearchVO = new VideoSearchVO();
-//                videoSearchVO.setVideoId(video.getVideoId());
-//                videoSearchVO.setVideoTitle(video.getVideoTitle());
-//                // localdatetime转换为date
-//                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-//                videoSearchVO.setCoverImage(video.getCoverImage());
-//                videoSearchVO.setVideoUrl(video.getVideoUrl());
-//                videoSearchVO.setUserId(userId);
-//                // 获取用户信息
-//                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-//                if (StringUtils.isNotNull(userCache)) {
-//                    videoSearchVO.setUserNickName(userCache.getNickName());
-//                    videoSearchVO.setUserAvatar(userCache.getAvatar());
-//                } else {
-//                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-//                    videoSearchVO.setUserNickName(remoteUser.getNickName());
-//                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
-//                }
-//                String msg = JSON.toJSONString(videoSearchVO);
-                // 2.利用消息后置处理器添加消息头
+                // 发送rabbit消息
                 rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, videoId, message -> {
-                    // 3.添加延迟消息属性，设置1分钟
+                    // 添加延迟消息属性，设置1分钟
                     message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
                     return message;
                 });
@@ -259,6 +244,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 // 同步视频详情
                 rabbitTemplate.convertAndSend(EXCHANGE_VIDEO_DIRECT, DIRECT_KEY_INFO, videoId);
                 log.debug(" ==> {} 发送了一条消息 ==> {}", EXCHANGE_VIDEO_DIRECT, videoId);
+                // 同步用户发件箱
+                userFollowVideoPushService.pusOutBoxFeed(video.getUserId(), videoId, DateUtils.toDate(video.getCreateTime()).getTime());
                 return videoId;
             } else {
                 throw new CustomException(null);
@@ -308,29 +295,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     videoPosition.setVideoId(video.getVideoId());
                     boolean save1 = videoPositionService.save(videoPosition);
                 }
-                // 1.发送整个video对象发送消息
-//                VideoSearchVO videoSearchVO = new VideoSearchVO();
-//                videoSearchVO.setVideoId(video.getVideoId());
-//                videoSearchVO.setVideoTitle(video.getVideoTitle());
-//                // localdatetime转换为date
-//                videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-//                videoSearchVO.setCoverImage(video.getCoverImage());
-//                videoSearchVO.setVideoUrl(video.getVideoUrl());
-//                videoSearchVO.setUserId(userId);
-//                // 获取用户信息
-//                Member userCache = redisService.getCacheObject("member:userinfo:" + userId);
-//                if (StringUtils.isNotNull(userCache)) {
-//                    videoSearchVO.setUserNickName(userCache.getNickName());
-//                    videoSearchVO.setUserAvatar(userCache.getAvatar());
-//                } else {
-//                    Member remoteUser = remoteMemberService.userInfoById(userId).getData();
-//                    videoSearchVO.setUserNickName(remoteUser.getNickName());
-//                    videoSearchVO.setUserAvatar(remoteUser.getAvatar());
-//                }
-//                String msg = JSON.toJSONString(videoSearchVO);
-                // 2.利用消息后置处理器添加消息头
+                // 发送消息
                 rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, video.getVideoId(), message -> {
-                    // 3.添加延迟消息属性，设置1分钟
+                    // 添加延迟消息属性，设置1分钟
                     message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
                     return message;
                 });
@@ -339,6 +306,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 interestPushService.cacheVideoToTagRedis(video.getVideoId(), Arrays.asList(videoPublishDto.getVideoTags()));
                 // 同步视频分类库
 
+                // 同步视频观看量到redis
+
+                // 同步用户发件箱
+                userFollowVideoPushService.pusOutBoxFeed(video.getUserId(), video.getVideoId(), DateUtils.toDate(video.getCreateTime()).getTime());
                 return video.getVideoId();
             }
         } else {
@@ -1226,5 +1197,30 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoUpdate.setVideoId(videoId);
         videoUpdate.setVideoInfo(new Gson().toJson(mediaVideoInfo));
         this.updateById(videoUpdate);
+    }
+
+    /**
+     * 封装videoVO
+     *
+     * @param videoIds
+     * @return
+     */
+    @Override
+    public List<VideoVO> packageVideoVOByVideoIds(Long loginUserId,List<String> videoIds) {
+        List<Video> videoList = this.exitsByVideoIds(videoIds);
+        List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
+        // 封装VideoVO
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList.stream()
+                .map(vo -> packageVideoVOAsync(vo, loginUserId)).toArray(CompletableFuture[]::new));
+        allFutures.join();
+        return videoVOList;
+    }
+
+    @Override
+    public List<Video> exitsByVideoIds(List<String> videoIds) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Video::getVideoId, videoIds)
+                .eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
+        return this.list(queryWrapper);
     }
 }
