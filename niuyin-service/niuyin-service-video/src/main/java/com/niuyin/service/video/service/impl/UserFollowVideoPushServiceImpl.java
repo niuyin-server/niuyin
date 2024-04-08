@@ -13,10 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
-import static com.niuyin.model.constants.VideoConstants.*;
+import static com.niuyin.model.constants.VideoConstants.IN_FOLLOW;
+import static com.niuyin.model.constants.VideoConstants.OUT_FOLLOW;
 
 /**
  * userFollowVideoPushServiceImpl
@@ -125,12 +128,12 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
         // 查看关注人的发件箱
         List<Set<DefaultTypedTuple>> result = redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (Long followId : followIds) {
-                connection.zRevRangeByScoreWithScores((t1 + followId).getBytes(), min, max, 0, 50);
+                connection.zRevRangeByScoreWithScores((t1 + followId).getBytes(), min, max, 0, 20);
             }
             return null;
         });
         final ObjectMapper objectMapper = new ObjectMapper();
-        // 放入收件箱
+        // 放入用户收件箱
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (Set<DefaultTypedTuple> tuples : result) {
                 if (!ObjectUtils.isEmpty(tuples)) {
