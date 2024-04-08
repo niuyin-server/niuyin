@@ -3,7 +3,7 @@ package com.niuyin.dubbo.api;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
-import org.apache.ibatis.annotations.Param;
+import com.niuyin.model.video.vo.VideoVO;
 
 import java.util.List;
 
@@ -83,4 +83,12 @@ public interface DubboVideoService {
      * @return
      */
     void apiInitFollowVideoFeed(Long userId, List<Long> followIds);
+
+    /**
+     * 通过videoIds获取vo
+     *
+     * @param videoIds
+     * @return
+     */
+    List<VideoVO> apiGetVideoVOListByVideoIds(Long loginUserId, List<String> videoIds);
 }
