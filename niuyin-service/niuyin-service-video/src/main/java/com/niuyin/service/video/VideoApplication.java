@@ -15,6 +15,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableRedisConfig
 @EnableScheduling
 @EnableCaching
+@EnableAsync
 @EnableDubbo
 @Import({MybatisPlusConfig.class, Swagger2Configuration.class})
 public class VideoApplication {
