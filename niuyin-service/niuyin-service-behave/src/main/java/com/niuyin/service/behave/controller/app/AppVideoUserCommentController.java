@@ -46,7 +46,7 @@ public class AppVideoUserCommentController {
     /**
      * 分页评论回复
      */
-        @PostMapping("/replyPage")
+    @PostMapping("/replyPage")
     public PageDataInfo queryCommentReplyPage(@Validated @RequestBody VideoCommentReplayPageDTO pageDTO) {
         return videoUserCommentService.getCommentReplyPage(pageDTO);
     }
