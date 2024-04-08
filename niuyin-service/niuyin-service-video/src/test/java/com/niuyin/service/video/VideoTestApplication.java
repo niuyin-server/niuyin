@@ -1,5 +1,6 @@
 package com.niuyin.service.video;
 
+import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
@@ -8,19 +9,19 @@ import com.aliyun.oss.model.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
-import com.niuyin.common.utils.video.FfmpegUtil;
-import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.uniqueid.IdGenerator;
+import com.niuyin.common.utils.video.FfmpegUtil;
+import com.niuyin.feign.member.RemoteMemberService;
+import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.domain.VideoSensitive;
 import com.niuyin.model.video.dto.VideoPublishDto;
-import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
@@ -29,17 +30,8 @@ import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
-import com.aliyun.oss.ClientException;
-
-import java.io.*;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.niuyin.starter.video.service.FfmpegVideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -48,12 +40,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
@@ -477,7 +476,7 @@ public class VideoTestApplication {
             // System.out.println(uploadId);
 
             // partETags是PartETag的集合。PartETag由分片的ETag和分片号组成。
-            List<PartETag> partETags = new ArrayList<PartETag>();
+            List<PartETag> partETags = new ArrayList<>();
             // 每个分片的大小，用于计算文件有多少个分片。单位为字节。
             final long partSize = 1024 * 1024L;   //1 MB。
 
