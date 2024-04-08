@@ -4,6 +4,7 @@ import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
+import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.service.IVideoTagRelationService;
@@ -12,7 +13,6 @@ import com.niuyin.service.video.service.UserFollowVideoPushService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -147,4 +147,14 @@ public class DubboVideoServiceImpl implements DubboVideoService {
         userFollowVideoPushService.initFollowVideoFeed(userId, followIds);
     }
 
+    /**
+     * 通过videoIds获取vo
+     *
+     * @param videoIds
+     * @return
+     */
+    @Override
+    public List<VideoVO> apiGetVideoVOListByVideoIds(Long loginUserId, List<String> videoIds) {
+        return videoService.packageVideoVOByVideoIds(loginUserId, videoIds);
+    }
 }

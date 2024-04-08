@@ -1,4 +1,4 @@
-package com.niuyin.model.social;
+package com.niuyin.model.social.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;

@@ -2,8 +2,6 @@ package com.niuyin.common.service;
 
 import cn.hutool.core.util.BooleanUtil;
 import lombok.AllArgsConstructor;
-import org.apache.poi.ss.formula.functions.T;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
@@ -274,6 +272,36 @@ public class RedisService {
      */
     public Set getCacheZSetRange(String key, long startIndex, long endIndex) {
         return redisTemplate.opsForZSet().reverseRange(key, startIndex, endIndex);
+    }
+
+    /**
+     * 分页查询zset
+     * range升序，reverseRange降序
+     *
+     * @param key
+     * @param startIndex
+     * @param endIndex
+     * @return
+     */
+    public <T> Set<T> getCacheZSetReverseRange(String key, long startIndex, long endIndex) {
+        return redisTemplate.opsForZSet().reverseRange(key, startIndex, endIndex);
+    }
+
+    /**
+     * 以 score range 查询
+     *
+     * @param key
+     * @param minScore
+     * @param maxScore
+     * @return
+     */
+    public Set getCacheZSetRangeByScore(String key, double minScore, double maxScore) {
+        return redisTemplate.opsForZSet().rangeByScore(key, minScore, maxScore);
+    }
+
+    public Set<ZSetOperations.TypedTuple<String>> getCacheZSetWithScoresByScoreRange(String key, double minScore, double maxScore) {
+        ZSetOperations<String, String> zSetOps = redisTemplate.opsForZSet();
+        return zSetOps.rangeByScoreWithScores(key, minScore, maxScore);
     }
 
     /**

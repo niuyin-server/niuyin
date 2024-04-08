@@ -2,4 +2,71 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.behave.mapper.VideoUserCommentMapper">
 
+    <select id="selectCommentParentPage" resultType="com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO">
+        select vuc.*,
+               m.nick_name,
+               m.avatar,
+               (SELECT COUNT(*)
+                FROM video_user_comment vuc2
+                WHERE vuc2.origin_id = vuc.comment_id
+                  and vuc2.status = '0') AS childrenCount
+        from video_user_comment vuc
+                 left join member m on vuc.user_id = m.user_id
+        where video_id = #{videoId}
+          and origin_id = 0
+          and m.status = '0'
+        order by ${orderBy} desc
+        limit #{pageNum},#{pageSize};
+    </select>
+    <select id="selectCommentParentPageOrderByCreateTime"
+            resultType="com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO">
+        select vuc.*,
+               m.nick_name,
+               m.avatar,
+               (SELECT COUNT(*)
+                FROM video_user_comment vuc2
+                WHERE vuc2.origin_id = vuc.comment_id
+                  and vuc2.status = '0') AS childrenCount
+        from video_user_comment vuc
+                 left join member m on vuc.user_id = m.user_id
+        where video_id = #{videoId}
+          and origin_id = 0
+          and m.status = '0'
+        order by vuc.create_time desc
+        limit #{pageNum},#{pageSize};
+    </select>
+    <select id="selectCommentParentPageOrderByLikeNum"
+            resultType="com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO">
+        select vuc.*,
+               m.nick_name,
+               m.avatar,
+               (SELECT COUNT(*)
+                FROM video_user_comment vuc2
+                WHERE vuc2.origin_id = vuc.comment_id
+                  and vuc2.status = '0') AS childrenCount
+        from video_user_comment vuc
+                 left join member m on vuc.user_id = m.user_id
+        where video_id = #{videoId}
+          and origin_id = 0
+          and m.status = '0'
+        order by vuc.like_num desc
+        limit #{pageNum},#{pageSize};
+    </select>
+
+    <select id="selectCommentReplayPageByOriginId" resultType="com.niuyin.model.behave.domain.VideoUserComment">
+        select vuc.*
+        from video_user_comment vuc
+        where vuc.origin_id = #{commentId}
+          and vuc.status = '0'
+        order by ${orderBy} desc
+        limit #{pageNum},#{pageSize};
+    </select>
+
+    <select id="selectCommentReplayPageCountByOriginId" resultType="java.lang.Long">
+        select count(*)
+        from video_user_comment vuc
+        where vuc.origin_id = #{commentId}
+          and vuc.status = '0'
+    </select>
+
 </mapper>

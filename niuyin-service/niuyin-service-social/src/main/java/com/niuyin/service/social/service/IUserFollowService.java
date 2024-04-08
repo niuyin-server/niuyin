@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.vo.VideoVO;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -67,4 +67,13 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @return
      */
     List<Video> followVideoFeed(Long lastTime);
+
+    /**
+     * 获取社交动态分页
+     *
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO);
+
 }

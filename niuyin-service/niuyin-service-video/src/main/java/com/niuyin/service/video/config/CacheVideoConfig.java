@@ -38,12 +38,9 @@ public class CacheVideoConfig {
     public CacheManager cacheManager(Ticker ticker) {
         SimpleCacheManager manager = new SimpleCacheManager();
         if (specs != null) {
-            List<CaffeineCache> caches =
-                    specs.entrySet().stream()
-                            .map(entry -> buildCache(entry.getKey(),
-                                    entry.getValue(),
-                                    ticker))
-                            .collect(Collectors.toList());
+            List<CaffeineCache> caches = specs.entrySet().stream()
+                    .map(entry -> buildCache(entry.getKey(), entry.getValue(), ticker))
+                    .collect(Collectors.toList());
             manager.setCaches(caches);
         }
         return manager;
@@ -62,4 +59,5 @@ public class CacheVideoConfig {
     public Ticker ticker() {
         return Ticker.systemTicker();
     }
+
 }

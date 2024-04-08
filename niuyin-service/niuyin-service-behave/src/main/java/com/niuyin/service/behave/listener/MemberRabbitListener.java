@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  *
  * @AUTHOR: roydon
  * @DATE: 2023/10/31
- * video视频服务mq监听器
+ * 用户服务mq监听器
  **/
 @Slf4j
 @Component
@@ -28,7 +28,9 @@ public class MemberRabbitListener {
     private IUserFavoriteService userFavoriteService;
 
     /**
-     * video延时消息
+     * 用户注册创建默认收藏夹
+     *
+     * @param msg 用户id
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = BehaveQueueConstant.FAVORITE_DIRECT_QUEUE, durable = "true"),

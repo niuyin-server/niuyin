@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
@@ -18,10 +20,12 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
-import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.social.mapper.UserFollowMapper;
 import com.niuyin.service.social.service.IUserFollowService;
+import com.niuyin.service.social.service.SocialDynamicsService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -31,10 +35,14 @@ import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static com.niuyin.model.cache.SocialCacheConstants.FOLLOW;
 import static com.niuyin.model.constants.VideoConstants.IN_FOLLOW;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_DIRECT_EXCHANGE;
@@ -60,12 +68,23 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @DubboReference
     private DubboMemberService dubboMemberService;
 
-    @DubboReference
+    @DubboReference(mock = "fail:return null")
     private DubboVideoService dubboVideoService;
 
     @Resource
     private RedisTemplate redisTemplate;
 
+    @Resource
+    private RedisService redisService;
+
+    @Resource
+    private SocialDynamicsService socialDynamicsService;
+
+    /**
+     * 关注用户
+     *
+     * @param userId 被关注用户id
+     */
     @Override
     public boolean followUser(Long userId) {
         Long loginUserId = UserContext.getUserId();
@@ -89,11 +108,17 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             // 已关注
             throw new CustomException(HttpCodeEnum.ALREADY_FOLLOW);
         }
-        // 发送消息到mqq
-        sendNotice2MQ(loginUserId, userId);
-        // 初始化用户关注视频收件箱
-        dubboVideoService.apiInitFollowVideoFeed(loginUserId, this.getFollowList(loginUserId).stream().map(UserFollow::getUserFollowId).collect(Collectors.toList()));
-        return this.save(new UserFollow(loginUserId, userId, LocalDateTime.now()));
+        LocalDateTime now = LocalDateTime.now();
+        boolean save = this.save(new UserFollow(loginUserId, userId, now));
+        if (save) {
+            // 发送消息到mq
+            sendNotice2MQ(loginUserId, userId);
+            // 初始化用户关注视频收件箱
+            dubboVideoService.apiInitFollowVideoFeed(loginUserId, this.getFollowList(loginUserId).stream().map(UserFollow::getUserFollowId).collect(Collectors.toList()));
+            // 缓存如用户关注缓存
+            redisService.setCacheZSet(FOLLOW + loginUserId, userId, DateUtils.toDate(now).getTime());
+        }
+        return save;
     }
 
     /**
@@ -240,5 +265,23 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             videos.add(video);
         });
         return videos;
+    }
+
+    /**
+     * 获取社交动态分页
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO) {
+        PageDataInfo<String> socialDynamics = socialDynamicsService.getSocialDynamics(pageDTO);
+        // 封装视频vo
+        List<String> videoIds = socialDynamics.getRows();
+        if (videoIds.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        List<VideoVO> videoVOList = dubboVideoService.apiGetVideoVOListByVideoIds(UserContext.getUserId(),videoIds);
+        return PageDataInfo.genPageData(videoVOList, socialDynamics.getTotal());
     }
 }

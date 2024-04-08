@@ -142,7 +142,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @param videoId
      */
     @Async
-    protected void likeNumIncrement(String videoId) {
+    public void likeNumIncrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, 1);
     }
 
@@ -152,7 +152,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @param videoId
      */
     @Async
-    protected void likeNumDecrement(String videoId) {
+    public void likeNumDecrement(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_LIKE_NUM_MAP_KEY, videoId, -1);
     }
 

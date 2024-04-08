@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserComment;
+import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * (VideoUserComment)表服务接口
@@ -73,4 +73,26 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @return
      */
     boolean removeCommentByVideoId(String videoId);
+
+    /**
+     * 分页视频父评论
+     *
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO);
+
+    /**
+     * 评论视频
+     *
+     * @param videoUserComment
+     * @return
+     */
+    boolean commentVideo(VideoUserComment videoUserComment);
+
+    /**
+     * 视频评论回复分页
+     */
+    PageDataInfo getCommentReplyPage(VideoCommentReplayPageDTO pageDTO);
+
 }

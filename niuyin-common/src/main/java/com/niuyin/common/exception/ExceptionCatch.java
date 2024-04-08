@@ -22,7 +22,7 @@ public class ExceptionCatch {
      */
     @ExceptionHandler(Throwable.class)
     public R<?> exception(Throwable e) {
-        log.error("catch exception:{}", e.getMessage());
+        log.error("catch exception:{}", e);
         return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), e.getMessage());
     }
 
@@ -34,7 +34,7 @@ public class ExceptionCatch {
      */
     @ExceptionHandler(RuntimeException.class)
     public R<?> exception(RuntimeException e) {
-        log.error("Catch RuntimeException: {}", e.getMessage());
+        log.error("Catch RuntimeException: {}", e);
         return R.fail(e.getMessage());
     }
 

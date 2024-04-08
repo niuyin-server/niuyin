@@ -1,7 +1,7 @@
 package com.niuyin.service.social.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.social.domain.UserFollow;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
