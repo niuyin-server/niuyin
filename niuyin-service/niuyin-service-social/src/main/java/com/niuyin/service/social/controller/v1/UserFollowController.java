@@ -4,15 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.vo.UserFollowsFansVo;
 import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.social.UserFollow;
+import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.text.ParseException;
 
 /**
  * 用户关注表(UserFollow)表控制层
