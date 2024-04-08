@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageDataInfo implements Serializable {
+public class PageDataInfo<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -31,7 +31,7 @@ public class PageDataInfo implements Serializable {
     /**
      * 列表数据
      */
-    private List<?> rows;
+    private List<T> rows;
 
     /**
      * 总记录数
@@ -45,15 +45,15 @@ public class PageDataInfo implements Serializable {
      * @param total
      * @return
      */
-    public static PageDataInfo genPageData(List<?> rows, long total) {
-        return new PageDataInfo(R.SUCCESS, "OK", rows, total);
+    public static <T> PageDataInfo<T> genPageData(List<T> rows, long total) {
+        return new PageDataInfo<>(R.SUCCESS, "OK", rows, total);
     }
 
     /**
      * 返回空数据
      */
-    public static PageDataInfo emptyPage() {
-        return new PageDataInfo(R.SUCCESS, "OK", null, 0);
+    public static <T> PageDataInfo<T> emptyPage() {
+        return new PageDataInfo<>(R.SUCCESS, "OK", null, 0);
     }
 
 }
