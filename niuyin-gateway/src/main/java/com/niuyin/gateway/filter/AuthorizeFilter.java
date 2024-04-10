@@ -32,9 +32,11 @@ public class AuthorizeFilter implements GlobalFilter {
         if (request.getURI().getPath().contains("/login")
                 || request.getURI().getPath().contains("/sms-login")
                 || request.getURI().getPath().contains("/register")
+                || request.getURI().getPath().contains("/app/sms-register")
                 || request.getURI().getPath().contains("/swagger-ui")
                 || request.getURI().getPath().contains("/api/v1/feed")
                 || request.getURI().getPath().contains("/api/v1/app/recommend")
+                || request.getURI().getPath().contains("/api/v1/hot")
                 || request.getURI().getPath().contains("/websocket")
         ) {
             // 请求头 userId制空
