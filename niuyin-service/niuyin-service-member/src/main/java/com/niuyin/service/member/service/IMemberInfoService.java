@@ -2,8 +2,7 @@ package com.niuyin.service.member.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.member.domain.MemberInfo;
-import com.niuyin.model.member.vo.MemberInfoVO;
-import org.springframework.web.multipart.MultipartFile;
+import com.niuyin.model.member.vo.app.AppMemberInfoVO;
 
 /**
  * 会员详情表(MemberInfo)表服务接口
@@ -20,5 +19,7 @@ public interface IMemberInfoService extends IService<MemberInfo> {
      * @return
      */
     MemberInfo queryInfoByUserId(Long userId);
+
+    AppMemberInfoVO getUserInfoById(Long userId);
 
 }

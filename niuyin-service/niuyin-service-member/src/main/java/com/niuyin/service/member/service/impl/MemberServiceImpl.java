@@ -5,13 +5,13 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.exception.CustomException;
+import com.niuyin.common.service.RedisService;
 import com.niuyin.common.utils.IdUtils;
+import com.niuyin.common.utils.IpUtils;
+import com.niuyin.common.utils.JwtUtil;
 import com.niuyin.common.utils.ServletUtils;
 import com.niuyin.common.utils.audit.SensitiveWordUtil;
 import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.IpUtils;
-import com.niuyin.common.utils.JwtUtil;
 import com.niuyin.feign.social.RemoteSocialService;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.common.enums.HttpCodeEnum;
@@ -20,20 +20,19 @@ import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.domain.UserSensitive;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
+import com.niuyin.model.member.dto.SmsRegisterDTO;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
 import com.niuyin.service.member.constants.UserCacheConstants;
 import com.niuyin.service.member.mapper.MemberMapper;
 import com.niuyin.service.member.service.IMemberInfoService;
-import com.niuyin.service.member.service.IUserSensitiveService;
 import com.niuyin.service.member.service.IMemberService;
-import org.apache.dubbo.config.annotation.DubboService;
+import com.niuyin.service.member.service.IUserSensitiveService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -176,6 +175,51 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Member::getUserName, username);
         return count(queryWrapper) > 0;
+    }
+
+    private boolean telephoneExist(String telephone) {
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Member::getTelephone, telephone);
+        return count(queryWrapper) > 0;
+    }
+
+    /**
+     * 用户注册-sms
+     *
+     * @param smsRegisterDTO
+     */
+    @Override
+    public boolean smsRegister(SmsRegisterDTO smsRegisterDTO) {
+        //判断Telephone是否存在
+        if (userNameExist(smsRegisterDTO.getTelephone())) {
+            throw new CustomException(PHONENUMBER_EXIST);
+        }
+        if (!smsRegisterDTO.getPassword().equals(smsRegisterDTO.getConfirmPassword())) {
+            throw new CustomException(CONFIRM_PASSWORD_NOT_MATCH);
+        }
+        // 生成随机盐加密密码
+        String fastUUID = IdUtils.fastUUID();
+        String enPasswd = DigestUtils.md5DigestAsHex((smsRegisterDTO.getPassword().trim() + fastUUID).getBytes());
+        Member user = new Member();
+        user.setUserName(smsRegisterDTO.getTelephone());
+        user.setTelephone(smsRegisterDTO.getTelephone());
+        user.setPassword(enPasswd);
+        user.setSalt(fastUUID);
+        user.setNickName(IdUtils.shortUUID());
+        user.setCreateTime(LocalDateTime.now());
+        boolean save = this.save(user);
+        //如果保存成功，则向mq发送消息，发送内容为用户的id
+        if (save) {
+            String msg = user.getUserId().toString();
+            rabbitTemplate.convertAndSend(BEHAVE_EXCHANGE, CREATE_ROUTING_KEY, msg);
+            // 创建用户详情表member_info
+            MemberInfo memberInfo = new MemberInfo();
+            memberInfo.setUserId(user.getUserId());
+            memberInfoService.save(memberInfo);
+            return save;
+        } else {
+            throw new CustomException(null);
+        }
     }
 
     /**
