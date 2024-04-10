@@ -284,4 +284,32 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         List<VideoVO> videoVOList = dubboVideoService.apiGetVideoVOListByVideoIds(UserContext.getUserId(),videoIds);
         return PageDataInfo.genPageData(videoVOList, socialDynamics.getTotal());
     }
+
+    /**
+     * 是否关注用户
+     *
+     * @param userId
+     * @param followUserId
+     * @return
+     */
+    @Override
+    public Boolean weatherFollow(Long userId, Long followUserId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId,userId).eq(UserFollow::getUserFollowId,followUserId);
+        return this.count(queryWrapper) > 0;
+    }
+
+    @Override
+    public Long getUserFollowCount(Long userId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId,userId);
+        return this.count(queryWrapper);
+    }
+
+    @Override
+    public Long getUserFansCount(Long userId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserFollowId,userId);
+        return this.count(queryWrapper);
+    }
 }
