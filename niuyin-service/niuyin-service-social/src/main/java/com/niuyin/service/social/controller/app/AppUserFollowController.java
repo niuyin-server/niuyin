@@ -56,11 +56,12 @@ public class AppUserFollowController {
 
     /**
      * 初始化用户收件箱
+     * todo 返回未读视频动态数
      */
     @GetMapping("/initUserInBox")
     public R<?> initUserInBox() {
         socialDynamicsService.initUserFollowInBox(UserContext.getUserId());
-        return R.ok();
+        return R.ok(true);
     }
 
 }
