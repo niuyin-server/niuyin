@@ -76,4 +76,16 @@ public interface IUserFollowService extends IService<UserFollow> {
      */
     PageDataInfo<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO);
 
+    /**
+     * 是否关注用户
+     *
+     * @param userId
+     * @param followUserId
+     * @return
+     */
+    Boolean weatherFollow(Long userId, Long followUserId);
+
+    Long getUserFollowCount(Long userId);
+
+    Long getUserFansCount(Long userId);
 }
