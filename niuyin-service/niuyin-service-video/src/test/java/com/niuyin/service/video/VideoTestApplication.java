@@ -26,10 +26,8 @@ import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.mapper.VideoSensitiveMapper;
-import com.niuyin.service.video.service.IVideoCategoryRelationService;
-import com.niuyin.service.video.service.IVideoCategoryService;
-import com.niuyin.service.video.service.IVideoImageService;
-import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.service.video.service.*;
+import com.niuyin.service.video.service.cache.VideoRedisBatchCache;
 import com.niuyin.starter.video.service.FfmpegVideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
@@ -49,14 +48,18 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
@@ -94,6 +97,15 @@ public class VideoTestApplication {
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private IVideoTagRelationService videoTagRelationService;
+
+    @Resource
+    RedisTemplate<String, Object> redisTemplate;
+
+    @Resource
+    private VideoRedisBatchCache videoRedisBatchCache;
 
 //    void bindTest(){
 //        VideoBindDto videoBindDto = new VideoBindDto();
@@ -567,5 +579,56 @@ public class VideoTestApplication {
         });
     }
 
+    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+
+    @Test
+    @DisplayName("相关视频推荐")
+    void testRelateVideoRecommend() {
+        String videoId = "1187772141509017600c487e9f7";
+        Set<String> resultVideoIds = new HashSet<>(); // 推荐结果
+        AtomicInteger videoCount = new AtomicInteger(10); // 需要推荐的视频个数
+        // 查询视频的标签
+        List<Long> videoTagIds = videoTagRelationService.queryVideoTagIdsByVideoId(videoId);
+        // 每个标签需要推荐的视频数
+        int ceil = (int) Math.ceil((double) videoCount.get() / videoTagIds.size());
+//        videoTagIds.forEach(tagId -> {
+//            String tagSetKey = VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tagId;
+//            List<Object> vIds = redisTemplate.opsForSet().randomMembers(tagSetKey, ceil);
+//            assert vIds != null;
+//            if (vIds.isEmpty()) {
+//                return;
+//            }
+//            resultVideoIds.addAll(vIds.stream().map(Object::toString).collect(Collectors.toList()));
+//        });
+//        resultVideoIds.forEach(System.out::println);
+
+        List<Callable<Void>> tasks = new ArrayList<>();
+        for (Long tagId : videoTagIds) {
+            tasks.add(() -> {
+                String tagSetKey = VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tagId;
+                List<Object> vIds = redisTemplate.opsForSet().randomMembers(tagSetKey, ceil);
+                if (vIds != null && !vIds.isEmpty()) {
+                    synchronized (resultVideoIds) {
+                        resultVideoIds.addAll(vIds.stream().map(Object::toString).collect(Collectors.toList()));
+                    }
+                }
+                return null;
+            });
+        }
+
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        resultVideoIds.forEach(System.out::println);
+
+        Map<String, Video> batch = videoRedisBatchCache.getBatch(new ArrayList<>(resultVideoIds));
+        batch.entrySet().forEach(entry ->{
+            log.debug(entry.getValue().toString());
+        });
+
+    }
 
 }
