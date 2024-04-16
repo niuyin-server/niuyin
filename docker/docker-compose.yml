@@ -70,20 +70,10 @@ services:
       dockerfile: dockerfile
     ports:
       - "9090:9090"
-    depends_on:
-      - niuyin-redis
-    links:
-      - niuyin-redis
   niuyin-service-video:
     container_name: niuyin-service-video
     build:
       context: ./niuyin/service/video
       dockerfile: dockerfile
     ports:
-      - "9201:9201"
-    depends_on:
-      - niuyin-redis
-      - niuyin-mysql
-    links:
-      - niuyin-redis
-      - niuyin-mysql
+      - "9301:9301"

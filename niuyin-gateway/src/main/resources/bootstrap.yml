@@ -12,10 +12,14 @@ spring:
       discovery:
         server-addr: 106.14.105.101:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+        ip: 8.130.182.227
       config:
         server-addr: 106.14.105.101:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
         file-extension: yml
+        shared-configs:
+          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
     gateway:
       httpclient:
         #        response-timeout: PT10S # 全局的响应超时时间，网络链接后，后端服务多久不返回网关就报错 The response timeout.
@@ -45,7 +49,3 @@ spring:
             groupId: DEFAULT_GROUP
             data-type: json
             rule-type: gw-flow
-logging:
-  level:
-    com.niuyin: debug
-    org.springframework: warn

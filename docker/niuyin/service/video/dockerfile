@@ -11,5 +11,10 @@ RUN mkdir -p /home/niuyin
 WORKDIR /home/niuyin
 # 复制jar文件到路径
 COPY ./jar/niuyin-service-video.jar /home/niuyin/niuyin-service-video.jar
+
+ENV DUBBO_IP_TO_REGISTRY=8.130.182.227
+
+ENV DUBBO_PORT_TO_REGISTRY=20880
+
 # 启动网关服务
 ENTRYPOINT ["java","-jar","niuyin-service-video.jar"]

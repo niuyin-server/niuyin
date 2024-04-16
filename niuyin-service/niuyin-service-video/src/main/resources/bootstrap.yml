@@ -11,6 +11,7 @@ spring:
       discovery:
         server-addr: 106.14.105.101:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+        ip: 8.130.182.227
       config:
         server-addr: 106.14.105.101:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
@@ -19,7 +20,8 @@ spring:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-logging:
-  level:
-    com.niuyin: debug
-    org.springframework: warn
+          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+ribbon:
+  eager-load:
+    enabled: true
