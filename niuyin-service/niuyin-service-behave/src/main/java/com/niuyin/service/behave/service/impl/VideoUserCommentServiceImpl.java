@@ -68,7 +68,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
     @Resource
     private RedisService redisService;
 
-    @DubboReference(mock = "fail:return null")
+    @DubboReference(mock = "return null")
     private DubboMemberService dubboMemberService;
 
     /**
