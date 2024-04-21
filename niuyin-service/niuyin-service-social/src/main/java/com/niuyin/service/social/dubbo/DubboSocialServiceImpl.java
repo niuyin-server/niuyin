@@ -12,7 +12,7 @@ import javax.annotation.Resource;
  * @AUTHOR: roydon
  * @DATE: 2024/4/8
  **/
-@DubboService
+@DubboService(timeout = 2000, retries = 3, weight = 1)
 public class DubboSocialServiceImpl implements DubboSocialService {
 
     @Resource

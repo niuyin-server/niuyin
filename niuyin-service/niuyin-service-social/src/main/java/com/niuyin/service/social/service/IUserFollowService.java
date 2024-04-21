@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
+import com.niuyin.model.social.vo.Fans;
+import com.niuyin.model.social.vo.FollowUser;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.VideoVO;
 
@@ -88,4 +90,19 @@ public interface IUserFollowService extends IService<UserFollow> {
     Long getUserFollowCount(Long userId);
 
     Long getUserFansCount(Long userId);
+
+    /**
+     * 分页我的关注列表
+     */
+    PageDataInfo<FollowUser> appGetFollowPage(PageDTO pageDTO);
+
+    IPage<UserFollow> fansPage(PageDTO pageDTO);
+
+    /**
+     * 分页我的粉丝
+     *
+     * @param pageDTO
+     * @return
+     */
+    PageDataInfo<Fans> appGetFansPage(PageDTO pageDTO);
 }
