@@ -17,6 +17,7 @@ import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
+import com.niuyin.model.behave.enums.UserVideoBehaveEnum;
 import com.niuyin.model.behave.vo.VideoUserCommentVO;
 import com.niuyin.model.behave.vo.app.AppVideoUserCommentParentVO;
 import com.niuyin.model.behave.vo.app.VideoCommentReplayVO;
@@ -28,6 +29,7 @@ import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.behave.enums.VideoCommentStatus;
 import com.niuyin.service.behave.mapper.VideoUserCommentMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
+import com.niuyin.service.behave.service.IUserVideoBehaveService;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -70,6 +72,9 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
 
     @DubboReference(mock = "return null")
     private DubboMemberService dubboMemberService;
+
+    @Resource
+    private IUserVideoBehaveService userVideoBehaveService;
 
     /**
      * 回复评论
@@ -303,6 +308,8 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         boolean save = this.save(videoUserComment);
         if (save) {
             commentVideoSendNotice2MQ(videoUserComment.getVideoId(), videoUserComment.getContent(), UserContext.getUser().getUserId());
+            // 插入收藏行为数据
+            userVideoBehaveService.syncUserVideoBehave(UserContext.getUser().getUserId(), videoUserComment.getVideoId(), UserVideoBehaveEnum.COMMENT);
         }
         return true;
     }
@@ -378,5 +385,16 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
             }
         });
         return PageDataInfo.genPageData(videoCommentReplayVOS, total);
+    }
+
+    /**
+     * 获取用户评论视频记录
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<String> getUserCommentVideoIdsRecord(Long userId) {
+        return videoUserCommentMapper.queryUserCommentVideoIdsRecord(userId);
     }
 }
