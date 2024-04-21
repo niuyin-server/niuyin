@@ -27,6 +27,13 @@ public class UserContext {
         return getUser().getUserId();
     }
 
+    /**
+     * 是否登录
+     */
+    public static boolean hasLogin() {
+        return !getUserId().equals(0L);
+    }
+
     //清理
     public static void clear() {
         USER_THREAD_LOCAL.remove();
