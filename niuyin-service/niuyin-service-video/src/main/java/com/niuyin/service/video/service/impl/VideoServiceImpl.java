@@ -68,7 +68,7 @@ import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
-import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT7;
+import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT30;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.VideoCacheConstants.*;
@@ -798,7 +798,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             Duration between = Duration.between(LocalDateTime.now(), createTime);
             long hours = between.toHours();
             // 计算的是7天的数据量，使用7天总的小时数减去这个差值
-            long totalHour = VIDEO_BEFORE_DAT7 * 24;
+            long totalHour = VIDEO_BEFORE_DAT30 * 24;
             long realHour = totalHour - Math.abs(hours);
             score += Math.abs(realHour) * HotVideoConstants.WEIGHT_CREATE_TIME;
         }
@@ -1100,14 +1100,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public List<VideoRecommendVO> pushAppVideoList() {
-        Long userId = UserContext.getUserId();
         Member member;
-        if (userId == 0L) {
+        if (!UserContext.hasLogin()) {
             // 游客登陆
             member = new Member();
             member.setUserId(2L);
         } else {
-            member = dubboMemberService.apiGetById(userId);
+            member = dubboMemberService.apiGetById(UserContext.getUserId());
             if (Objects.isNull(member)) {
                 member = new Member();
                 member.setUserId(2L);
