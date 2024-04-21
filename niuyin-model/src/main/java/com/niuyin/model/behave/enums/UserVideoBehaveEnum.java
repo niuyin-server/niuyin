@@ -16,7 +16,7 @@ import lombok.Getter;
 public enum UserVideoBehaveEnum {
 
     NOT_BEHAVE("0", "无行为", 0),
-    VIEW("1", "观看", 1),
+    VIEW("1", "观看", 1), // 观看行为前端主动请求接口
     LIKE("2", "点赞", 2),
     COMMENT("3", "评论", 3),
     FAVORITE("4", "收藏", 4),
