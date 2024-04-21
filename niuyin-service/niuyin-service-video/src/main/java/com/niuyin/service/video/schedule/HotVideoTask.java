@@ -15,7 +15,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT7;
+import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT30;
 
 /**
  * HotVideoTask
@@ -41,10 +41,10 @@ public class HotVideoTask {
         try {
             boolean tryLock = redisService.tryLock(HOT_VIDEO_CACHE_BUILD_LOCK_KEY, CACHE_BUILD_LOCK_TTL, TimeUnit.SECONDS);
             if (tryLock) {
-                log.info("==> 开始计算热门视频，首先查询最近7天的视频记录");
-                List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(VIDEO_BEFORE_DAT7));
+                log.info("==> 获取redis互斥锁 {} 成功！ 开始计算热门视频，首先查询最近30天的视频记录", HOT_VIDEO_CACHE_BUILD_LOCK_KEY);
+                List<Video> videoList = videoService.getVideoListLtCreateTime(DateUtils.getTodayMinusStartLocalDateTime(VIDEO_BEFORE_DAT30));
                 List<HotVideoVO> hotVideoVOList = videoService.computeHotVideoScore(videoList);
-                if(hotVideoVOList.isEmpty()){
+                if (hotVideoVOList.isEmpty()) {
                     return;
                 }
                 hotVideoVOList.forEach(h -> {
@@ -55,8 +55,8 @@ public class HotVideoTask {
                         redisService.setCacheZSet(VideoCacheConstants.VIDEO_HOT, video.getVideoId(), h.getScore());
                     }
                 });
-                // 缓存热门视频过期事件1天
-                redisService.expire(VideoCacheConstants.VIDEO_HOT, 1, TimeUnit.DAYS);
+                // 缓存热门视频过期时间7天
+                redisService.expire(VideoCacheConstants.VIDEO_HOT, 7, TimeUnit.DAYS);
                 log.info("==> 热门视频缓存到redis完成");
             }
         } finally {
