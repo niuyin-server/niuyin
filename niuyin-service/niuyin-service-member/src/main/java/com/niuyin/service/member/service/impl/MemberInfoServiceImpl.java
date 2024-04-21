@@ -39,7 +39,7 @@ public class MemberInfoServiceImpl extends ServiceImpl<MemberInfoMapper, MemberI
     @Lazy
     private IMemberService memberService;
 
-    @DubboReference(mock = "fail:return null")
+    @DubboReference(mock = "return null")
     private DubboSocialService dubboSocialService;
 
     /**
