@@ -1,7 +1,6 @@
 package com.niuyin.service.behave.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.context.UserContext;
@@ -11,8 +10,8 @@ import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.VideoUserLike;
+import com.niuyin.model.behave.enums.UserVideoBehaveEnum;
 import com.niuyin.model.behave.vo.app.MyLikeVideoVO;
-import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.model.member.enums.ShowStatusEnum;
 import com.niuyin.model.notice.domain.Notice;
@@ -21,7 +20,6 @@ import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
 import com.niuyin.model.video.domain.VideoPosition;
-import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
@@ -29,6 +27,7 @@ import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.behave.constants.VideoCacheConstants;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
+import com.niuyin.service.behave.service.IUserVideoBehaveService;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -42,9 +41,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.niuyin.model.notice.mq.NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY;
@@ -72,6 +68,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     @DubboReference
     private DubboVideoService dubboVideoService;
 
+    @Resource
+    private IUserVideoBehaveService userVideoBehaveService;
+
     /**
      * 向视频点赞表插入点赞信息
      *
@@ -97,6 +96,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             // 更新用户模型
             List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(videoId);
             dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 1.0));
+            // 插入点赞行为数据
+            userVideoBehaveService.syncUserVideoBehave(userId, videoId, UserVideoBehaveEnum.LIKE);
             return this.save(videoUserLike);
         } else {
             // 取消点赞
@@ -284,5 +285,17 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     @Override
     public Long getVideoLikeNum(String videoId) {
         return videoUserLikeMapper.selectVideoLikeCount(videoId);
+    }
+
+    /**
+     * 获取用户点赞视频id列表
+     *
+     * @param userId
+     */
+    @Override
+    public List<String> getVideoIdsByUserId(Long userId) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoUserLike::getVideoId).eq(VideoUserLike::getUserId, userId);
+        return this.list(queryWrapper).stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
     }
 }
