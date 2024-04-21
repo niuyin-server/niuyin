@@ -13,6 +13,7 @@ import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.*;
 import com.niuyin.model.video.vo.VideoUploadVO;
 import com.niuyin.model.video.vo.VideoVO;
+import com.niuyin.service.video.annotation.VideoRepeatSubmit;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.service.InterestPushService;
@@ -71,6 +72,29 @@ public class VideoController {
     public R<String> testUploadVideo(@RequestParam("file") MultipartFile file) {
         return R.ok(aliyunOssService.uploadVideoFile(file, "video"));
     }
+
+    /**
+     * todo 前端在dto传入一个唯一业务字段 #videoPublishDto.uniqueKey
+     *
+     * @param videoPublishDto
+     * @return
+     */
+    @VideoRepeatSubmit(key = "#videoPublishDto.coverImage")
+    @PostMapping("/test-video-repeat-submit")
+    public R<String> testVideoRepeatSubmit(@RequestBody VideoPublishDto videoPublishDto) {
+        return R.ok();
+    }
+
+//    /**
+//     * 测试redisson分布式锁
+//     *
+//     * @return
+//     */
+//    @GetMapping("/test-redisson-lock")
+//    @RedissonLock(prefixKey = "redisson:lock", key = "test")
+//    public R<String> testRateLimit() {
+//        return R.ok("test rate limit");
+//    }
 
     /**
      * 首页推送视频
