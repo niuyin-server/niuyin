@@ -95,4 +95,12 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      */
     PageDataInfo getCommentReplyPage(VideoCommentReplayPageDTO pageDTO);
 
+    /**
+     * 获取用户评论视频记录
+     *
+     * @param userId
+     * @return
+     */
+    List<String> getUserCommentVideoIdsRecord(Long userId);
+
 }
