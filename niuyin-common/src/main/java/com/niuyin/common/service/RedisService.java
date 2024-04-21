@@ -275,6 +275,25 @@ public class RedisService {
     }
 
     /**
+     * 根据score排序分页查询zset
+     *
+     * @param key
+     * @param startIndex
+     * @param endIndex
+     * @param desc       true:降序，false:升序
+     * @return
+     */
+    public Set getCacheZSetRangeWithScores(String key, long startIndex, long endIndex, boolean desc) {
+        if (desc) {
+            // 降序
+            return redisTemplate.opsForZSet().reverseRangeWithScores(key, startIndex, endIndex);
+        } else {
+            // 升序
+            return redisTemplate.opsForZSet().rangeWithScores(key, startIndex, endIndex);
+        }
+    }
+
+    /**
      * 分页查询zset
      * range升序，reverseRange降序
      *
