@@ -20,15 +20,26 @@ public interface VideoUserCommentMapper extends BaseMapper<VideoUserComment> {
 
     /**
      * 分页视频父评论
+     *
      * @param pageDTO
      * @return
      */
     List<AppVideoUserCommentParentVO> selectCommentParentPage(VideoUserCommentPageDTO pageDTO);
+
     List<AppVideoUserCommentParentVO> selectCommentParentPageOrderByCreateTime(VideoUserCommentPageDTO pageDTO);
+
     List<AppVideoUserCommentParentVO> selectCommentParentPageOrderByLikeNum(VideoUserCommentPageDTO pageDTO);
 
     List<VideoUserComment> selectCommentReplayPageByOriginId(VideoCommentReplayPageDTO pageDTO);
 
     Long selectCommentReplayPageCountByOriginId(VideoCommentReplayPageDTO pageDTO);
+
+    /**
+     * 获取用户评论视频记录
+     *
+     * @param userId
+     * @return
+     */
+    List<String> queryUserCommentVideoIdsRecord(Long userId);
 }
 

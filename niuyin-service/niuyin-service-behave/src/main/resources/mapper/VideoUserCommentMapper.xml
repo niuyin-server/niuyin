@@ -68,5 +68,11 @@
         where vuc.origin_id = #{commentId}
           and vuc.status = '0'
     </select>
+    <select id="queryUserCommentVideoIdsRecord" resultType="java.lang.String">
+        select distinct video_id
+        from video_user_comment
+        where origin_id = '0'
+          and user_id = #{userId};
+    </select>
 
 </mapper>
