@@ -6,6 +6,8 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 
+import java.util.List;
+
 /**
  * 视频收藏表(VideoUserFavorites)表服务接口
  *
@@ -33,6 +35,7 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      * @return
      */
     PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
+
     PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto);
 
     /**
@@ -44,4 +47,12 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
     boolean removeFavoriteRecordByVideoId(String videoId);
 
     Long getFavoriteCountByVideoId(String videoId);
+
+    /**
+     * 获取用户收藏视频列表
+     *
+     * @param userId
+     * @return
+     */
+    List<String> getFavoriteVideoIdListByUserId(Long userId);
 }

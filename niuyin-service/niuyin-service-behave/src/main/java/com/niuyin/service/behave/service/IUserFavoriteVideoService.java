@@ -13,12 +13,6 @@ import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 public interface IUserFavoriteVideoService extends IService<UserFavoriteVideo> {
 
     /**
-     * 收藏视频到收藏夹
-     *
-     * @param userFavoriteVideoDTO
-     * @return
-     */
-    /**
      * 用户收藏视频到收藏夹功能
      * @param userFavoriteVideoDTO
      * @return

@@ -9,6 +9,7 @@ import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
 import com.niuyin.common.service.RedisService;
+import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.common.utils.date.DateUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
@@ -21,6 +22,8 @@ import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.social.domain.UserFollow;
+import com.niuyin.model.social.vo.Fans;
+import com.niuyin.model.social.vo.FollowUser;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.social.mapper.UserFollowMapper;
@@ -68,7 +71,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @DubboReference
     private DubboMemberService dubboMemberService;
 
-    @DubboReference(mock = "fail:return null")
+    @DubboReference(mock = "return null")
     private DubboVideoService dubboVideoService;
 
     @Resource
@@ -171,6 +174,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     public IPage<UserFollow> followPage(PageDTO pageDTO) {
         LambdaQueryWrapper<UserFollow> userFollowLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userFollowLambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
+        userFollowLambdaQueryWrapper.orderByDesc(UserFollow::getCreateTime);
         return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), userFollowLambdaQueryWrapper);
     }
 
@@ -281,7 +285,78 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         if (videoIds.isEmpty()) {
             return PageDataInfo.emptyPage();
         }
-        List<VideoVO> videoVOList = dubboVideoService.apiGetVideoVOListByVideoIds(UserContext.getUserId(),videoIds);
+        List<VideoVO> videoVOList = dubboVideoService.apiGetVideoVOListByVideoIds(UserContext.getUserId(), videoIds);
         return PageDataInfo.genPageData(videoVOList, socialDynamics.getTotal());
+    }
+
+    /**
+     * 是否关注用户
+     *
+     * @param userId
+     * @param followUserId
+     * @return
+     */
+    @Override
+    public Boolean weatherFollow(Long userId, Long followUserId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId, userId).eq(UserFollow::getUserFollowId, followUserId);
+        return this.count(queryWrapper) > 0;
+    }
+
+    @Override
+    public Long getUserFollowCount(Long userId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserId, userId);
+        return this.count(queryWrapper);
+    }
+
+    @Override
+    public Long getUserFansCount(Long userId) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserFollowId, userId);
+        return this.count(queryWrapper);
+    }
+
+    /**
+     * 分页我的关注列表
+     *
+     * @param pageDTO
+     */
+    @Override
+    public PageDataInfo<FollowUser> appGetFollowPage(PageDTO pageDTO) {
+        IPage<UserFollow> userFollowIPage = this.followPage(pageDTO);
+        List<FollowUser> followUserList = new ArrayList<>();
+        userFollowIPage.getRecords().forEach(uf -> {
+            Member user = dubboMemberService.apiGetById(uf.getUserFollowId());
+            followUserList.add(BeanCopyUtils.copyBean(user, FollowUser.class));
+        });
+        return PageDataInfo.genPageData(followUserList, userFollowIPage.getTotal());
+    }
+
+    @Override
+    public IPage<UserFollow> fansPage(PageDTO pageDTO) {
+        LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFollow::getUserFollowId, UserContext.getUserId());
+        queryWrapper.orderByDesc(UserFollow::getCreateTime);
+        return this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
+    }
+
+    /**
+     * 分页我的粉丝
+     *
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    public PageDataInfo<Fans> appGetFansPage(PageDTO pageDTO) {
+        IPage<UserFollow> userFollowIPage = this.fansPage(pageDTO);
+        List<Fans> fansList = new ArrayList<>();
+        userFollowIPage.getRecords().forEach(uf -> {
+            Member user = dubboMemberService.apiGetById(uf.getUserId());
+            Fans fans = BeanCopyUtils.copyBean(user, Fans.class);
+            fans.setWeatherFollow(weatherFollow(UserContext.getUserId(), uf.getUserId()));
+            fansList.add(fans);
+        });
+        return PageDataInfo.genPageData(fansList, userFollowIPage.getTotal());
     }
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.dto.LoginUserDTO;
 import com.niuyin.model.member.dto.RegisterBody;
+import com.niuyin.model.member.dto.SmsRegisterDTO;
 import com.niuyin.model.member.dto.UpdatePasswordDTO;
 
 import java.util.List;
@@ -46,4 +47,9 @@ public interface IMemberService extends IService<Member> {
      * 获取头像
      */
     String getAvatarById(Long userId);
+
+    /**
+     * 用户注册-sms
+     */
+    boolean smsRegister(SmsRegisterDTO smsRegisterDTO);
 }

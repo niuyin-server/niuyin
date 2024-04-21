@@ -25,5 +25,7 @@ public class SmsConstant {
      * 用户注册短信验证码key
      */
     public static final String SMS_REGISTER_CODE_KEY = "sms:register_captcha:";
+    // 注册验证码过期时间 单位：分钟
+    public static final long SMS_REGISTER_AUTH_CODE_EXPIRE_TIME = 5L;
 
 }

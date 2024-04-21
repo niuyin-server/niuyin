@@ -180,7 +180,6 @@ public interface IVideoService extends IService<Video> {
      */
     List<RelateVideoVO> getRelateVideoList(String videoId);
 
-
     List<VideoRecommendVO> pushAppVideoList();
 
     VideoInfoVO getVideoInfoForApp(String videoId);
@@ -201,4 +200,5 @@ public interface IVideoService extends IService<Video> {
     List<VideoVO> packageVideoVOByVideoIds(Long loginUserId, List<String> videoIds);
 
     List<Video> exitsByVideoIds(List<String> videoIds);
+
 }

@@ -5,6 +5,7 @@ import com.niuyin.gateway.constant.TokenConstants;
 import com.niuyin.gateway.util.JwtUtil;
 import com.niuyin.gateway.util.R;
 import io.jsonwebtoken.Claims;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -22,6 +23,8 @@ import reactor.core.publisher.Mono;
 @Order(-100) //优先级设置  值越小  优先级越高
 @Component
 public class AuthorizeFilter implements GlobalFilter {
+
+    @SneakyThrows
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         //1.获取request和response对象
@@ -32,15 +35,37 @@ public class AuthorizeFilter implements GlobalFilter {
         if (request.getURI().getPath().contains("/login")
                 || request.getURI().getPath().contains("/sms-login")
                 || request.getURI().getPath().contains("/register")
+                || request.getURI().getPath().contains("/app/sms-register")
                 || request.getURI().getPath().contains("/swagger-ui")
                 || request.getURI().getPath().contains("/api/v1/feed")
                 || request.getURI().getPath().contains("/api/v1/app/recommend")
+                || request.getURI().getPath().contains("/api/v1/hot")
                 || request.getURI().getPath().contains("/websocket")
+                || request.getURI().getPath().contains("/userVideoBehave/syncViewBehave")
         ) {
-            // 请求头 userId制空
-            ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> {
-                httpHeaders.add("userId", "0");
-            }).build();
+            //若存在token获取token解析token
+            String token = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (StringUtils.isNotBlank(token)) {
+                String strToken = token.split(TokenConstants.PREFIX)[1];
+                Claims claimsBody = JwtUtil.getClaimsBody(strToken);
+                //是否是过期
+                int result = JwtUtil.verifyToken(claimsBody);
+                if (result == 1 || result == 2) {
+                    // 令牌过期
+
+                } else {
+                    //获取用户信息
+                    Object userId = claimsBody.get("id");
+
+                    //存储header中
+                    ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> httpHeaders.add("userId", userId + "")).build();
+                    //重置请求
+                    exchange.mutate().request(serverHttpRequest);
+                    return chain.filter(exchange);
+                }
+            }
+            // 请求头 userId 置空
+            ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> httpHeaders.add("userId", "0")).build();
             //重置请求
             exchange.mutate().request(serverHttpRequest);
             return chain.filter(exchange);//放行
@@ -65,16 +90,14 @@ public class AuthorizeFilter implements GlobalFilter {
             int result = JwtUtil.verifyToken(claimsBody);
             if (result == 1 || result == 2) {
                 response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
-                DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "用户未登录")).getBytes());
+                DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "令牌失效，请重新登录")).getBytes());
                 return response.writeWith(Mono.just(dataBuffer));
             }
             //获取用户信息
             Object userId = claimsBody.get("id");
 
             //存储header中
-            ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> {
-                httpHeaders.add("userId", userId + "");
-            }).build();
+            ServerHttpRequest serverHttpRequest = request.mutate().headers(httpHeaders -> httpHeaders.add("userId", userId + "")).build();
             //重置请求
             exchange.mutate().request(serverHttpRequest);
 

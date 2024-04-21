@@ -44,6 +44,7 @@ import com.niuyin.service.video.constants.VideoConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.*;
+import com.niuyin.service.video.service.cache.VideoRedisBatchCache;
 import com.niuyin.starter.file.service.FileStorageService;
 import com.niuyin.starter.video.service.FfmpegVideoService;
 import lombok.extern.slf4j.Slf4j;
@@ -60,15 +61,14 @@ import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
-import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT7;
+import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT30;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.VideoCacheConstants.*;
@@ -142,6 +142,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private UserFollowVideoPushService userFollowVideoPushService;
+
+    @Resource
+    private VideoRedisBatchCache videoRedisBatchCache;
 
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
@@ -795,7 +798,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             Duration between = Duration.between(LocalDateTime.now(), createTime);
             long hours = between.toHours();
             // 计算的是7天的数据量，使用7天总的小时数减去这个差值
-            long totalHour = VIDEO_BEFORE_DAT7 * 24;
+            long totalHour = VIDEO_BEFORE_DAT30 * 24;
             long realHour = totalHour - Math.abs(hours);
             score += Math.abs(realHour) * HotVideoConstants.WEIGHT_CREATE_TIME;
         }
@@ -1032,6 +1035,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return this.list(queryWrapper);
     }
 
+    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+
     /**
      * 相关视频推荐 todo
      *
@@ -1040,20 +1045,68 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public List<RelateVideoVO> getRelateVideoList(String videoId) {
+        Set<String> resultVideoIds = new HashSet<>(); // 推荐结果
+        int videoCount = 10; // 需要推荐的视频个数
+        // 查询视频的标签
+        List<Long> videoTagIds = videoTagRelationService.queryVideoTagIdsByVideoId(videoId);
+        // 每个标签需要推荐的视频数
+        int ceil = (int) Math.ceil((double) videoCount / videoTagIds.size());
 
-        return null;
+        List<Callable<Void>> tasks = new ArrayList<>();
+        for (Long tagId : videoTagIds) {
+            tasks.add(() -> {
+                String tagSetKey = VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tagId;
+                List<Object> vIds = redisTemplate.opsForSet().randomMembers(tagSetKey, ceil);
+                if (vIds != null && !vIds.isEmpty()) {
+                    synchronized (resultVideoIds) {
+                        resultVideoIds.addAll(vIds.stream().map(Object::toString).collect(Collectors.toList()));
+                    }
+                }
+                return null;
+            });
+        }
+
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        resultVideoIds.forEach(System.out::println);
+
+        Map<String, Video> batch = videoRedisBatchCache.getBatch(new ArrayList<>(resultVideoIds));
+        List<Video> videoList = new ArrayList<>(batch.values());
+        List<RelateVideoVO> relateVideoVOS = BeanCopyUtils.copyBeanList(videoList, RelateVideoVO.class);
+        relateVideoVOS.forEach(v -> {
+            //    private VideoAuthor videoAuthor;
+            //    private VideoBehave videoBehave;
+            //    private VideoSocial videoSocial;
+            Member member = dubboMemberService.apiGetById(v.getUserId());
+            if (!Objects.isNull(member)) {
+                v.setVideoAuthor(new RelateVideoVO.VideoAuthor(v.getUserId(), member.getNickName(), member.getAvatar()));
+            }
+            // 封装观看量、点赞数、收藏量
+            Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, v.getVideoId());
+            Long likeNum = dubboBehaveService.apiGetVideoLikeNum(v.getVideoId());
+            Long favoriteNum = dubboBehaveService.apiGetVideoFavoriteNum(v.getVideoId());
+            // 评论数
+            Long commentNum = dubboBehaveService.apiGetVideoCommentNum(v.getVideoId());
+            v.setVideoBehave(new RelateVideoVO.VideoBehave(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum, StringUtils.isNull(likeNum) ? 0L : likeNum, StringUtils.isNull(favoriteNum) ? 0L : favoriteNum, StringUtils.isNull(commentNum) ? 0L : commentNum));
+            // 社交数据
+            v.setVideoSocial(new RelateVideoVO.VideoSocial(false));
+        });
+        return relateVideoVOS;
     }
 
     @Override
     public List<VideoRecommendVO> pushAppVideoList() {
-        Long userId = UserContext.getUserId();
         Member member;
-        if (userId == 0L) {
+        if (!UserContext.hasLogin()) {
             // 游客登陆
             member = new Member();
             member.setUserId(2L);
         } else {
-            member = dubboMemberService.apiGetById(userId);
+            member = dubboMemberService.apiGetById(UserContext.getUserId());
             if (Objects.isNull(member)) {
                 member = new Member();
                 member.setUserId(2L);
@@ -1206,7 +1259,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return
      */
     @Override
-    public List<VideoVO> packageVideoVOByVideoIds(Long loginUserId,List<String> videoIds) {
+    public List<VideoVO> packageVideoVOByVideoIds(Long loginUserId, List<String> videoIds) {
         List<Video> videoList = this.exitsByVideoIds(videoIds);
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
         // 封装VideoVO

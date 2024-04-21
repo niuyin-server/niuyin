@@ -13,15 +13,14 @@ import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
+import com.niuyin.model.behave.enums.UserVideoBehaveEnum;
 import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
 import com.niuyin.model.behave.vo.app.MyFavoriteVideoVO;
-import com.niuyin.model.behave.vo.app.MyLikeVideoVO;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.enums.NoticeType;
 import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoImage;
-import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.enums.PublishType;
 import com.niuyin.model.video.vo.UserModel;
@@ -30,6 +29,7 @@ import com.niuyin.service.behave.mapper.UserFavoriteVideoMapper;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IUserFavoriteVideoService;
+import com.niuyin.service.behave.service.IUserVideoBehaveService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.AllArgsConstructor;
@@ -43,7 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -84,6 +86,9 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     @Resource
     private IVideoUserLikeService videoUserLikeService;
 
+    @Resource
+    private IUserVideoBehaveService userVideoBehaveService;
+
     /**
      * 用户收藏
      */
@@ -110,6 +115,8 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
             // 更新用户模型
             List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(videoId);
             dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 2.0));
+            // 插入收藏行为数据
+            userVideoBehaveService.syncUserVideoBehave(userId, videoId, UserVideoBehaveEnum.FAVORITE);
             return this.save(videoUserFavorites);
         }
         return false;
@@ -224,7 +231,7 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         pageDto.setUserId(UserContext.getUserId());
         // 查询用户收藏的视频列表（包含分页）
         List<String> videoIds = videoUserFavoritesMapper.selectUserFavoriteVideoIds(pageDto);
-        if(videoIds.isEmpty()){
+        if (videoIds.isEmpty()) {
             return PageDataInfo.emptyPage();
         }
         // 查询视频
@@ -281,5 +288,18 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     @Override
     public Long getFavoriteCountByVideoId(String videoId) {
         return videoUserFavoritesMapper.selectFavoriteCountByVideoId(videoId);
+    }
+
+    /**
+     * 获取用户收藏视频列表
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<String> getFavoriteVideoIdListByUserId(Long userId) {
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(VideoUserFavorites::getVideoId).eq(VideoUserFavorites::getUserId, userId);
+        return this.list(queryWrapper).stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
     }
 }
