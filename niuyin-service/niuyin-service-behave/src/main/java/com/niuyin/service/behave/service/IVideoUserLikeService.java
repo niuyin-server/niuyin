@@ -1,10 +1,8 @@
 package com.niuyin.service.behave.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserLike;
-import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPageDto;
 
 import java.util.List;
@@ -26,6 +24,7 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @return
      */
     PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto);
+
     PageDataInfo queryMyLikeVideoPageForApp(VideoPageDto pageDto);
 
     /**
@@ -51,4 +50,10 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @return
      */
     Long getVideoLikeNum(String videoId);
+
+    /**
+     * 获取用户点赞视频id列表
+     */
+    List<String> getVideoIdsByUserId(Long userId);
+
 }
