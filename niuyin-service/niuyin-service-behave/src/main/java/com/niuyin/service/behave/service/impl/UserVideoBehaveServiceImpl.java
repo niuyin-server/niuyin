@@ -8,7 +8,6 @@ import com.niuyin.service.behave.service.IUserVideoBehaveService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.LocalDateTime;
 
 /**
  * 用户视频行为表(UserVideoBehave)表服务实现类
@@ -35,7 +34,6 @@ public class UserVideoBehaveServiceImpl extends ServiceImpl<UserVideoBehaveMappe
         userVideoBehave.setUserId(userId);
         userVideoBehave.setUserBehave(behave.getCode());
         userVideoBehave.setVideoId(videoId);
-        userVideoBehave.setCreateTime(LocalDateTime.now());
-        return this.save(userVideoBehave);
+        return userVideoBehaveMapper.syncUserVideoBehave(userVideoBehave);
     }
 }
