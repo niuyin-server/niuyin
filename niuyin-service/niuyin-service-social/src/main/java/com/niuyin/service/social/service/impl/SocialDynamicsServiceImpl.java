@@ -60,6 +60,7 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
         Set<ZSetOperations.TypedTuple<String>> videoIdSet = new HashSet<>();
 
         for (Object followUserId : followUserIds) {
+            // 获取关注列表用户发件箱近一月视频数据
             Set<ZSetOperations.TypedTuple<String>> followUserVideoIds = redisService.getCacheZSetWithScoresByScoreRange(OUT_FOLLOW + (Long) followUserId, time, DateUtils.getNowDate().getTime());
             if (followUserVideoIds.isEmpty()) {
                 continue;
@@ -70,6 +71,7 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
             List<ZSetOperations.TypedTuple<String>> collect = followUserVideoIds.stream()
                     .sorted(Comparator.comparing(ZSetOperations.TypedTuple<String>::getScore).reversed())
                     .collect(Collectors.toList());
+            // 拿到最晚发布的一条视频的发布时间
             ZSetOperations.TypedTuple<String> stringTypedTuple = collect.get(0);
             // 封装用户
             DynamicUser dynamicUser = new DynamicUser();
@@ -111,7 +113,7 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
     public PageDataInfo<String> getSocialDynamics(PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set cacheZSetRange = redisService.getCacheZSetRange(IN_FOLLOW + UserContext.getUserId(), startIndex, endIndex);
+        Set cacheZSetRange = redisService.getCacheZSetRangeWithScores(IN_FOLLOW + UserContext.getUserId(), startIndex, endIndex, true);
         Long cacheZSetZCard = redisService.getCacheZSetZCard(IN_FOLLOW + UserContext.getUserId());
         return PageDataInfo.genPageData(new ArrayList<>(cacheZSetRange), cacheZSetZCard);
     }
