@@ -59,5 +59,13 @@ public class AppVideoController {
         return videoService.queryMyVideoPageForApp(pageDto);
     }
 
+    /**
+     * 分页查询用户视频
+     */
+    @PostMapping("/userPage")
+    public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
+        return videoService.queryUserVideoPage(pageDto);
+    }
+
 
 }
