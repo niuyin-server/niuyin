@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.niuyin.service.notice.mapper.NoticeMapper">
+    <insert id="saveNotice">
+        INSERT INTO notice (operate_user_id, notice_user_id, video_id, comment_id, content, remark, notice_type,
+                            receive_flag, create_time)
+        VALUES (#{operateUserId}, #{noticeUserId}, #{videoId}, #{commentId}, #{content}, #{remark}, #{noticeType},
+                #{receiveFlag}, now())
+        ON DUPLICATE KEY UPDATE receive_flag = VALUES(receive_flag), create_time = VALUES(create_time);
+    </insert>
 
-<!--    根据视频id查询记录-->
+    <!--    根据视频id查询记录-->
     <select id="selectVideoById" resultType="com.niuyin.model.video.domain.Video">
-        select * from video where video_id = #{videoId}
+        select *
+        from video
+        where video_id = #{videoId}
     </select>
-    <select id="batchSelectVideoAuthor" parameterType="java.util.List" resultType="com.niuyin.model.member.domain.Member">
+    <select id="batchSelectVideoAuthor" parameterType="java.util.List"
+            resultType="com.niuyin.model.member.domain.Member">
         SELECT m.nick_name,m.avatar FROM member m WHERE m.user_id IN
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}

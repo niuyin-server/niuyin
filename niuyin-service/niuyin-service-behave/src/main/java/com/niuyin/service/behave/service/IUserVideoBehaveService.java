@@ -20,6 +20,6 @@ public interface IUserVideoBehaveService extends IService<UserVideoBehave> {
      * @param behave
      * @return
      */
-    boolean syncUserVideoBehave(Long userId, String videoId, UserVideoBehaveEnum behave);
+    Boolean syncUserVideoBehave(Long userId, String videoId, UserVideoBehaveEnum behave);
 
 }

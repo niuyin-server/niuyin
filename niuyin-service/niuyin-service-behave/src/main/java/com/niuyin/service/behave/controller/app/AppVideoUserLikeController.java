@@ -1,12 +1,10 @@
 package com.niuyin.service.behave.controller.app;
 
+import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -22,6 +20,22 @@ public class AppVideoUserLikeController {
 
     @Resource
     private IVideoUserLikeService videoUserLikeService;
+
+    /**
+     * 用户点赞
+     */
+    @GetMapping("/{videoId}")
+    public R<Boolean> userLikeAction(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserLikeService.videoActionLike(videoId));
+    }
+
+    /**
+     * 用户取消点赞
+     */
+    @GetMapping("/unlike/{videoId}")
+    public R<Boolean> userUnlikeAction(@PathVariable("videoId") String videoId) {
+        return R.ok(videoUserLikeService.videoActionUnlike(videoId));
+    }
 
     /**
      * 我的点赞分页查询

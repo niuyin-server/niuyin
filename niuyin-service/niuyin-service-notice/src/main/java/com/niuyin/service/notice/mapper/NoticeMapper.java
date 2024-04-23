@@ -32,5 +32,6 @@ public interface NoticeMapper extends BaseMapper<Notice> {
      */
     List<Member> batchSelectVideoAuthor(List<Long> userId);
 
+    boolean saveNotice(Notice notice);
 }
 

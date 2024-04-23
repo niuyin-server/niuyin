@@ -56,4 +56,10 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      */
     List<String> getVideoIdsByUserId(Long userId);
 
+    /**
+     * 视频点赞
+     */
+    Boolean videoActionLike(String videoId);
+
+    Boolean videoActionUnlike(String videoId);
 }

@@ -108,6 +108,17 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     /**
+     * 新增消息
+     *
+     * @param notice
+     * @return
+     */
+    @Override
+    public boolean saveNotice(Notice notice) {
+        return noticeMapper.saveNotice(notice);
+    }
+
+    /**
      * 分页消息
      *
      * @param pageDTO

@@ -34,4 +34,12 @@ public interface INoticeService extends IService<Notice> {
      * @return
      */
     PageDataInfo getBehaveNoticePage(NoticePageDTO pageDTO);
+
+    /**
+     * 新增消息
+     *
+     * @param notice
+     * @return
+     */
+    boolean saveNotice(Notice notice);
 }

@@ -13,6 +13,7 @@ import com.niuyin.model.social.cache.DynamicUser;
 import com.niuyin.service.social.service.SocialDynamicsService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -107,15 +108,16 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
 
     /**
      * 获取社交动态列表
-     * 从redis分页用户发件箱
+     * 从redis分页用户收件箱
      */
     @Override
     public PageDataInfo<String> getSocialDynamics(PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set cacheZSetRange = redisService.getCacheZSetRangeWithScores(IN_FOLLOW + UserContext.getUserId(), startIndex, endIndex, true);
+        Set<DefaultTypedTuple<String>> cacheZSetRange = redisService.getCacheZSetRangeWithScores(IN_FOLLOW + UserContext.getUserId(), startIndex, endIndex, true);
+        List<String> collect = cacheZSetRange.stream().map(DefaultTypedTuple::getValue).collect(Collectors.toList());
         Long cacheZSetZCard = redisService.getCacheZSetZCard(IN_FOLLOW + UserContext.getUserId());
-        return PageDataInfo.genPageData(new ArrayList<>(cacheZSetRange), cacheZSetZCard);
+        return PageDataInfo.genPageData(collect, cacheZSetZCard);
     }
 
     /**

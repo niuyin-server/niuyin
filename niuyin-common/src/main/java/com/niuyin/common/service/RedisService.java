@@ -283,7 +283,7 @@ public class RedisService {
      * @param desc       true:降序，false:升序
      * @return
      */
-    public Set getCacheZSetRangeWithScores(String key, long startIndex, long endIndex, boolean desc) {
+    public <T> Set<DefaultTypedTuple<T>> getCacheZSetRangeWithScores(String key, long startIndex, long endIndex, boolean desc) {
         if (desc) {
             // 降序
             return redisTemplate.opsForZSet().reverseRangeWithScores(key, startIndex, endIndex);
