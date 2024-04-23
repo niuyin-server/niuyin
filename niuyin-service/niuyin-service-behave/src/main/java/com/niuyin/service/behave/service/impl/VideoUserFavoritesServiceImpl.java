@@ -226,9 +226,27 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
     }
 
     @Override
-    public PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto) {
+    public PageDataInfo queryMyFavoriteVideoPageForApp(VideoPageDto pageDto) {
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
+        // 查询用户收藏的视频列表（包含分页）
+        List<String> videoIds = videoUserFavoritesMapper.selectUserFavoriteVideoIds(pageDto);
+        if (videoIds.isEmpty()) {
+            return PageDataInfo.emptyPage();
+        }
+        // 查询视频
+        List<Video> videos = dubboVideoService.apiGetVideoListByVideoIds(videoIds);
+        List<MyFavoriteVideoVO> myFavoriteVideoVOList = BeanCopyUtils.copyBeanList(videos, MyFavoriteVideoVO.class);
+        // 设置点赞量
+        CompletableFuture.allOf(myFavoriteVideoVOList.stream().map(this::packageMyLikeVideoPageAsync).toArray(CompletableFuture[]::new)).join();
+        // 查询用户收藏的视频总数
+        Long count = videoUserFavoritesMapper.selectUserFavoriteVideosCount(pageDto);
+        return PageDataInfo.genPageData(myFavoriteVideoVOList, count);
+    }
+
+    @Override
+    public PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto) {
+        pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         // 查询用户收藏的视频列表（包含分页）
         List<String> videoIds = videoUserFavoritesMapper.selectUserFavoriteVideoIds(pageDto);
         if (videoIds.isEmpty()) {

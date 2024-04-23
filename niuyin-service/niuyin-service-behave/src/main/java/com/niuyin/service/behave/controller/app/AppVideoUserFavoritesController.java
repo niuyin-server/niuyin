@@ -25,6 +25,14 @@ public class AppVideoUserFavoritesController {
      */
     @PostMapping("/myPage")
     public PageDataInfo myFavoritePageForApp(@RequestBody VideoPageDto pageDto) {
+        return videoUserFavoritesService.queryMyFavoriteVideoPageForApp(pageDto);
+    }
+
+    /**
+     * 分页用户收藏
+     */
+    @PostMapping("/userPage")
+    public PageDataInfo userFavoritePage(@RequestBody VideoPageDto pageDto) {
         return videoUserFavoritesService.queryUserFavoriteVideoPageForApp(pageDto);
     }
 

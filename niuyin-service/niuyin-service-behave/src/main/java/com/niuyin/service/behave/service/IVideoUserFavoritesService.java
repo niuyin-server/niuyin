@@ -36,6 +36,7 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      */
     PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
 
+    PageDataInfo queryMyFavoriteVideoPageForApp(VideoPageDto pageDto);
     PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto);
 
     /**
@@ -55,4 +56,5 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      * @return
      */
     List<String> getFavoriteVideoIdListByUserId(Long userId);
+
 }

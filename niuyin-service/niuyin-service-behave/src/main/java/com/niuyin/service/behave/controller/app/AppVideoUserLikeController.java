@@ -1,14 +1,12 @@
 package com.niuyin.service.behave.controller.app;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.feign.video.RemoteVideoService;
-import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -31,6 +29,14 @@ public class AppVideoUserLikeController {
     @PostMapping("/myLikePage")
     public PageDataInfo myLikePageForApp(@RequestBody VideoPageDto pageDto) {
         return videoUserLikeService.queryMyLikeVideoPageForApp(pageDto);
+    }
+
+    /**
+     * 分页用户点赞列表
+     */
+    @PostMapping("/userPage")
+    public PageDataInfo personLikePage(@RequestBody VideoPageDto pageDto) {
+        return videoUserLikeService.queryPersonLikePage(pageDto);
     }
 
 }

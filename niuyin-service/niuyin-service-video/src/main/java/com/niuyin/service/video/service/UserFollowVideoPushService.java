@@ -1,6 +1,5 @@
 package com.niuyin.service.video.service;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
