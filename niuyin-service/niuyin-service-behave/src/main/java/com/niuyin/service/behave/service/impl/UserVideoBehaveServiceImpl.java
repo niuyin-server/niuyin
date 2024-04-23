@@ -5,6 +5,7 @@ import com.niuyin.model.behave.domain.UserVideoBehave;
 import com.niuyin.model.behave.enums.UserVideoBehaveEnum;
 import com.niuyin.service.behave.mapper.UserVideoBehaveMapper;
 import com.niuyin.service.behave.service.IUserVideoBehaveService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -28,8 +29,9 @@ public class UserVideoBehaveServiceImpl extends ServiceImpl<UserVideoBehaveMappe
      * @param behave
      * @return
      */
+    @Async
     @Override
-    public boolean syncUserVideoBehave(Long userId, String videoId, UserVideoBehaveEnum behave) {
+    public Boolean syncUserVideoBehave(Long userId, String videoId, UserVideoBehaveEnum behave) {
         UserVideoBehave userVideoBehave = new UserVideoBehave();
         userVideoBehave.setUserId(userId);
         userVideoBehave.setUserBehave(behave.getCode());

@@ -35,6 +35,12 @@
         from video v
     </sql>
 
+    <insert id="userLikeVideo">
+        INSERT INTO video_user_like (user_id, video_id, create_time)
+        VALUES (#{userId}, #{videoId}, now())
+        ON DUPLICATE KEY UPDATE create_time = VALUES(create_time);
+    </insert>
+
     <select id="selectAllLikeNumForUser">
 
     </select>
@@ -95,9 +101,10 @@
         from video_position
         where video_id = #{videoId}
     </select>
-    <select id="selectImagesByVideoIds" parameterType="java.util.List" resultType="com.niuyin.model.video.domain.VideoImage">
-            SELECT *
-            FROM video_image
+    <select id="selectImagesByVideoIds" parameterType="java.util.List"
+            resultType="com.niuyin.model.video.domain.VideoImage">
+        SELECT *
+        FROM video_image
         <where>
             <if test="list != null and list.size() > 0">
                 AND video_id IN

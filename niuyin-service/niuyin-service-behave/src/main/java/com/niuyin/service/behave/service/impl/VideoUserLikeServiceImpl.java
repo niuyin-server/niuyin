@@ -83,8 +83,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         Long userId = UserContext.getUserId();
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
-        List<VideoUserLike> list = this.list(queryWrapper);
-        if (StringUtils.isNull(list) || list.isEmpty()) {
+        VideoUserLike one = this.getOne(queryWrapper);
+        if (StringUtils.isNull(one)) {
             VideoUserLike videoUserLike = new VideoUserLike();
             videoUserLike.setVideoId(videoId);
             videoUserLike.setUserId(userId);
@@ -95,7 +95,9 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
             sendNoticeWithLikeVideo(videoId, userId);
             // 更新用户模型
             List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(videoId);
-            dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 1.0));
+            if (!tagIds.isEmpty()) {
+                dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 1.0));
+            }
             // 插入点赞行为数据
             userVideoBehaveService.syncUserVideoBehave(userId, videoId, UserVideoBehaveEnum.LIKE);
             return this.save(videoUserLike);
@@ -113,7 +115,8 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @param videoId
      * @param operateUserId
      */
-    private void sendNoticeWithLikeVideo(String videoId, Long operateUserId) {
+    @Async
+    public void sendNoticeWithLikeVideo(String videoId, Long operateUserId) {
         // 根据视频获取发布者id
         Video video = videoUserLikeMapper.selectVideoByVideoId(videoId);
         if (StringUtils.isNull(video)) {
@@ -297,5 +300,41 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(VideoUserLike::getVideoId).eq(VideoUserLike::getUserId, userId);
         return this.list(queryWrapper).stream().map(VideoUserLike::getVideoId).collect(Collectors.toList());
+    }
+
+    /**
+     * 视频点赞
+     *
+     * @param videoId
+     */
+    @Override
+    public Boolean videoActionLike(String videoId) {
+        Long userId = UserContext.getUserId();
+        boolean likeVideo = videoUserLikeMapper.userLikeVideo(videoId, userId);
+        if (likeVideo) {
+            // 将本条点赞信息存储到redis
+//            likeNumIncrement(videoId);
+            // 发送消息，创建通知
+            sendNoticeWithLikeVideo(videoId, userId);
+            // 更新用户模型
+            List<Long> tagIds = dubboVideoService.apiGetVideoTagIds(videoId);
+            if (!tagIds.isEmpty()) {
+                dubboVideoService.apiUpdateUserModel(UserModel.buildUserModel(userId, tagIds, 1.0));
+            }
+            // 插入点赞行为数据
+            userVideoBehaveService.syncUserVideoBehave(userId, videoId, UserVideoBehaveEnum.LIKE);
+        }
+        return likeVideo;
+    }
+
+    @Override
+    public Boolean videoActionUnlike(String videoId) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, UserContext.getUserId());
+        boolean remove = this.remove(queryWrapper);
+        if (remove) {
+//            likeNumDecrement(videoId);
+        }
+        return remove;
     }
 }

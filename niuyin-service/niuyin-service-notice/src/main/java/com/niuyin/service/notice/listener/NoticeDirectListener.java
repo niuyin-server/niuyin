@@ -36,7 +36,13 @@ public class NoticeDirectListener {
             key = NoticeDirectConstant.NOTICE_CREATE_ROUTING_KEY))
     public void listenDirectQueueCreate(String msg) {
         Notice notice = JSON.parseObject(msg, Notice.class);
+        // todo 接口调用多次
         noticeService.save(notice);
+//        noticeService.saveNotice(notice);
+        // todo 通知websocket推送消息未读数
+        // todo 用户未登录
+//        Long unreadNoticeCount = noticeService.getUnreadNoticeCount();
+//        WebSocketServer.sendOneMessage(notice.getNoticeUserId(), WebSocketBaseResp.build(WebSocketMsgType.NOTICE_UNREAD_COUNT.getCode(), unreadNoticeCount.toString()));
         log.info("notice 接收到创建通知的消息：{}", msg);
     }
 

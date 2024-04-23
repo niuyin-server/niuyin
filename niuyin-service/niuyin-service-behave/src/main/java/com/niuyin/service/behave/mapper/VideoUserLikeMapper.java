@@ -61,5 +61,14 @@ public interface VideoUserLikeMapper extends BaseMapper<VideoUserLike> {
      * @return
      */
     Long selectVideoLikeCount(String videoId);
+
+    /**
+     * 点赞视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    boolean userLikeVideo(String videoId, Long userId);
 }
 

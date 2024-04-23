@@ -1,5 +1,7 @@
 package com.niuyin.service.notice.controller.v1;
 
+import com.alibaba.fastjson2.JSON;
+import com.niuyin.model.notice.vo.WebSocketBaseResp;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,13 +11,14 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
 @ServerEndpoint("/websocket/{userId}")
 public class WebSocketServer {
 
-    // 用来存在线连接数
+    // 用来保存在线连接数
     private static final Map<Long, Session> sessionPool = new ConcurrentHashMap<>();
 
     /**
@@ -24,6 +27,7 @@ public class WebSocketServer {
     @OnOpen
     public void onOpen(Session session, @PathParam(value = "userId") Long userId) {
         try {
+            session.setMaxIdleTimeout(30000L);
             sessionPool.put(userId, session);
             log.info("websocket消息: 有新的连接，总数为:" + sessionPool.size());
         } catch (Exception e) {
@@ -57,11 +61,47 @@ public class WebSocketServer {
      * 此为单点消息
      */
     @SneakyThrows
-    public static void sendOneMessage(Long userId, String message) {
+    public static <T> void sendOneMessage(Long userId, WebSocketBaseResp<T> message) {
         Session session = sessionPool.get(userId);
         if (session != null && session.isOpen()) {
-            log.info("websocket: 单点消息:" + message);
-            session.getAsyncRemote().sendText(message);
+            String jsonString = JSON.toJSONString(message);
+            log.info("websocket: 单点消息:" + jsonString);
+            session.getAsyncRemote().sendText(jsonString);
         }
     }
+
+    /**
+     * 连接是否存在
+     *
+     * @param userId
+     * @return boolean
+     */
+    public static boolean isConnected(Long userId) {
+        return sessionPool.containsKey(userId);
+    }
+
+    /**
+     * 心跳检测
+     *
+     * @param ping
+     * @return
+     */
+    public static synchronized int sendPing(String ping) {
+        if (sessionPool.isEmpty()) {
+            return 0;
+        }
+        AtomicInteger count = new AtomicInteger(0);
+        sessionPool.forEach((userId, session) -> {
+            count.getAndIncrement();
+            try {
+                session.getAsyncRemote().sendText(ping);
+            } catch (Exception e) {
+                sessionPool.remove(userId);
+                log.info("客户端心跳检测异常移除: " + userId + "，心跳发送失败，已移除！");
+            }
+        });
+        return sessionPool.size();
+    }
+
+
 }

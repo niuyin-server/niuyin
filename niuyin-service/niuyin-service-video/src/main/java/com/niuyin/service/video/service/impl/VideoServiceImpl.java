@@ -1194,7 +1194,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public VideoInfoVO getVideoInfoForApp(String videoId) {
         // 视频浏览量加一
         viewNumIncrement(videoId);
-        Long loginUserId = UserContext.getUserId();
         Video video = this.getById(videoId);
         VideoInfoVO videoInfoVO = BeanCopyUtils.copyBean(video, VideoInfoVO.class);
         // 视频作者
@@ -1202,7 +1201,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         Author author = BeanCopyUtils.copyBean(Objects.isNull(member) ? new Member() : member, Author.class);
         videoInfoVO.setAuthor(author);
         // 社交-是否关注
-        videoInfoVO.setWeatherFollow(videoMapper.userWeatherAuthor(loginUserId, videoInfoVO.getUserId()) > 0);
+        if (UserContext.hasLogin()) {
+            Long loginUserId = UserContext.getUserId();
+            videoInfoVO.setWeatherFollow(videoMapper.userWeatherAuthor(loginUserId, videoInfoVO.getUserId()) > 0);
+            videoInfoVO.setWeatherLike(videoMapper.selectUserLikeVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
+            videoInfoVO.setWeatherFavorite(videoMapper.userWeatherFavoriteVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
+        }
         // 行为-观看、点赞、收藏、评论量；是否点赞、收藏
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoInfoVO.getVideoId());
         videoInfoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
@@ -1212,8 +1216,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoInfoVO.setFavoriteNum(Objects.isNull(favoriteNum) ? 0L : favoriteNum);
         Long commentNum = dubboBehaveService.apiGetVideoCommentNum(videoInfoVO.getVideoId());
         videoInfoVO.setCommentNum(Objects.isNull(commentNum) ? 0L : commentNum);
-        videoInfoVO.setWeatherLike(videoMapper.selectUserLikeVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
-        videoInfoVO.setWeatherFavorite(videoMapper.userWeatherFavoriteVideo(videoInfoVO.getVideoId(), loginUserId) > 0);
         // 视频标签
         String[] tags = videoTagRelationService.queryVideoTags(videoInfoVO.getVideoId());
         videoInfoVO.setTags(tags);
