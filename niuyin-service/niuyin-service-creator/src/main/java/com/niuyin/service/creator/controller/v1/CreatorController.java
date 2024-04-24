@@ -53,7 +53,7 @@ public class CreatorController {
      */
     @PostMapping("/upload-video")
     public R<String> uploadVideo(@RequestParam("file") MultipartFile file) {
-        return R.ok(creatorService.uploadVideo(file));
+        return R.ok(creatorService.multipartUploadVideo(file));
     }
 
     /**
@@ -64,4 +64,12 @@ public class CreatorController {
         return R.ok(creatorService.dashboardAmount());
     }
 
+//    /**
+//     * 测试分片上传视频
+//     * success
+//     */
+//    @PostMapping("/testMultipartUploadVideo")
+//    public R<String> multipartUploadVideoFile(@RequestParam("file") MultipartFile file) {
+//        return R.ok(creatorService.multipartUploadVideo(file));
+//    }
 }
