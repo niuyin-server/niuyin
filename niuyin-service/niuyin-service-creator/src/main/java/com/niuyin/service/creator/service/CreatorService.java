@@ -46,6 +46,14 @@ public interface CreatorService {
     String uploadVideo(MultipartFile file);
 
     /**
+     * 分片上传视频
+     *
+     * @param file
+     * @return
+     */
+    String multipartUploadVideo(MultipartFile file);
+
+    /**
      * 视频播放量
      */
     DashboardAmountVO dashboardAmount();

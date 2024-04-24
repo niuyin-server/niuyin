@@ -1,10 +1,8 @@
 package com.niuyin.service.creator.service.impl;
 
 import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.file.PathUtils;
 import com.niuyin.common.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.creator.dto.VideoPageDTO;
@@ -110,6 +108,17 @@ public class CreatorServiceImpl implements CreatorService {
     @Override
     public String uploadVideo(MultipartFile file) {
         return aliyunOssService.uploadVideoFile(file, "video");
+    }
+
+    /**
+     * 分片上传视频
+     *
+     * @param file
+     * @return
+     */
+    @Override
+    public String multipartUploadVideo(MultipartFile file) {
+        return aliyunOssService.multipartUploadVideoFile(file, "video");
     }
 
     /**

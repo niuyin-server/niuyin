@@ -26,4 +26,13 @@ public interface AliyunOssService {
      */
     String uploadVideoFile(MultipartFile file, String folder);
 
+    /**
+     * 分片上传视频文件
+     *
+     * @param file 文件本体
+     * @param folder oss路径前缀
+     * @return url
+     */
+    String multipartUploadVideoFile(MultipartFile file, String folder);
+
 }
