@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
+import com.niuyin.model.behave.vo.app.FavoriteFolderVO;
 import com.niuyin.model.common.dto.PageDTO;
 
 import java.util.List;
@@ -47,4 +48,10 @@ public interface IUserFavoriteService extends IService<UserFavorite> {
      * @return
      */
     PageDataInfo queryMyCollectionInfoPage(PageDTO pageDTO);
+
+    /**
+     * 收藏夹列表
+     */
+    List<FavoriteFolderVO> userFavoritesFolderList(String videoId);
+
 }

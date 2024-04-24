@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.context.UserContext;
 import com.niuyin.common.domain.R;
 import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
 import com.niuyin.model.common.dto.PageDTO;
@@ -73,6 +72,7 @@ public class UserFavoriteController {
      */
     @PostMapping()
     public R<?> newFavorite(@RequestBody UserFavorite userFavorite) {
+        userFavorite.setUserId(UserContext.getUserId());
         return R.ok(userFavoriteService.saveFavorite(userFavorite));
     }
 
@@ -95,6 +95,7 @@ public class UserFavoriteController {
      */
     @PutMapping()
     public R<Boolean> updateFavorite(@RequestBody UserFavorite userFavorite) {
+        userFavorite.setUserId(UserContext.getUserId());
         return R.ok(userFavoriteService.updateById(userFavorite));
     }
 

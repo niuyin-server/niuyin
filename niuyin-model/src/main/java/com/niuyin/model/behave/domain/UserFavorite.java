@@ -33,7 +33,7 @@ public class UserFavorite implements Serializable {
     /**
      * 收藏夹名称
      */
-    @Size(min = 1, max = 10, message = "标题长度需在1~10范围内")
+    @Size(min = 1, max = 20, message = "标题长度需在1~20范围内")
     private String title;
     /**
      * 收藏夹描述

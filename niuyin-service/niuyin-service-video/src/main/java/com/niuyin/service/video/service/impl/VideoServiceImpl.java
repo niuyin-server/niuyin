@@ -1275,7 +1275,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public List<Video> exitsByVideoIds(List<String> videoIds) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Video::getVideoId, videoIds)
-                .eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
+                .eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode())
+                .orderByDesc(Video::getCreateTime);
         return this.list(queryWrapper);
     }
 }

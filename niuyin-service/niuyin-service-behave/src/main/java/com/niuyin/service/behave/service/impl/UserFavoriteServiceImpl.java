@@ -9,14 +9,15 @@ import com.niuyin.common.domain.vo.PageDataInfo;
 import com.niuyin.common.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
+import com.niuyin.model.behave.vo.app.FavoriteFolderVO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.DelFlagEnum;
 import com.niuyin.service.behave.mapper.UserFavoriteMapper;
 import com.niuyin.service.behave.service.IUserFavoriteService;
+import com.niuyin.service.behave.service.IUserFavoriteVideoService;
 import com.niuyin.service.behave.util.PackageCollectionInfoPageProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -36,6 +37,9 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
 
     @Resource
     PackageCollectionInfoPageProcessor packageCollectionInfoPageProcessor;
+
+    @Resource
+    private IUserFavoriteVideoService userFavoriteVideoService;
 
     /**
      * 用户新建收藏夹
@@ -109,4 +113,19 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
         return collectionInfoList;
     }
 
+    /**
+     * 收藏夹列表
+     */
+    @Override
+    public List<FavoriteFolderVO> userFavoritesFolderList(String videoId) {
+        LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
+        List<UserFavorite> favoriteList = this.list(queryWrapper);
+        List<FavoriteFolderVO> favoriteFolderVOS = BeanCopyUtils.copyBeanList(favoriteList, FavoriteFolderVO.class);
+        favoriteFolderVOS.forEach(f -> {
+            f.setVideoCount(userFavoriteMapper.selectVideoCountByFavoriteId(f.getFavoriteId()));
+            f.setWeatherFavorite(userFavoriteVideoService.videoWeatherInFavoriteFolder(f.getFavoriteId(), videoId));
+        });
+        return favoriteFolderVOS;
+    }
 }
