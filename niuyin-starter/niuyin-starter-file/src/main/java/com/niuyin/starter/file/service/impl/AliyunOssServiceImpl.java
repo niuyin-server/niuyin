@@ -189,7 +189,7 @@ public class AliyunOssServiceImpl implements AliyunOssService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            ossClient.shutdown();
+//            ossClient.shutdown();
         }
         log.debug("结束分片上传视频");
         String url = "https://" + BUCKET_NAME + "." + END_POINT + "/" + objectName;
