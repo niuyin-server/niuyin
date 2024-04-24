@@ -187,4 +187,18 @@ public class UserFavoriteVideoServiceImpl extends ServiceImpl<UserFavoriteVideoM
     public void favoriteNumDecrease(String videoId) {
         redisService.incrementCacheMapValue(VideoCacheConstants.VIDEO_FAVORITE_NUM_MAP_KEY, videoId, -1);
     }
+
+    /**
+     * 视频是否在收藏夹中
+     *
+     * @param favoriteId
+     * @param videoId
+     * @return
+     */
+    @Override
+    public Boolean videoWeatherInFavoriteFolder(Long favoriteId, String videoId) {
+        LambdaQueryWrapper<UserFavoriteVideo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFavoriteVideo::getFavoriteId, favoriteId).eq(UserFavoriteVideo::getVideoId, videoId);
+        return this.count(queryWrapper) > 0;
+    }
 }

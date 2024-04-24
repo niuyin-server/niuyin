@@ -294,6 +294,19 @@ public class RedisService {
     }
 
     /**
+     * zset根据score降序分页
+     *
+     * @param key
+     * @param pageNum
+     * @param pageSize
+     * @param <T>
+     * @return
+     */
+    public <T> Set<DefaultTypedTuple<T>> zSetReverseRangeByScoreWithScores(String key, long pageNum, long pageSize) {
+        return redisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, Double.MIN_VALUE, Double.MAX_VALUE, pageNum, pageSize);
+    }
+
+    /**
      * 分页查询zset
      * range升序，reverseRange降序
      *

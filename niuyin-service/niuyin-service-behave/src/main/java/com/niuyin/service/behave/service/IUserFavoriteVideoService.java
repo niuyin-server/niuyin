@@ -19,4 +19,11 @@ public interface IUserFavoriteVideoService extends IService<UserFavoriteVideo> {
      */
     Boolean videoFavorites(UserFavoriteVideoDTO userFavoriteVideoDTO);
 
+    /**
+     * 视频是否在收藏夹中
+     * @param favoriteId
+     * @param videoId
+     * @return
+     */
+    Boolean videoWeatherInFavoriteFolder(Long favoriteId, String videoId);
 }
