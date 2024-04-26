@@ -466,4 +466,16 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         vo.setAuthor(author);
     }
 
+    /**
+     * 获取视频父分类集合
+     *
+     * @return
+     */
+    @Override
+    public List<VideoCategory> getVideoParentCategoryList() {
+        LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoCategory::getParentId, 0L)
+                .eq(VideoCategory::getStatus, VideoCategoryStatus.NORMAL.getCode());
+        return this.list(queryWrapper);
+    }
 }

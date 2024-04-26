@@ -50,6 +50,10 @@ public class VideoCategoryController {
         return R.ok(videoCategoryService.getCategoryTree());
     }
 
+    @GetMapping("/parentList")
+    public R<?> getVideoParentCategoryList() {
+        return R.ok(videoCategoryService.getVideoParentCategoryList());
+    }
 
 }
 

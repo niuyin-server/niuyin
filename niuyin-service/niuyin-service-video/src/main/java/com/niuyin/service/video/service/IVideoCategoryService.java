@@ -65,4 +65,12 @@ public interface IVideoCategoryService extends IService<VideoCategory> {
      * @return
      */
     PageDataInfo getVideoPageByCategoryId(CategoryVideoPageDTO pageDTO);
+
+    /**
+     * 获取视频父分类集合
+     *
+     * @return
+     */
+    List<VideoCategory> getVideoParentCategoryList();
+
 }
