@@ -14,8 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class CreatorTest {
 
+
     @Test
-    void testVideoPage(){
+    void testVideoPage() {
 
     }
 

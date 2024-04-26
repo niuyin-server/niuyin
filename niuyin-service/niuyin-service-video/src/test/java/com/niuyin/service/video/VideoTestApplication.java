@@ -17,10 +17,7 @@ import com.niuyin.common.utils.video.FfmpegUtil;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.model.search.vo.VideoSearchVO;
-import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoCategoryRelation;
-import com.niuyin.model.video.domain.VideoImage;
-import com.niuyin.model.video.domain.VideoSensitive;
+import com.niuyin.model.video.domain.*;
 import com.niuyin.model.video.dto.VideoPublishDto;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
@@ -625,10 +622,17 @@ public class VideoTestApplication {
         resultVideoIds.forEach(System.out::println);
 
         Map<String, Video> batch = videoRedisBatchCache.getBatch(new ArrayList<>(resultVideoIds));
-        batch.entrySet().forEach(entry ->{
+        batch.entrySet().forEach(entry -> {
             log.debug(entry.getValue().toString());
         });
 
+    }
+
+    @Test
+    @DisplayName("测试视频分类")
+    void getVideoParentCategoryListTest() {
+        List<VideoCategory> videoParentCategoryList = videoCategoryService.getVideoParentCategoryList();
+        videoParentCategoryList.forEach(System.out::println);
     }
 
 }
