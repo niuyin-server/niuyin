@@ -1,7 +1,7 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
 import com.niuyin.model.video.vo.VideoCategoryVo;
 import com.niuyin.service.video.service.IVideoCategoryService;
@@ -24,8 +24,8 @@ public class VideoCategoryController {
     private IVideoCategoryService videoCategoryService;
 
     @GetMapping()
-    public R<?> getAllCategory() {
-        List<VideoCategoryVo> categoryNames = videoCategoryService.selectAllCategory();
+    public R<?> getAllParentCategory() {
+        List<VideoCategoryVo> categoryNames = videoCategoryService.selectAllParentCategory();
         return R.ok(categoryNames);
     }
 
