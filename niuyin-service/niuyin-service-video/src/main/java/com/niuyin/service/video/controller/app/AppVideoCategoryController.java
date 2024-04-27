@@ -1,7 +1,7 @@
 package com.niuyin.service.video.controller.app;
 
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.video.dto.CategoryVideoPageDTO;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.service.video.service.IVideoCategoryService;

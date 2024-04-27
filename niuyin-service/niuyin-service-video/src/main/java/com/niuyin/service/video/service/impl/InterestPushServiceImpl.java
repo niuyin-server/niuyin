@@ -1,8 +1,8 @@
 package com.niuyin.service.video.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;

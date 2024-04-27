@@ -1,9 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.niuyin.common.exception.ExceptionCatch,\
-  com.niuyin.common.swagger.SwaggerConfiguration,\
-  com.niuyin.common.swagger.Swagger2Configuration,\
-  com.niuyin.common.config.WebMvcConfig,\
-  com.niuyin.common.config.RedisConfig,\
-  com.niuyin.common.service.RedisCache,\
-  com.niuyin.common.service.RedisService,\
-  com.niuyin.common.config.MybatisPlusConfig

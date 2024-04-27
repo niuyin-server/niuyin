@@ -2,7 +2,7 @@ package com.niuyin.service.notice.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
 

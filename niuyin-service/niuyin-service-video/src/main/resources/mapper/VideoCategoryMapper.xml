@@ -8,28 +8,38 @@
         where status = '0'
     </select>
 
+    <select id="getAllVideoParentCategory" resultType="com.niuyin.model.video.domain.VideoCategory">
+        SELECT id, name
+        FROM video_category
+        where status = '0'
+          and parent_id = '0'
+    </select>
+
     <select id="selectVideoByCategoryId" resultType="com.niuyin.model.video.domain.Video">
         SELECT v.*
         FROM video_category_relation vcr
                  LEFT JOIN video v ON v.video_id = vcr.video_id
         where vcr.category_id = #{categoryId}
+           or vcr.category_id in (select id from video_category where parent_id = #{categoryId})
         ORDER BY v.create_time DESC
         LIMIT #{pageNum}, #{pageSize};
     </select>
+
     <select id="selectVideoCountByCategoryId" resultType="java.lang.Long">
         select count(1) as count
-        from video_category_relation
-        where category_id = #{categoryId};
+        from video_category_relation vcr
+        where vcr.category_id = #{categoryId}
+           or vcr.category_id in (select id from video_category where parent_id = #{categoryId});
     </select>
+
     <select id="selectVideoPageByCategoryId" resultType="com.niuyin.model.video.domain.Video">
         SELECT v.*
         FROM video v
                  INNER JOIN video_category_relation vcr ON v.video_id = vcr.video_id
-        where vcr.category_id =  #{id}
+        where vcr.category_id = #{id}
           and v.del_flag = '0'
         ORDER BY v.create_time DESC
         LIMIT #{pageNum}, #{pageSize};
-
     </select>
 </mapper>
 

@@ -1,7 +1,7 @@
 package com.niuyin.service.search.service;
 
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.common.enums.VideoPlatformEnum;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 

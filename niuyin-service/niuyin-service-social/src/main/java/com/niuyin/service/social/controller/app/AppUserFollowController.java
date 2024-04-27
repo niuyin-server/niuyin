@@ -1,8 +1,8 @@
 package com.niuyin.service.social.controller.app;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.cache.DynamicUser;
 import com.niuyin.model.social.vo.Fans;

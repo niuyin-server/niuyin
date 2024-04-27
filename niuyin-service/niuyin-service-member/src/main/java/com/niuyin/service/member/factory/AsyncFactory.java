@@ -1,8 +1,8 @@
 package com.niuyin.service.member.factory;
 
-import com.niuyin.common.utils.IpUtils;
-import com.niuyin.common.utils.ServletUtils;
-import com.niuyin.common.utils.spring.SpringUtils;
+import com.niuyin.common.core.utils.IpUtils;
+import com.niuyin.common.core.utils.ServletUtils;
+import com.niuyin.common.core.utils.spring.SpringUtils;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.service.member.service.IMemberService;
 import lombok.extern.slf4j.Slf4j;

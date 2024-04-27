@@ -19,6 +19,7 @@ import java.util.List;
 @Mapper
 public interface VideoCategoryMapper extends BaseMapper<VideoCategory> {
     List<VideoCategory> getAllVideoCategory();
+    List<VideoCategory> getAllVideoParentCategory();
 
     /**
      * 分页通过分类id查询视频集合

@@ -1,9 +1,9 @@
 package com.niuyin.service.search.controller.v1;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
@@ -12,7 +12,6 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
-import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;

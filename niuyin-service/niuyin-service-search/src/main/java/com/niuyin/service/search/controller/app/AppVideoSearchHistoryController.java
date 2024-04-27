@@ -1,6 +1,6 @@
 package com.niuyin.service.search.controller.app;
 
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import org.springframework.web.bind.annotation.*;

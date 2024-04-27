@@ -1,11 +1,7 @@
 package com.niuyin.service.behave;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.niuyin.common.context.UserContext;
 import com.niuyin.model.behave.domain.VideoUserLike;
-import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
-import com.niuyin.model.video.dto.VideoPageDto;
-import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
 import com.niuyin.service.behave.mapper.VideoUserLikeMapper;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;

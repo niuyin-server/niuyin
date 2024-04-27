@@ -1,7 +1,7 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.niuyin.common.domain.R;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.service.video.service.IVideoTagService;
 import org.springframework.validation.annotation.Validated;

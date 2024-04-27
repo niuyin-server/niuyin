@@ -1,8 +1,8 @@
 package com.niuyin.service.video.schedule;
 
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.date.DateUtils;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.HotVideoVO;
 import com.niuyin.service.video.constants.VideoCacheConstants;

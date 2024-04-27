@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.controller.v1;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.model.behave.enums.UserVideoBehaveEnum;
 import com.niuyin.service.behave.service.IUserVideoBehaveService;
 import org.springframework.web.bind.annotation.GetMapping;

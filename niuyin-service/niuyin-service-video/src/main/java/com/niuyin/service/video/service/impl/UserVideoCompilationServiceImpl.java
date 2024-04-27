@@ -5,13 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.video.domain.UserVideoCompilation;
-import com.niuyin.model.video.domain.UserVideoCompilationRelation;
-import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.dto.UpdateUserVideoCompilationDTO;
 import com.niuyin.model.video.dto.UserVideoCompilationPageDTO;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 用户视频合集表(UserVideoCompilation)表服务实现类

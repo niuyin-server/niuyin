@@ -1,9 +1,9 @@
 package com.niuyin.service.member.strategy.login;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.IpUtils;
-import com.niuyin.common.utils.ServletUtils;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.utils.IpUtils;
+import com.niuyin.common.core.utils.ServletUtils;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.dto.SmsLoginDTO;
 import com.niuyin.model.member.enums.LoginTypeEnum;

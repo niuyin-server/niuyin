@@ -1,9 +1,9 @@
 package com.niuyin.service.member.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.dubbo.api.DubboSocialService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;

@@ -1,11 +1,9 @@
 package com.niuyin.service.search.service.impl;
 
-import com.hankcs.hanlp.dictionary.CustomDictionary;
 import com.mongodb.client.result.DeleteResult;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.utils.date.DateUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.utils.date.DateUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.common.enums.VideoPlatformEnum;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
@@ -15,15 +13,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import com.hankcs.hanlp.HanLP;
-import com.hankcs.hanlp.seg.common.Term;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.io.StringReader;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * VideoSearchHistoryServiceImpl

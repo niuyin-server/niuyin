@@ -1,6 +1,6 @@
 package com.niuyin.service.member.strategy.login;
 
-import com.niuyin.common.utils.JwtUtil;
+import com.niuyin.common.core.utils.JwtUtil;
 import com.niuyin.service.member.strategy.LoginStrategy;
 
 import javax.annotation.PostConstruct;

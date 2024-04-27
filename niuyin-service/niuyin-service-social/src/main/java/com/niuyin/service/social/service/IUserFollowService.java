@@ -2,7 +2,7 @@ package com.niuyin.service.social.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.model.social.vo.Fans;

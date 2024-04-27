@@ -1,6 +1,6 @@
 package com.niuyin.service.creator.service;
 
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
 import com.niuyin.model.creator.vo.DashboardAmountVO;

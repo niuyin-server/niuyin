@@ -2,7 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 

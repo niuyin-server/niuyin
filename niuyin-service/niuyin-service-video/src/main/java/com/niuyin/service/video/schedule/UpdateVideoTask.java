@@ -1,6 +1,6 @@
 package com.niuyin.service.video.schedule;
 
-import com.niuyin.common.service.RedisService;
+import com.niuyin.common.core.service.RedisService;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.video.constants.VideoCacheConstants;
 import com.niuyin.service.video.service.IVideoService;

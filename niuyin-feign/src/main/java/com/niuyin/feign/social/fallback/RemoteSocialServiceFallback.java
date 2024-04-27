@@ -1,6 +1,6 @@
 package com.niuyin.feign.social.fallback;
 
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.feign.social.RemoteSocialService;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;

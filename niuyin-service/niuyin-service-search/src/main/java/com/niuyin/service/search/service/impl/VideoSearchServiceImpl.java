@@ -1,13 +1,13 @@
 package com.niuyin.service.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.date.DateUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.date.DateUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.common.enums.VideoPlatformEnum;
