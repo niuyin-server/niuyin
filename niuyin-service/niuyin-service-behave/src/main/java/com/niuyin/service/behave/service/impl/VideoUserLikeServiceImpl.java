@@ -3,11 +3,11 @@ package com.niuyin.service.behave.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.behave.enums.UserVideoBehaveEnum;
@@ -336,5 +336,12 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
 //            likeNumDecrement(videoId);
         }
         return remove;
+    }
+
+    @Override
+    public boolean weatherLikeVideo(String videoId, Long userId) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
+        return this.count(queryWrapper) > 0;
     }
 }

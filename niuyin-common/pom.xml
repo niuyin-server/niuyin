@@ -10,6 +10,10 @@
     </parent>
 
     <artifactId>niuyin-common</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>niuyin-common-core</module>
+    </modules>
 
     <dependencies>
 

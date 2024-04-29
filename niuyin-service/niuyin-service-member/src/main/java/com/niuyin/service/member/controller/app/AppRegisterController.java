@@ -1,6 +1,6 @@
 package com.niuyin.service.member.controller.app;
 
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.model.member.dto.SmsRegisterDTO;
 import com.niuyin.service.member.service.RegisterService;
 import com.niuyin.starter.sms.domain.model.SmsCode;

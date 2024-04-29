@@ -8,16 +8,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.audit.SensitiveWordUtil;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.date.DateUtils;
-import com.niuyin.common.utils.file.PathUtils;
-import com.niuyin.common.utils.string.StringUtils;
-import com.niuyin.common.utils.uniqueid.IdGenerator;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.audit.SensitiveWordUtil;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.date.DateUtils;
+import com.niuyin.common.core.utils.file.PathUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
+import com.niuyin.common.core.utils.uniqueid.IdGenerator;
 import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.feign.behave.RemoteBehaveService;
@@ -39,7 +39,7 @@ import com.niuyin.model.video.vo.app.VideoInfoVO;
 import com.niuyin.model.video.vo.app.VideoRecommendVO;
 import com.niuyin.service.video.constants.HotVideoConstants;
 import com.niuyin.service.video.constants.QiniuVideoOssConstants;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.constants.VideoConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
@@ -71,7 +71,7 @@ import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VID
 import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT30;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
-import static com.niuyin.service.video.constants.VideoCacheConstants.*;
+import static com.niuyin.model.constants.VideoCacheConstants.*;
 
 /**
  * 视频表(Video)表服务实现类
@@ -451,8 +451,10 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         log.debug("mp结束feed");
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
         // 封装VideoVO
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList.stream()
-                .map(vo -> packageVideoVOAsync(vo, UserContext.getUserId())).toArray(CompletableFuture[]::new));
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
+                .stream()
+                .map(vo -> packageVideoVOAsync(vo, UserContext.getUserId()))
+                .toArray(CompletableFuture[]::new));
         allFutures.join();
         return videoVOList;
     }
@@ -1100,17 +1102,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public List<VideoRecommendVO> pushAppVideoList() {
-        Member member;
-        if (!UserContext.hasLogin()) {
+        Member member = dubboMemberService.apiGetById(UserContext.getUserId());
+        if (!UserContext.hasLogin() || Objects.isNull(member)) {
             // 游客登陆
             member = new Member();
             member.setUserId(2L);
-        } else {
-            member = dubboMemberService.apiGetById(UserContext.getUserId());
-            if (Objects.isNull(member)) {
-                member = new Member();
-                member.setUserId(2L);
-            }
         }
         Collection<String> videoIdsByUserModel = interestPushService.getVideoIdsByUserModel(member);
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
@@ -1262,7 +1258,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public List<VideoVO> packageVideoVOByVideoIds(Long loginUserId, List<String> videoIds) {
-        List<Video> videoList = this.exitsByVideoIds(videoIds);
+        Map<String, Video> batch = videoRedisBatchCache.getBatch(new ArrayList<>(videoIds));
+        List<Video> videoList = new ArrayList<>(batch.values());
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
         // 封装VideoVO
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList.stream()

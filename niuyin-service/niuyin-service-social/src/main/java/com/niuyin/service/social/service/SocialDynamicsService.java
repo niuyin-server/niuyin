@@ -1,6 +1,6 @@
 package com.niuyin.service.social.service;
 
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.cache.DynamicUser;
 

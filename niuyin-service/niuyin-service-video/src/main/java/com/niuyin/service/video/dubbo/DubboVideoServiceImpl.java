@@ -2,18 +2,19 @@ package com.niuyin.service.video.dubbo;
 
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.mapper.VideoMapper;
-import com.niuyin.service.video.service.IVideoService;
-import com.niuyin.service.video.service.IVideoTagRelationService;
-import com.niuyin.service.video.service.InterestPushService;
-import com.niuyin.service.video.service.UserFollowVideoPushService;
+import com.niuyin.service.video.service.*;
+import com.niuyin.service.video.service.cache.VideoRedisBatchCache;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DubboVideoServiceImpl
@@ -38,6 +39,12 @@ public class DubboVideoServiceImpl implements DubboVideoService {
 
     @Resource
     private UserFollowVideoPushService userFollowVideoPushService;
+
+    @Resource
+    private IVideoPositionService videoPositionService;
+
+    @Resource
+    private VideoRedisBatchCache videoRedisBatchCache;
 
     /**
      * 同步视频标签库
@@ -67,7 +74,8 @@ public class DubboVideoServiceImpl implements DubboVideoService {
      */
     @Override
     public List<Video> apiGetVideoListByVideoIds(List<String> videoIds) {
-        return videoService.listByIds(videoIds);
+        Map<String, Video> batch = videoRedisBatchCache.getBatch(new ArrayList<>(videoIds));
+        return new ArrayList<>(batch.values());
     }
 
     /**
@@ -156,5 +164,16 @@ public class DubboVideoServiceImpl implements DubboVideoService {
     @Override
     public List<VideoVO> apiGetVideoVOListByVideoIds(Long loginUserId, List<String> videoIds) {
         return videoService.packageVideoVOByVideoIds(loginUserId, videoIds);
+    }
+
+    /**
+     * 获取视频定位
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public VideoPosition apiGetVideoPositionByVideoId(String videoId) {
+        return videoPositionService.queryPositionByVideoId(videoId);
     }
 }

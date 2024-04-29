@@ -1,9 +1,9 @@
 package com.niuyin.service.behave;
 
-import com.niuyin.common.annotations.EnableRedisConfig;
-import com.niuyin.common.annotations.EnableUserTokenInterceptor;
-import com.niuyin.common.config.MybatisPlusConfig;
-import com.niuyin.common.swagger.Swagger2Configuration;
+import com.niuyin.common.core.annotations.EnableRedisConfig;
+import com.niuyin.common.core.annotations.EnableUserTokenInterceptor;
+import com.niuyin.common.core.config.MybatisPlusConfig;
+import com.niuyin.common.core.swagger.Swagger2Configuration;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

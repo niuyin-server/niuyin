@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
@@ -21,7 +21,7 @@ import com.niuyin.model.video.enums.VideoCategoryStatus;
 import com.niuyin.model.video.vo.*;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.model.video.vo.app.CategoryVideoVo;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.mapper.VideoCategoryMapper;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
-import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
+import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
  * (VideoCategory)表服务实现类
@@ -79,7 +79,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     @Override
     public List<VideoCategory> saveVideoCategoriesToRedis() {
         // 查询数据库获取视频分类列表
-        List<VideoCategory> videoCategories = videoCategoryMapper.getAllVideoCategory();
+        List<VideoCategory> videoCategories = videoCategoryMapper.getAllVideoParentCategory();
         if (videoCategories.isEmpty()) {
             return new ArrayList<>();
         }
@@ -100,6 +100,15 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         return BeanCopyUtils.copyBeanList(cacheList, VideoCategoryVo.class);
     }
 
+    @Override
+    public List<VideoCategoryVo> selectAllParentCategory() {
+        List<VideoCategory> cacheList = redisService.getCacheList(VideoCacheConstants.VIDEO_CATEGORY_PREFIX);
+        if (cacheList.isEmpty()) {
+            cacheList = saveVideoCategoriesToRedis();
+        }
+        return BeanCopyUtils.copyBeanList(cacheList, VideoCategoryVo.class);
+    }
+
     /**
      * 分页根据分类获取视频
      *
@@ -111,12 +120,13 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         if (StringUtils.isNull(pageDTO.getCategoryId())) {
             return PageDataInfo.emptyPage();
         }
+        // 查询该分类id以及其子分类
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
         List<Video> videoList = videoCategoryMapper.selectVideoByCategoryId(pageDTO);
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
-        videoVOList.forEach(v -> {
-            System.out.println("v.getVideoId() = " + v.getVideoId());
-        });
+//        videoVOList.forEach(v -> {
+//            System.out.println("v.getVideoId() = " + v.getVideoId());
+//        });
         Long videoCount = videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getCategoryId());
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
                 .stream()

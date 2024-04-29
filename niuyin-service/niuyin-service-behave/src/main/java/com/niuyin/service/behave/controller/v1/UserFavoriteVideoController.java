@@ -1,8 +1,8 @@
 package com.niuyin.service.behave.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
 import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.service.behave.service.IUserFavoriteVideoService;

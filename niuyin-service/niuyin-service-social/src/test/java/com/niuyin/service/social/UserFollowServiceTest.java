@@ -1,6 +1,6 @@
 package com.niuyin.service.social;
 
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.social.service.IUserFollowService;

@@ -1,12 +1,12 @@
 package com.niuyin.service.behave.controller.v1;
 
 import com.alibaba.fastjson2.JSON;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;

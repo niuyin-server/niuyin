@@ -20,6 +20,7 @@
         <module>niuyin-service-social</module>
         <module>niuyin-service-behave</module>
         <module>niuyin-service-notice</module>
+        <module>niuyin-service-recommend</module>
     </modules>
 
     <dependencies>
@@ -39,10 +40,12 @@
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-model</artifactId>
         </dependency>
+        <!--        niuyin-common-->
         <dependency>
             <groupId>com.niuyin</groupId>
-            <artifactId>niuyin-common</artifactId>
+            <artifactId>niuyin-common-core</artifactId>
         </dependency>
+        <!--        niuyin-feign-->
         <dependency>
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-feign</artifactId>

@@ -5,13 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.date.DateUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.date.DateUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.feign.member.RemoteMemberService;
@@ -24,7 +24,6 @@ import com.niuyin.model.notice.enums.ReceiveFlag;
 import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.model.social.vo.Fans;
 import com.niuyin.model.social.vo.FollowUser;
-import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.social.mapper.UserFollowMapper;
 import com.niuyin.service.social.service.IUserFollowService;
@@ -250,7 +249,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
      * @return
      */
     @Override
-    public List<Video> followVideoFeed(Long lastTime) {
+    public List<VideoVO> followVideoFeed(Long lastTime) {
         Long userId = UserContext.getUserId();
         // 是否存在
         Set<Object> videoIds = redisTemplate.opsForZSet().reverseRangeByScore(IN_FOLLOW + userId,
@@ -259,16 +258,10 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 lastTime == null ? 0 : 1,
                 10);
         if (ObjectUtils.isEmpty(videoIds)) {
-            // 可能只是缓存中没有了,缓存只存储7天内的关注视频,继续往后查看关注的用户太少了,不做考虑 - feed流必然会产生的问题
             return new ArrayList<>();
         }
-        // 这里不会按照时间排序，需要手动排序
-        List<Video> videos = new ArrayList<>();
-        videoIds.forEach(id -> {
-            Video video = dubboVideoService.apiGetVideoByVideoId((String) id);
-            videos.add(video);
-        });
-        return videos;
+        List<String> collect = videoIds.stream().map(Object::toString).collect(Collectors.toList());
+        return dubboVideoService.apiGetVideoVOListByVideoIds(UserContext.getUserId(), collect);
     }
 
     /**

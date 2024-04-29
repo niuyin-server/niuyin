@@ -1,9 +1,9 @@
 package com.niuyin.service.social.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.vo.UserFollowsFansVo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
@@ -110,7 +110,7 @@ public class UserFollowController {
      * @return
      */
     @GetMapping("/videoFeed")
-    public R followFeed(@RequestParam(required = false) Long lastTime){
+    public R followFeed(@RequestParam(required = false) Long lastTime) {
         return R.ok(userFollowService.followVideoFeed(lastTime));
     }
 

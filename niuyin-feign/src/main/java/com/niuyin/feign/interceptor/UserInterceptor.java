@@ -1,7 +1,7 @@
 package com.niuyin.feign.interceptor;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.utils.string.StringUtils;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 

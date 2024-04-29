@@ -1,7 +1,7 @@
 package com.niuyin.service.video.service.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.niuyin.common.utils.RedisUtils;
+import com.niuyin.common.core.utils.RedisUtils;
 import org.springframework.data.util.Pair;
 
 import java.lang.reflect.ParameterizedType;

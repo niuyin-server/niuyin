@@ -1,14 +1,14 @@
 package com.niuyin.service.member.controller.v1;
 
 import cn.hutool.core.util.PhoneUtil;
-import com.niuyin.common.constant.Constants;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.EmailUtils;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.constant.Constants;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.EmailUtils;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.member.domain.MemberInfo;

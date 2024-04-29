@@ -14,6 +14,7 @@ public interface IUserFavoriteVideoService extends IService<UserFavoriteVideo> {
 
     /**
      * 用户收藏视频到收藏夹功能
+     *
      * @param userFavoriteVideoDTO
      * @return
      */
@@ -21,6 +22,7 @@ public interface IUserFavoriteVideoService extends IService<UserFavoriteVideo> {
 
     /**
      * 视频是否在收藏夹中
+     *
      * @param favoriteId
      * @param videoId
      * @return

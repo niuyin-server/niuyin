@@ -107,7 +107,7 @@
             <!-- common -->
             <dependency>
                 <groupId>com.niuyin</groupId>
-                <artifactId>niuyin-common</artifactId>
+                <artifactId>niuyin-common-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

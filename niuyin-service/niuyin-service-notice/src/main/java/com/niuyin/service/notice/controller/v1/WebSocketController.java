@@ -1,6 +1,6 @@
 package com.niuyin.service.notice.controller.v1;
 
-import com.niuyin.common.context.UserContext;
+import com.niuyin.common.core.context.UserContext;
 import com.niuyin.model.notice.vo.WebSocketBaseResp;
 import com.niuyin.service.notice.enums.WebSocketMsgType;
 import lombok.extern.slf4j.Slf4j;

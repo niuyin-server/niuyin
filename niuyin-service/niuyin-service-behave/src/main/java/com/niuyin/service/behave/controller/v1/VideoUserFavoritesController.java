@@ -1,21 +1,15 @@
 package com.niuyin.service.behave.controller.v1;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.feign.video.RemoteVideoService;
-import com.niuyin.model.behave.domain.UserFavoriteVideo;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
-import com.niuyin.model.behave.dto.UserFavoriteVideoDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 视频收藏表(VideoUserFavorites)表控制层

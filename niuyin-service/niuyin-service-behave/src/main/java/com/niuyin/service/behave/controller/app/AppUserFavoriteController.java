@@ -1,8 +1,8 @@
 package com.niuyin.service.behave.controller.app;
 
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import org.springframework.web.bind.annotation.*;

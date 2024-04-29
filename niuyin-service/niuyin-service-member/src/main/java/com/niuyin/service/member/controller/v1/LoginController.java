@@ -1,7 +1,7 @@
 package com.niuyin.service.member.controller.v1;
 
-import com.niuyin.common.constant.Constants;
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.constant.Constants;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.model.member.dto.SmsLoginDTO;
 import com.niuyin.model.member.enums.LoginTypeEnum;
 import com.niuyin.service.member.service.LoginService;

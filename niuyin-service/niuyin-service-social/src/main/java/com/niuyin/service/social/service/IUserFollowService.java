@@ -2,12 +2,11 @@ package com.niuyin.service.social.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.model.social.vo.Fans;
 import com.niuyin.model.social.vo.FollowUser;
-import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.VideoVO;
 
 import java.util.List;
@@ -68,7 +67,7 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param lastTime 滚动分页参数，首次为null，后续为上次的末尾视频时间
      * @return
      */
-    List<Video> followVideoFeed(Long lastTime);
+    List<VideoVO> followVideoFeed(Long lastTime);
 
     /**
      * 获取社交动态分页

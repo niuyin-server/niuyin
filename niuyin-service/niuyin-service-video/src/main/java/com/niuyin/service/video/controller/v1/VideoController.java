@@ -1,11 +1,11 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.file.PathUtils;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.utils.file.PathUtils;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.HttpCodeEnum;

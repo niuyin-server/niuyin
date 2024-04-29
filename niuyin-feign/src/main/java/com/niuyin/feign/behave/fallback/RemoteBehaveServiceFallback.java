@@ -1,6 +1,6 @@
 package com.niuyin.feign.behave.fallback;
 
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.feign.behave.RemoteBehaveService;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;

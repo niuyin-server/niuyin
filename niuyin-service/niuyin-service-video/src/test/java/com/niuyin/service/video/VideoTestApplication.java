@@ -9,17 +9,17 @@ import com.aliyun.oss.model.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.service.RedisService;
-import com.niuyin.common.utils.bean.BeanCopyUtils;
-import com.niuyin.common.utils.uniqueid.IdGenerator;
-import com.niuyin.common.utils.video.FfmpegUtil;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
+import com.niuyin.common.core.utils.uniqueid.IdGenerator;
+import com.niuyin.common.core.utils.video.FfmpegUtil;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.*;
 import com.niuyin.model.video.dto.VideoPublishDto;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.mapper.VideoSensitiveMapper;
@@ -57,7 +57,7 @@ import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
-import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
+import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
  * 功能：

@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.video.dto.VideoPageDto;
 
@@ -62,4 +62,6 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
     Boolean videoActionLike(String videoId);
 
     Boolean videoActionUnlike(String videoId);
+
+    boolean weatherLikeVideo(String videoId, Long userId);
 }

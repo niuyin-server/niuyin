@@ -1,7 +1,7 @@
 package com.niuyin.service.notice.controller.app;
 
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.notice.dto.NoticePageDTO;
 import com.niuyin.service.notice.service.INoticeService;
 import lombok.extern.slf4j.Slf4j;

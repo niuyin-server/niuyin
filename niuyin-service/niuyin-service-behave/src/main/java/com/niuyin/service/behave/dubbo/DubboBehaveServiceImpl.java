@@ -84,4 +84,21 @@ public class DubboBehaveServiceImpl implements DubboBehaveService {
     public boolean removeOtherFavoriteVideoBehaveRecord(String videoId) {
         return videoUserFavoritesService.removeFavoriteRecordByVideoId(videoId);
     }
+
+    /**
+     * 是否点赞视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean apiWeatherLikeVideo(String videoId, Long userId) {
+        return videoUserLikeService.weatherLikeVideo(videoId, userId);
+    }
+
+    @Override
+    public boolean apiWeatherFavoriteVideo(String videoId, Long userId) {
+        return videoUserFavoritesService.weatherFavoriteVideo(videoId, userId);
+    }
 }

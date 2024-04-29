@@ -1,8 +1,8 @@
 package com.niuyin.feign.member;
 
 import com.niuyin.feign.member.fallback.RemoteMemberServiceFallback;
-import com.niuyin.common.constant.ServiceNameConstants;
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.constant.ServiceNameConstants;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.model.member.domain.Member;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

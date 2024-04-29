@@ -1,8 +1,8 @@
 package com.niuyin.service.member.controller.v1;
 
-import com.niuyin.common.domain.R;
-import com.niuyin.common.exception.CustomException;
-import com.niuyin.common.utils.string.StringUtils;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.exception.CustomException;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.member.domain.MemberInfo;
 import com.niuyin.service.member.service.IMemberInfoService;

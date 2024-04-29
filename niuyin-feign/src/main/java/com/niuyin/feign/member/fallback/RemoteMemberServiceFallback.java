@@ -1,6 +1,6 @@
 package com.niuyin.feign.member.fallback;
 
-import com.niuyin.common.domain.R;
+import com.niuyin.common.core.domain.R;
 import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import org.springframework.cloud.openfeign.FallbackFactory;

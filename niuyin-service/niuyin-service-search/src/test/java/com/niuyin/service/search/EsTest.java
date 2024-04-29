@@ -1,7 +1,7 @@
 package com.niuyin.service.search;
 
 import com.alibaba.fastjson.JSON;
-import com.niuyin.common.utils.date.DateUtils;
+import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.domain.VideoSearchVO;

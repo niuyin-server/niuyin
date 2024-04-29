@@ -1,9 +1,8 @@
 package com.niuyin.service.video.controller.v1;
 
-import com.niuyin.common.context.UserContext;
-import com.niuyin.common.domain.R;
-import com.niuyin.common.domain.vo.PageDataInfo;
-import com.niuyin.model.common.dto.PageDTO;
+import com.niuyin.common.core.context.UserContext;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.video.domain.UserVideoCompilation;
 import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.dto.UpdateUserVideoCompilationDTO;

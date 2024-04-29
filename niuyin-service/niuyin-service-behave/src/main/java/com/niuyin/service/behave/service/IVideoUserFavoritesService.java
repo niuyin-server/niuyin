@@ -2,7 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 
@@ -37,6 +37,7 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
     PageDataInfo queryUserFavoriteVideoPage(VideoPageDto pageDto);
 
     PageDataInfo queryMyFavoriteVideoPageForApp(VideoPageDto pageDto);
+
     PageDataInfo queryUserFavoriteVideoPageForApp(VideoPageDto pageDto);
 
     /**
@@ -57,4 +58,12 @@ public interface IVideoUserFavoritesService extends IService<VideoUserFavorites>
      */
     List<String> getFavoriteVideoIdListByUserId(Long userId);
 
+    /**
+     * 是否收藏视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    boolean weatherFavoriteVideo(String videoId, Long userId);
 }
