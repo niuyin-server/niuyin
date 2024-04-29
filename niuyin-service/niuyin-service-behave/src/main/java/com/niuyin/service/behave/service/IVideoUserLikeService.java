@@ -62,4 +62,6 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
     Boolean videoActionLike(String videoId);
 
     Boolean videoActionUnlike(String videoId);
+
+    boolean weatherLikeVideo(String videoId, Long userId);
 }

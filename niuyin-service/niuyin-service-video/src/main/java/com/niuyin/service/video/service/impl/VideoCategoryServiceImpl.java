@@ -21,7 +21,7 @@ import com.niuyin.model.video.enums.VideoCategoryStatus;
 import com.niuyin.model.video.vo.*;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.model.video.vo.app.CategoryVideoVo;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.mapper.VideoCategoryMapper;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
-import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
+import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
  * (VideoCategory)表服务实现类

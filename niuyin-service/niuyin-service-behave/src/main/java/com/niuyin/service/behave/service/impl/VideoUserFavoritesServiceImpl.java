@@ -320,4 +320,22 @@ public class VideoUserFavoritesServiceImpl extends ServiceImpl<VideoUserFavorite
         queryWrapper.select(VideoUserFavorites::getVideoId).eq(VideoUserFavorites::getUserId, userId);
         return this.list(queryWrapper).stream().map(VideoUserFavorites::getVideoId).collect(Collectors.toList());
     }
+
+    /**
+     * 是否收藏视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    @Override
+    public boolean weatherFavoriteVideo(String videoId, Long userId) {
+        LambdaQueryWrapper<VideoUserFavorites> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserFavorites::getVideoId, videoId).eq(VideoUserFavorites::getUserId, userId);
+        // 查询收藏夹是否有记录
+        LambdaQueryWrapper<UserFavoriteVideo> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(UserFavoriteVideo::getVideoId, videoId).eq(UserFavoriteVideo::getUserId, userId);
+        long count = userFavoriteVideoService.count(queryWrapper2);
+        return this.count(queryWrapper) > 0 || count > 0;
+    }
 }

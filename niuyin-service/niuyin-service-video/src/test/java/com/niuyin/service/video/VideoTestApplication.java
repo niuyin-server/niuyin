@@ -19,7 +19,7 @@ import com.niuyin.model.behave.vo.VideoUserLikeAndFavoriteVo;
 import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.*;
 import com.niuyin.model.video.dto.VideoPublishDto;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.domain.MediaVideoInfo;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.mapper.VideoSensitiveMapper;
@@ -57,7 +57,7 @@ import static com.niuyin.model.common.enums.HttpCodeEnum.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
-import static com.niuyin.service.video.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
+import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 
 /**
  * 功能：

@@ -45,4 +45,15 @@ public interface DubboBehaveService {
     boolean removeOtherLikeVideoBehaveRecord(String videoId);
 
     boolean removeOtherFavoriteVideoBehaveRecord(String videoId);
+
+    /**
+     * 是否点赞视频
+     *
+     * @param videoId
+     * @param userId
+     * @return
+     */
+    boolean apiWeatherLikeVideo(String videoId, Long userId);
+
+    boolean apiWeatherFavoriteVideo(String videoId, Long userId);
 }

@@ -5,7 +5,7 @@ import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.vo.HotVideoVO;
-import com.niuyin.service.video.constants.VideoCacheConstants;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -219,72 +219,63 @@ public class InterestPushServiceImpl implements InterestPushService {
         }
         // 创建结果集
         Set<String> videoIds = new HashSet<>(10);
-        if (StringUtils.isNotNull(member)) {
-            Long userId = member.getUserId();
-            // 随机获取
-            List<String> list = redisService.pipeline(connection -> {
-                for (Long tagId : random10TagIdsFromUserModel(member)) {
-                    String key = VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tagId;
-                    log.debug("key:{}", key);
-                    byte[] bytes = connection.sRandMember(Objects.requireNonNull(redisTemplate.getStringSerializer().serialize(key)));
-                    if (bytes != null) {
-                        return redisTemplate.getStringSerializer().deserialize(bytes);
-                    }
-                }
-                return null;
-            });
-            // 获取到的videoIds去重
-            Set<String> setVideoIds = list.stream().filter(StringUtils::isNotNull).map(Object::toString).collect(Collectors.toSet());
-            Set<String> videoSetIds = completeVideoIdsFromTagIds(setVideoIds, random10TagIdsFromUserModel(member));
-            log.debug("videoSetIds:{}", videoSetIds);
-            // 根据视频观看历史去重
-            List<String> simpIds = redisService.pipeline(connection -> {
-                for (String id : videoSetIds) {
-                    String key = VIDEO_VIEW_HISTORY_CACHE_KEY_PREFIX + id + ":" + userId;
-                    byte[] bytes = connection.get(redisTemplate.getStringSerializer().serialize(key));
-                    if (bytes != null) {
-                        return redisTemplate.getStringSerializer().deserialize(bytes);
-                    }
-                }
-                return null;
-            });
-            simpIds = simpIds.stream().filter(StringUtils::isNotNull).collect(Collectors.toList());
-
-            // todo 根据已筛选去重
-
-            if (!ObjectUtils.isEmpty(simpIds)) {
-                for (Object simpId : simpIds) {
-                    String l = simpId.toString();
-                    if (videoSetIds.contains(l)) {
-                        videoSetIds.remove(l);
-                    }
+        // 随机获取
+        List<String> list = redisService.pipeline(connection -> {
+            for (Long tagId : random10TagIdsFromUserModel(member)) {
+                String key = VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX + tagId;
+                log.debug("key:{}", key);
+                byte[] bytes = connection.sRandMember(redisTemplate.getStringSerializer().serialize(key));
+                if (bytes != null) {
+                    return redisTemplate.getStringSerializer().deserialize(bytes);
                 }
             }
+            return null;
+        });
+        // 获取到的videoIds去重
+        Set<String> setVideoIds = list.stream().filter(StringUtils::isNotNull).map(Object::toString).collect(Collectors.toSet());
+        Set<String> videoSetIds = completeVideoIdsFromTagIds(setVideoIds, random10TagIdsFromUserModel(member));
+        log.debug("videoSetIds:{}", videoSetIds);
+        // 根据视频观看历史去重
+//            List<String> simpIds = redisService.pipeline(connection -> {
+//                for (String id : videoSetIds) {
+//                    String key = VIDEO_VIEW_HISTORY_CACHE_KEY_PREFIX + id + ":" + userId;
+//                    byte[] bytes = connection.get(redisTemplate.getStringSerializer().serialize(key));
+//                    if (bytes != null) {
+//                        return redisTemplate.getStringSerializer().deserialize(bytes);
+//                    }
+//                }
+//                return null;
+//            });
+//            simpIds = simpIds.stream().filter(StringUtils::isNotNull).collect(Collectors.toList());
+//
+//            // todo 根据已筛选去重
+//
+//            if (!ObjectUtils.isEmpty(simpIds)) {
+//                for (Object simpId : simpIds) {
+//                    String l = simpId.toString();
+//                    if (videoSetIds.contains(l)) {
+//                        videoSetIds.remove(l);
+//                    }
+//                }
+//            }
 
-            videoIds.addAll(videoSetIds);
-            int videoIdsSize = videoIds.size();
-            log.debug("videoIds size:{}", videoIdsSize);
-            // todo 不够10条数据就随机取标签补全10条，男生推美女，女生推帅哥 o.0
+        videoIds.addAll(videoSetIds);
+        int videoIdsSize = videoIds.size();
+        log.debug("videoIds size:{}", videoIdsSize);
+        // todo 不够10条数据就随机取标签补全10条，男生推美女，女生推帅哥 o.0
 
-            // 随机补全视频id,根据性别: 男：美女(10) 女：帅哥(1) todo 或者递归再次随机根据模型筛选出视频
-            if (videoIdsSize < 10) {
-                String sex = member.getSex();
-                int requestNum = 10 - videoIdsSize;
-                log.debug("requestNum:{}", requestNum);
-                for (int i = 0; i < requestNum; i++) {
-                    String videoId = randomVideoIdFromTag("1".equals(sex) ? 20L : 1L);
-                    log.debug("add videoId:{}", videoId);
-                    videoIds.add(videoId);
-                }
+        // 随机补全视频id,根据性别: 男：美女(10) 女：帅哥(1) todo 或者递归再次随机根据模型筛选出视频
+        if (videoIdsSize < 10) {
+            String sex = member.getSex();
+            int requestNum = 10 - videoIdsSize;
+            log.debug("requestNum:{}", requestNum);
+            for (int i = 0; i < requestNum; i++) {
+                String videoId = randomVideoIdFromTag("1".equals(sex) ? 20L : 1L);
+                log.debug("add videoId:{}", videoId);
+                videoIds.add(videoId);
             }
-            return videoIds;
         }
-        // 游客
-        // 随机获取10个标签
-        List<VideoTag> videoTagList = videoTagService.random10VideoTags();
-        List<String> tagIdKeys = videoTagList.stream().map(VideoTag::getTagId).map(Object::toString).collect(Collectors.toList());
-        // 获取videoIds
-        return this.sRandom(tagIdKeys).stream().map(Object::toString).collect(Collectors.toSet());
+        return videoIds;
     }
 
     /**

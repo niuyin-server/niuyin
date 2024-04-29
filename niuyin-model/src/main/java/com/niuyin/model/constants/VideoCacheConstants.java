@@ -1,4 +1,4 @@
-package com.niuyin.service.video.constants;
+package com.niuyin.model.constants;
 
 /**
  * UserCacheConstant

@@ -1,6 +1,7 @@
 package com.niuyin.dubbo.api;
 
 import com.niuyin.model.video.domain.Video;
+import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
 import com.niuyin.model.video.vo.VideoVO;
@@ -91,4 +92,12 @@ public interface DubboVideoService {
      * @return
      */
     List<VideoVO> apiGetVideoVOListByVideoIds(Long loginUserId, List<String> videoIds);
+
+    /**
+     * 获取视频定位
+     *
+     * @param videoId
+     * @return
+     */
+    VideoPosition apiGetVideoPositionByVideoId(String videoId);
 }

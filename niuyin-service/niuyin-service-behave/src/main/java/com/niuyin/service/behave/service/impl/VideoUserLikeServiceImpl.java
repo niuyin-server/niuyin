@@ -337,4 +337,11 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
         }
         return remove;
     }
+
+    @Override
+    public boolean weatherLikeVideo(String videoId, Long userId) {
+        LambdaQueryWrapper<VideoUserLike> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(VideoUserLike::getVideoId, videoId).eq(VideoUserLike::getUserId, userId);
+        return this.count(queryWrapper) > 0;
+    }
 }
