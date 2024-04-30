@@ -73,6 +73,9 @@ public class VideoRecommendService {
     @Resource
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Resource
+    private UserTagModalRecommendService userTagModalRecommendService;
+
     /**
      * 解决异步线程无法访问主线程的ThreadLocal
      */
@@ -113,8 +116,17 @@ public class VideoRecommendService {
             allFutures.join();
             return videoVOList;
         } else {
-            // todo 未登录
-            return new ArrayList<>();
+            // todo 未登录 用户未登录如何推送
+            Long userIdUnLogin = 2l;
+            List<String> videoIdsByUserModel = userTagModalRecommendService.getVideoIdsByUserModel(userIdUnLogin);
+            List<Video> videoList = dubboVideoService.apiGetVideoListByVideoIds(videoIdsByUserModel);
+            List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
+            CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
+                    .stream()
+                    .map(vo -> packageUserVideoVOAsync(vo, null))
+                    .toArray(CompletableFuture[]::new));
+            allFutures.join();
+            return videoVOList;
         }
     }
 
