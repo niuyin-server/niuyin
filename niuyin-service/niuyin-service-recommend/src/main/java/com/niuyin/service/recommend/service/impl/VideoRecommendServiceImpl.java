@@ -26,6 +26,7 @@ public class VideoRecommendServiceImpl implements UserBasedCollaborativeFilterSe
 
     /**
      * 为指定用户生成推荐视频列表
+     * todo 可以只取到近一周的本用户的行为
      */
     @Override
     public List<String> generateVideoRecommendations(Long userId) {

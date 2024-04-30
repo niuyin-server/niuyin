@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
 import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_POSITION_PREFIX_KEY;
@@ -111,6 +112,8 @@ public class VideoRecommendService {
             if (videoList.isEmpty() || Objects.isNull(videoList)) {
                 return new ArrayList<>();
             }
+            // 过滤空值
+            videoList = videoList.stream().filter(Objects::nonNull).collect(Collectors.toList());
             List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
             CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
                     .stream()
