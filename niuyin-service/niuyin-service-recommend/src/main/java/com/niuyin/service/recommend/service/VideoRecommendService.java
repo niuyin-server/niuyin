@@ -96,6 +96,8 @@ public class VideoRecommendService {
             String listKey = "recommend:user_recommend_videos:" + userId;
             List<String> top20Items = get20ItemsFromList(listKey);
             if (top20Items.isEmpty()) {
+                // 发布事件补充推荐列表
+                applicationEventPublisher.publishEvent(new VideoRecommendEvent(this, userId));
                 return new ArrayList<>();
             }
             if (top20Items.size() < VIDEO_RECOMMEND_COUNT) {
