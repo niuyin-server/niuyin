@@ -38,10 +38,15 @@ public class AuthorizeFilter implements GlobalFilter {
                 || request.getURI().getPath().contains("/app/sms-register")
                 || request.getURI().getPath().contains("/swagger-ui")
                 || request.getURI().getPath().contains("/api/v1/feed")
+                || request.getURI().getPath().contains("/api/v1/pushVideo")
                 || request.getURI().getPath().contains("/api/v1/app/recommend")
+                || request.getURI().getPath().contains("/api/v1/app/hotVideo")
+                || request.getURI().getPath().contains("/api/v1/app/video/hotSearch")
                 || request.getURI().getPath().contains("/api/v1/hot")
+                || request.getURI().getPath().contains("/api/v1/video/search/hot")
                 || request.getURI().getPath().contains("/websocket")
                 || request.getURI().getPath().contains("/userVideoBehave/syncViewBehave")
+                || request.getURI().getPath().contains("/api/v1/video/feed")
         ) {
             //若存在token获取token解析token
             String token = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);

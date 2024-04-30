@@ -19,8 +19,7 @@
         SELECT v.*
         FROM video_category_relation vcr
                  LEFT JOIN video v ON v.video_id = vcr.video_id
-        where vcr.category_id = #{categoryId}
-           or vcr.category_id in (select id from video_category where parent_id = #{categoryId})
+        where vcr.category_id in (select id from video_category where parent_id = #{categoryId})
         ORDER BY v.create_time DESC
         LIMIT #{pageNum}, #{pageSize};
     </select>

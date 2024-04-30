@@ -913,7 +913,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Override
     public List<VideoVO> pushVideoList() {
-        Member member = dubboMemberService.apiGetById(UserContext.getUserId());
+        Member member;
+        if (!UserContext.hasLogin()) {
+            // 游客登陆
+            member = new Member();
+            member.setUserId(2L);
+        } else {
+            member = dubboMemberService.apiGetById(UserContext.getUserId());
+        }
         Collection<String> videoIdsByUserModel = interestPushService.getVideoIdsByUserModel(member);
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Video::getVideoId, videoIdsByUserModel);

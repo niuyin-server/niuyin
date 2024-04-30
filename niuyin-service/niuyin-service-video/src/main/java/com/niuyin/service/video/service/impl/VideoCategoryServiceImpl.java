@@ -124,9 +124,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
         List<Video> videoList = videoCategoryMapper.selectVideoByCategoryId(pageDTO);
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
-//        videoVOList.forEach(v -> {
-//            System.out.println("v.getVideoId() = " + v.getVideoId());
-//        });
         Long videoCount = videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getCategoryId());
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
                 .stream()

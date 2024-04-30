@@ -8,6 +8,7 @@ import com.niuyin.model.behave.vo.UserFollowsFansVo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.service.social.service.IUserFollowService;
+import com.niuyin.service.social.service.SocialDynamicsService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -24,6 +25,9 @@ public class UserFollowController {
 
     @Resource
     private IUserFollowService userFollowService;
+
+    @Resource
+    private SocialDynamicsService socialDynamicsService;
 
     /**
      * 关注
@@ -112,6 +116,16 @@ public class UserFollowController {
     @GetMapping("/videoFeed")
     public R followFeed(@RequestParam(required = false) Long lastTime) {
         return R.ok(userFollowService.followVideoFeed(lastTime));
+    }
+
+    /**
+     * 初始化用户收件箱
+     * todo 返回未读视频动态数
+     */
+    @GetMapping("/initUserInBox")
+    public R<?> initUserInBox() {
+        socialDynamicsService.initUserFollowInBox(UserContext.getUserId());
+        return R.ok(true);
     }
 
 }
