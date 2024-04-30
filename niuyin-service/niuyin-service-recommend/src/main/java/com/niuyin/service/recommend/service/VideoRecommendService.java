@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -89,7 +90,6 @@ public class VideoRecommendService {
         return userIdThreadLocal.get();
     }
 
-
     /**
      * 获取推荐视频流
      */
@@ -108,6 +108,9 @@ public class VideoRecommendService {
                 applicationEventPublisher.publishEvent(new VideoRecommendEvent(this, userId));
             }
             List<Video> videoList = dubboVideoService.apiGetVideoListByVideoIds(top20Items);
+            if (videoList.isEmpty() || Objects.isNull(videoList)) {
+                return new ArrayList<>();
+            }
             List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
             CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList
                     .stream()
