@@ -59,7 +59,7 @@ public class VideoRecommendService {
     @Resource
     private VideoRecommendLoadBalancer videoRecommendLoadBalancer;
 
-    @DubboReference(mock = "return null")
+    @DubboReference(retries = 3, mock = "return null")
     private DubboVideoService dubboVideoService;
 
     @DubboReference(mock = "return null")
