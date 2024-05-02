@@ -23,11 +23,14 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -47,7 +50,7 @@ import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_POSITION_PREF
 @Service
 public class VideoRecommendService {
 
-    private static final int VIDEO_RECOMMEND_COUNT = 20; // 推荐视频数量
+    private static final int VIDEO_RECOMMEND_COUNT = 10; // 推荐视频数量
     private static final int PULL_VIDEO_RECOMMEND_THRESHOLDS = 100; // 拉取推荐视频阈值
     private static final int PULL_VIDEO_RECOMMEND_COUNT = 100; // 拉取推荐视频数量
 
@@ -96,20 +99,17 @@ public class VideoRecommendService {
      */
     public List<VideoVO> pullVideoFeed() {
         if (UserContext.hasLogin()) {
+            long startTime = System.currentTimeMillis();
             Long userId = UserContext.getUserId();
             String listKey = "recommend:user_recommend_videos:" + userId;
-            List<String> top20Items = get20ItemsFromList(listKey);
-            if (top20Items.isEmpty()) {
-                // 发布事件补充推荐列表
-                applicationEventPublisher.publishEvent(new VideoRecommendEvent(this, userId));
-                return new ArrayList<>();
-            }
-            if (top20Items.size() < VIDEO_RECOMMEND_COUNT) {
-                // 发布事件补充推荐列表
+//            List<String> top10Items = lpopItemsFromRedisList(listKey, VIDEO_RECOMMEND_COUNT); // 耗时占了30% 400ms =》优化后 33ms
+            List<String> top10Items = lpopItemsFromRedisListOptimized(redisTemplate, listKey, VIDEO_RECOMMEND_COUNT); // 优化后 33ms
+            if (llengthOfRedisList(listKey) < PULL_VIDEO_RECOMMEND_THRESHOLDS) {
+                // redis list 推荐列表小于 阈值 发送事件补充推荐列表
                 applicationEventPublisher.publishEvent(new VideoRecommendEvent(this, userId));
             }
-            List<Video> videoList = dubboVideoService.apiGetVideoListByVideoIds(top20Items);
-            if (videoList.isEmpty() || Objects.isNull(videoList)) {
+            List<Video> videoList = dubboVideoService.apiGetVideoListByVideoIds(top10Items); // 耗时占了17% 220ms
+            if (CollectionUtils.isEmpty(videoList)) {
                 return new ArrayList<>();
             }
             // 过滤空值
@@ -120,6 +120,12 @@ public class VideoRecommendService {
                     .map(vo -> packageUserVideoVOAsync(vo, userId))
                     .toArray(CompletableFuture[]::new));
             allFutures.join();
+            long endTime = System.currentTimeMillis();
+
+            // 计算方法的执行时间
+            long duration = endTime - startTime;
+
+            System.out.println("方法执行时间：" + duration + " 毫秒");
             return videoVOList;
         } else {
             // todo 未登录 用户未登录如何推送
@@ -136,12 +142,47 @@ public class VideoRecommendService {
         }
     }
 
-    public List<String> get20ItemsFromList(String key) {
+    /**
+     * redis list长度
+     *
+     * @param key
+     * @return
+     */
+    public Long llengthOfRedisList(String key) {
         ListOperations<String, String> listOps = redisTemplate.opsForList();
-        List<String> items = listOps.range(key, 0, VIDEO_RECOMMEND_COUNT - 1); // 获取列表中的前20条数据
-        for (int i = 0; i < VIDEO_RECOMMEND_COUNT; i++) {
+        return listOps.size(key);
+    }
+
+    /**
+     * redis list lpop
+     *
+     * @param key
+     * @param count
+     * @return
+     */
+    public List<String> lpopItemsFromRedisList(String key, int count) {
+        ListOperations<String, String> listOps = redisTemplate.opsForList();
+        List<String> items = listOps.range(key, 0, count - 1); // 获取列表中的前20条数据
+        for (int i = 0; i < count; i++) {
             listOps.leftPop(key); // 从左侧弹出数据
         }
+        return items;
+    }
+
+    public List<String> lpopItemsFromRedisListOptimized(RedisTemplate<String, String> redisTemplate, String key, int count) {
+        // 使用Redis Script执行批量LPOP操作
+        DefaultRedisScript<List> script = new DefaultRedisScript<>(
+                "local result = {}; " +
+                        "for i=1," + count + " do " +
+                        "  table.insert(result, redis.call('lpop', KEYS[1])); " +
+                        "end; " +
+                        "return result;",
+                List.class
+        );
+
+        // 执行Lua脚本并获取结果
+        List<String> items = (List<String>) redisTemplate.execute(script, Collections.singletonList(key));
+
         return items;
     }
 
@@ -205,7 +246,6 @@ public class VideoRecommendService {
      */
     @Async
     public void packageVideoBehaveData(VideoVO videoVO) {
-        log.debug("packageVideoBehaveData开始");
         // 封装观看量、点赞数、收藏量
 //        Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoVO.getVideoId());
 //        videoVO.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
@@ -216,7 +256,6 @@ public class VideoRecommendService {
         // 评论数
         Long commentNum = dubboBehaveService.apiGetVideoCommentNum(videoVO.getVideoId());
         videoVO.setCommentNum(commentNum == null ? 0L : commentNum);
-        log.debug("packageVideoBehaveData结束");
     }
 
     /**
@@ -226,18 +265,10 @@ public class VideoRecommendService {
      */
     @Async
     public void packageMemberData(VideoVO videoVO) {
-        log.debug("packageMemberData开始");
         // 封装用户信息
-        Member userCache = redisService.getCacheObject("member:userinfo:" + videoVO.getUserId());
-        if (StringUtils.isNotNull(userCache)) {
-            videoVO.setUserNickName(userCache.getNickName());
-            videoVO.setUserAvatar(userCache.getAvatar());
-        } else {
-            Member publishUser = dubboMemberService.apiGetById(videoVO.getUserId());
-            videoVO.setUserNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
-            videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
-        }
-        log.debug("packageMemberData结束");
+        Member publishUser = dubboMemberService.apiGetById(videoVO.getUserId());
+        videoVO.setUserNickName(StringUtils.isNull(publishUser) ? "-" : publishUser.getNickName());
+        videoVO.setUserAvatar(StringUtils.isNull(publishUser) ? null : publishUser.getAvatar());
     }
 
     /**
@@ -247,7 +278,6 @@ public class VideoRecommendService {
      */
     @Async
     public void packageVideoSocialData(VideoVO videoVO, Long loginUserId) {
-        log.debug("packageVideoSocialData开始：{}", getUserId());
         if (StringUtils.isNotNull(loginUserId)) {
             // 是否关注、是否点赞、是否收藏
             videoVO.setWeatherLike(dubboBehaveService.apiWeatherLikeVideo(videoVO.getVideoId(), loginUserId));
@@ -258,7 +288,6 @@ public class VideoRecommendService {
                 videoVO.setWeatherFollow(dubboSocialService.apiWeatherFollow(loginUserId, videoVO.getUserId()));
             }
         }
-        log.debug("packageVideoSocialData结束");
     }
 
     /**
@@ -266,11 +295,9 @@ public class VideoRecommendService {
      */
     @Async
     public void packageVideoTagData(VideoVO videoVO) {
-        log.debug("packageVideoTagData开始");
         // 封装标签返回
         List<VideoTag> videoTagList = dubboVideoService.apiGetVideoTagStack(videoVO.getVideoId());
         videoVO.setTags(videoTagList.stream().map(VideoTag::getTag).toArray(String[]::new));
-        log.debug("packageVideoTagData结束");
     }
 
     /**
@@ -280,7 +307,6 @@ public class VideoRecommendService {
      */
     @Async
     public void packageVideoImageData(VideoVO videoVO) {
-        log.debug("packageVideoImageData开始");
         // 若是图文则封装图片集合
         if (videoVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
             Object imgsCacheObject = redisService.getCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId());
@@ -300,7 +326,6 @@ public class VideoRecommendService {
                 redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId(), 1, TimeUnit.DAYS);
             }
         }
-        log.debug("packageVideoImageData结束");
     }
 
     /**
@@ -310,7 +335,6 @@ public class VideoRecommendService {
      */
     @Async
     public void packageVideoPositionData(VideoVO videoVO) {
-        log.debug("packageVideoPositionData开始");
         // 若是开启定位，封装定位
         if (videoVO.getPositionFlag().equals(PositionFlag.OPEN.getCode())) {
             // 查询redis缓存
@@ -325,7 +349,6 @@ public class VideoRecommendService {
                 redisService.expire(VIDEO_POSITION_PREFIX_KEY + videoVO.getVideoId(), 1, TimeUnit.DAYS);
             }
         }
-        log.debug("packageVideoPositionData结束");
     }
 
 
