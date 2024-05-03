@@ -26,12 +26,12 @@ public class VideoRedisBatchCache extends AbstractRedisStringCache<String, Video
 
     @Override
     protected String getKey(String videoId) {
-        return "video:video:" + videoId;
+        return "video:video_batch:" + videoId;
     }
 
     @Override
     protected Long getExpireSeconds() {
-        return 12 * 60 * 60L;// 12小时
+        return 24 * 60 * 60L;// 24小时
     }
 
     @Override
