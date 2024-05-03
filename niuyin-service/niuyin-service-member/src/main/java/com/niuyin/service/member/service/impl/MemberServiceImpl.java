@@ -27,6 +27,7 @@ import com.niuyin.service.member.mapper.MemberMapper;
 import com.niuyin.service.member.service.IMemberInfoService;
 import com.niuyin.service.member.service.IMemberService;
 import com.niuyin.service.member.service.IUserSensitiveService;
+import com.niuyin.service.member.service.cache.MemberRedisBatchCache;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -70,6 +71,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private MemberRedisBatchCache memberRedisBatchCache;
 
     /**
      * 通过ID查询单条数据
@@ -290,5 +294,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         queryWrapper.select(Member::getAvatar);
         queryWrapper.eq(Member::getUserId, userId);
         return this.getOne(queryWrapper).getAvatar();
+    }
+
+    @Override
+    public Member getMemberById(Long userId) {
+        return memberRedisBatchCache.get(userId);
     }
 }
