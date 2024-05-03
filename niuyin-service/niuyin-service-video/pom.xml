@@ -57,11 +57,12 @@
             <artifactId>aliyun-java-sdk-green</artifactId>
             <version>3.6.6</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.roydon</groupId>-->
-<!--            <artifactId>niuyin-starter-rate-limit</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
+
     </dependencies>
 
     <build>

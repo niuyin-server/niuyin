@@ -407,5 +407,4 @@ public class RedisService {
         return redisTemplate.executePipelined(redisCallback);
     }
 
-
 }

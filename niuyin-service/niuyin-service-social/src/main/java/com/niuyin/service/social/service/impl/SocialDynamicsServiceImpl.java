@@ -80,6 +80,7 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
             dynamicUser.setHasRead(false);
             Member member = dubboMemberService.apiGetById((Long) followUserId);
             if (member != null) {
+                // 只存userid即可，剩下的使用rpc查
                 dynamicUser.setNickname(member.getNickName());
                 dynamicUser.setAvatar(member.getAvatar());
             } else {

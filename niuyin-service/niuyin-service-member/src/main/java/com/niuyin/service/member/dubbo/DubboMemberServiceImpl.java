@@ -25,7 +25,7 @@ public class DubboMemberServiceImpl implements DubboMemberService {
      */
     @Override
     public Member apiGetById(Long userId) {
-        return memberService.getById(userId);
+        return memberService.getMemberById(userId);
     }
 
     /**

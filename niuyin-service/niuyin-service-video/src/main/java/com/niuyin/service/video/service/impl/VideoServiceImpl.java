@@ -68,6 +68,7 @@ import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
+import static com.niuyin.service.video.config.AsyncConfig.VIDEO_EXECUTOR;
 import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT30;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
@@ -327,7 +328,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @param videoId
      * @return
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> asyncSaveVideoImagesToDB(String videoId, String imageUrl) {
         VideoImage videoImage = new VideoImage();
         videoImage.setVideoId(videoId);
@@ -376,12 +377,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return PageDataInfo.genPageData(myVideoVOList, videoIPage.getTotal());
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageMyVideoVOAsync(MyVideoVO vo) {
         return CompletableFuture.runAsync(() -> packageMyUserVideoVO(vo));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageMyUserVideoVO(MyVideoVO vo) {
         Long likeNum = dubboBehaveService.apiGetVideoLikeNum(vo.getVideoId());
         vo.setLikeNum(Objects.isNull(likeNum) ? 0L : likeNum);
@@ -395,7 +396,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return getUserVideoPage(pageDto);
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public PageDataInfo getUserVideoPage(VideoPageDto pageDto) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, pageDto.getUserId());
@@ -414,12 +415,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageUserVideoVOAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageUserVideoVO(videoVO));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageUserVideoVO(VideoVO videoVO) {
         CompletableFuture<Void> behaveDataFuture = packageVideoBehaveDataAsync(videoVO);
         CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
@@ -459,12 +460,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoVOList;
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoVOAsync(VideoVO videoVO, Long loginUserId) {
         return CompletableFuture.runAsync(() -> packageVideoVO(videoVO, loginUserId));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoVO(VideoVO videoVO, Long loginUserId) {
         log.debug("packageVideoVO开始");
         CompletableFuture<Void> viewNumFuture = viewNumIncrementAsync(videoVO.getVideoId());
@@ -486,37 +487,37 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         log.debug("packageVideoVO结束");
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> viewNumIncrementAsync(String videoId) {
         return CompletableFuture.runAsync(() -> viewNumIncrement(videoId));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoBehaveDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoBehaveData(videoVO));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoSocialDataAsync(VideoVO videoVO, Long loginUserId) {
         return CompletableFuture.runAsync(() -> packageVideoSocialData(videoVO, loginUserId));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageMemberDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageMemberData(videoVO));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoTagDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoTagData(videoVO));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoImageDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoImageData(videoVO));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoPositionDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoPositionData(videoVO));
     }
@@ -526,7 +527,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      *
      * @param videoId
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void viewNumIncrement(String videoId) {
         log.debug("viewNumIncrement开始");
         if (StringUtils.isNotEmpty(videoId)) {
@@ -540,7 +541,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      *
      * @param videoVO
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoBehaveData(VideoVO videoVO) {
         log.debug("packageVideoBehaveData开始");
         // 封装观看量、点赞数、收藏量
@@ -561,7 +562,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      *
      * @param videoVO
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageMemberData(VideoVO videoVO) {
         log.debug("packageMemberData开始");
         // 封装用户信息
@@ -582,7 +583,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      *
      * @param videoVO
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoSocialData(VideoVO videoVO, Long loginUserId) {
         log.debug("packageVideoSocialData开始" + getUserId());
         if (StringUtils.isNotNull(loginUserId)) {
@@ -601,7 +602,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     /**
      * 封装视频标签数据
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoTagData(VideoVO videoVO) {
         log.debug("packageVideoTagData开始");
         // 封装标签返回
@@ -615,7 +616,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      *
      * @param videoVO
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoImageData(VideoVO videoVO) {
         log.debug("packageVideoImageData开始");
         // 若是图文则封装图片集合
@@ -646,7 +647,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      *
      * @param videoVO
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoPositionData(VideoVO videoVO) {
         log.debug("packageVideoPositionData开始");
         // 若是开启定位，封装定位
@@ -934,12 +935,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoVOList;
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packagePushVideoVOAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packagePushVideoVO(videoVO));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packagePushVideoVO(VideoVO videoVO) {
         log.debug("packagePushVideoVO");
         CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
@@ -1128,12 +1129,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videoRecommendVOList;
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoRecommendVOAsync(VideoRecommendVO vo) {
         return CompletableFuture.runAsync(() -> packageVideoRecommendVO(vo));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoRecommendVO(VideoRecommendVO vo) {
         CompletableFuture<Void> behaveDataFuture = packageVideoRecommendVOBehaveDataAsync(vo);
         CompletableFuture<Void> memberDataFuture = packageVideoRecommendVODataAsync(vo);
@@ -1143,12 +1144,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         ).join();
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoRecommendVOBehaveDataAsync(VideoRecommendVO vo) {
         return CompletableFuture.runAsync(() -> packageVideoRecommendVOBehaveData(vo));
     }
 
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoRecommendVODataAsync(VideoRecommendVO vo) {
         return CompletableFuture.runAsync(() -> packageVideoRecommendVOMemberData(vo));
     }
@@ -1156,7 +1157,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     /**
      * 封装视频行为数据
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoRecommendVOBehaveData(VideoRecommendVO vo) {
         // 封装观看量、点赞数、收藏量
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, vo.getVideoId());
@@ -1173,7 +1174,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     /**
      * 封装作者数据
      */
-    @Async
+    @Async(VIDEO_EXECUTOR)
     public void packageVideoRecommendVOMemberData(VideoRecommendVO vo) {
         // 封装用户信息
         Author author = new Author();

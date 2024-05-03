@@ -52,4 +52,6 @@ public interface IMemberService extends IService<Member> {
      * 用户注册-sms
      */
     boolean smsRegister(SmsRegisterDTO smsRegisterDTO);
+
+    Member getMemberById(Long userId);
 }
