@@ -23,7 +23,7 @@ public interface InterestPushService {
     /**
      * 添加分类库,用于后续随机推送分类视频, todo 一个视频可能有多个分类
      */
-    void cacheVideoToCategoryRedis(Video video, List<Long> categoryIds);
+    void cacheVideoToCategoryRedis(String videoId, List<Long> categoryIds);
 
     /**
      * 删除标签内视频

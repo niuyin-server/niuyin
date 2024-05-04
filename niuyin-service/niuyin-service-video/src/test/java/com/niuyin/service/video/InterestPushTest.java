@@ -72,7 +72,7 @@ public class InterestPushTest {
         List<Video> videoList = videoService.list();
         videoList.forEach(v -> {
             // 存入分类库
-            interestPushService.cacheVideoToCategoryRedis(v, videoCategoryRelationService.queryVideoCategoryIdsByVideoId(v.getVideoId()));
+            interestPushService.cacheVideoToCategoryRedis(v.getVideoId(), videoCategoryRelationService.queryVideoCategoryIdsByVideoId(v.getVideoId()));
         });
 
     }

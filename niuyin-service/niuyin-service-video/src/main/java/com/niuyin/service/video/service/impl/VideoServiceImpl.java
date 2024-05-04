@@ -217,6 +217,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 videoCategoryRelation.setVideoId(video.getVideoId());
                 // 再将videoCategoryRelation对象存入video_category_relation表中
                 videoCategoryRelationService.saveVideoCategoryRelation(videoCategoryRelation);
+                // 存入分类库
+                interestPushService.cacheVideoToCategoryRedis(video.getVideoId(), Collections.singletonList(videoPublishDto.getCategoryId()));
             }
             // 视频标签处理
             // 视频标签限制个数，五个
