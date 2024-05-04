@@ -71,6 +71,20 @@ public class UserTagModalRecommendServiceImpl implements UserTagModalRecommendSe
     public List<String> getVideoIdsByUserModel(Long userId) {
         // todo 根据member查询其兴趣模型是否为空，为空则创建模型
         Map<String, Double> modelMap = redisService.getCacheMap(VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX + userId.toString());
+        if (Objects.isNull(modelMap) || modelMap.isEmpty()) {
+            List<Long> tagIds = new ArrayList<>(10);
+            tagIds.add(1L);
+            tagIds.add(18L);
+            tagIds.add(20L);
+            tagIds.add(34L);
+            tagIds.add(5L);
+            tagIds.add(60L);
+            tagIds.add(66L);
+            tagIds.add(77L);
+            tagIds.add(88L);
+            tagIds.add(9L);
+            initUserModel(userId, tagIds);
+        }
         // 创建结果集
         Set<String> videoIds = new HashSet<>(VIDEO_RECOMMEND_SIZE);
         // 随机获取视频id

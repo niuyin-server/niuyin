@@ -68,9 +68,9 @@ public class InterestPushServiceImpl implements InterestPushService {
 
     @Async
     @Override
-    public void cacheVideoToCategoryRedis(Video video, List<Long> categoryIds) {
+    public void cacheVideoToCategoryRedis(String videoId, List<Long> categoryIds) {
         categoryIds.forEach(id -> {
-            redisTemplate.opsForSet().add(VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + id.toString(), video.getVideoId());
+            redisTemplate.opsForSet().add(VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + id.toString(), videoId);
         });
     }
 
