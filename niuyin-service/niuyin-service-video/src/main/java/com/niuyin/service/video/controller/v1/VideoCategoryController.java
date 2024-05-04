@@ -4,6 +4,7 @@ import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
 import com.niuyin.model.video.vo.VideoCategoryVo;
+import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +54,14 @@ public class VideoCategoryController {
     @GetMapping("/parentList")
     public R<?> getVideoParentCategoryList() {
         return R.ok(videoCategoryService.getVideoParentCategoryList());
+    }
+
+    /**
+     * 获取视频父分类的子分类
+     */
+    @GetMapping("/children/{id}")
+    public R<List<AppVideoCategoryVo>> getParentCategoryChildrenList(@PathVariable("id") Long id) {
+        return R.ok(videoCategoryService.getNormalChildrenCategory(id));
     }
 
 }

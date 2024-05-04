@@ -47,6 +47,10 @@ public class AuthorizeFilter implements GlobalFilter {
                 || request.getURI().getPath().contains("/websocket")
                 || request.getURI().getPath().contains("/userVideoBehave/syncViewBehave")
                 || request.getURI().getPath().contains("/api/v1/video/feed")
+                || request.getURI().getPath().contains("/api/v1/category/tree")
+                || request.getURI().getPath().contains("/api/v1/category/parentList")
+                || request.getURI().getPath().contains("/api/v1/category/children/")
+                || request.getURI().getPath().contains("/api/v1/category/pushVideo/")
         ) {
             //若存在token获取token解析token
             String token = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);

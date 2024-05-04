@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
+import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoCategory;
@@ -21,27 +21,28 @@ import com.niuyin.model.video.enums.VideoCategoryStatus;
 import com.niuyin.model.video.vo.*;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.model.video.vo.app.CategoryVideoVo;
-import com.niuyin.model.constants.VideoCacheConstants;
 import com.niuyin.service.video.mapper.VideoCategoryMapper;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.IVideoCategoryRelationService;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
+import com.niuyin.service.video.service.cache.VideoRedisBatchCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX;
-import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.model.constants.VideoCacheConstants.VIDEO_IMAGES_PREFIX_KEY;
+import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 
 /**
  * (VideoCategory)表服务实现类
@@ -75,6 +76,9 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
 
     @DubboReference(mock = "return null", interfaceClass = DubboMemberService.class, timeout = 2000)
     private DubboMemberService dubboMemberService;
+
+    @Resource
+    private VideoRedisBatchCache videoRedisBatchCache;
 
     @Override
     public List<VideoCategory> saveVideoCategoriesToRedis() {
@@ -240,42 +244,50 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     public List<VideoPushVO> pushVideoByCategory(Long categoryId) {
         // 先判断 categoryId 是否有效
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(VideoCategory::getId, categoryId);
-        if (this.count(queryWrapper) < 1) {
+        queryWrapper.eq(VideoCategory::getId, categoryId).or().eq(VideoCategory::getParentId, categoryId);
+        List<VideoCategory> categoryList = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(categoryList)) {
             return new ArrayList<>();
         }
-        String categoryKey = VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + categoryId;
-        String pushedKey = VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + UserContext.getUserId();
-        Long totalCount = redisTemplate.opsForSet().size(categoryKey);
-        Long pushedCount = redisTemplate.opsForSet().size(pushedKey);
-        if (StringUtils.isNull(totalCount) || totalCount < 1) {
-            log.debug("没有分类视频");
-        }
-        Long subCount = totalCount - pushedCount;
-        if (subCount < 1) {
-            return new ArrayList<>();
-        }
+//        String categoryKey = VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + categoryId;
+//        String pushedKey = VIDEO_CATEGORY_PUSHED_CACHE_KEY_PREFIX + UserContext.getUserId();
+//        Long totalCount = redisTemplate.opsForSet().size(categoryKey);
+//        Long pushedCount = redisTemplate.opsForSet().size(pushedKey);
+//        if (StringUtils.isNull(totalCount) || totalCount < 1) {
+//            log.debug("没有分类视频");
+//        }
+//        Long subCount = totalCount - pushedCount;
+//        if (subCount < 1) {
+//            return new ArrayList<>();
+//        }
         // 查询当前用户已推送历史
-        Set<Object> cacheSet = redisService.getCacheSet(pushedKey);
+//        Set<Object> cacheSet = redisService.getCacheSet(pushedKey);
         // 去重结果
-        Set<String> results = new HashSet<>(10);
+        Set<String> results = new HashSet<>(20);
         // 随机获取10条记录
-        while (results.size() < 10) {
-            String item = (String) redisTemplate.opsForSet().randomMember(categoryKey);
-            if (!cacheSet.contains(item)) {
-                // 筛选出未被推送过的数据
-                results.add(item);
-                cacheSet.add(item);
-                // 已推送记录存到redis，过期时间为1小时，可以封装为异步
-                redisTemplate.opsForSet().add(pushedKey, item);
-                redisService.expire(pushedKey, 1, TimeUnit.MINUTES);
-            }
-            if (results.size() >= subCount) {
-                break;
-            }
-        }
+//        while (results.size() < 10) {
+//            String item = (String) redisTemplate.opsForSet().randomMember(categoryKey);
+//            if (!cacheSet.contains(item)) {
+//                // 筛选出未被推送过的数据
+//                results.add(item);
+//                cacheSet.add(item);
+//                // 已推送记录存到redis，过期时间为1小时，可以封装为异步
+//                redisTemplate.opsForSet().add(pushedKey, item);
+//                redisService.expire(pushedKey, 1, TimeUnit.MINUTES);
+//            }
+//            if (results.size() >= subCount) {
+//                break;
+//            }
+//        }
+        List<Long> categoryIds = categoryList.stream().map(VideoCategory::getId).collect(Collectors.toList());
+        categoryIds.forEach(id->{
+            List<String> strings = pullVideoIdsByCategoryId(id);
+            results.addAll(strings);
+        });
         // 封装result
-        List<Video> videoList = videoService.listByIds(results);
+//        List<Video> videoList = videoService.listByIds(results);
+        Map<String, Video> batch = videoRedisBatchCache.getBatch(new ArrayList<>(results));
+        List<Video> videoList = new ArrayList<>(batch.values());
         List<VideoPushVO> videoPushVOList = BeanCopyUtils.copyBeanList(videoList, VideoPushVO.class);
         CompletableFuture.allOf(videoPushVOList.stream()
                 .map(videoPushVO -> CompletableFuture.runAsync(() -> {
@@ -283,6 +295,12 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
                     asyncPackageVideoImage(videoPushVO);
                 })).toArray(CompletableFuture[]::new)).join();
         return videoPushVOList;
+    }
+
+    public List<String> pullVideoIdsByCategoryId(Long categoryId){
+        String categoryKey = VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + categoryId;
+        List<Object> list = redisTemplate.opsForSet().randomMembers(categoryKey, 10);
+        return list.stream().map(Object::toString).collect(Collectors.toList());
     }
 
     /**
@@ -329,6 +347,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     public List<VideoCategoryTree> getCategoryTree() {
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoCategory::getStatus, VideoCategoryStatus.NORMAL.getCode());
+        queryWrapper.eq(VideoCategory::getVisible, VideoCategoryStatus.NORMAL.getCode());
         queryWrapper.orderByAsc(VideoCategory::getOrderNum);
         List<VideoCategory> videoCategoryList = this.list(queryWrapper);
         List<VideoCategoryTree> videoCategoryTrees = BeanCopyUtils.copyBeanList(videoCategoryList, VideoCategoryTree.class);
