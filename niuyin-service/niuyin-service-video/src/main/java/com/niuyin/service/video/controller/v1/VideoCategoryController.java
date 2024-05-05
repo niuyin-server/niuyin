@@ -1,5 +1,6 @@
 package com.niuyin.service.video.controller.v1;
 
+import com.niuyin.common.core.annotations.MappingCostTime;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
@@ -51,6 +52,10 @@ public class VideoCategoryController {
         return R.ok(videoCategoryService.getCategoryTree());
     }
 
+    /**
+     * 获取视频父分类
+     */
+    @MappingCostTime
     @GetMapping("/parentList")
     public R<?> getVideoParentCategoryList() {
         return R.ok(videoCategoryService.getVideoParentCategoryList());
@@ -59,6 +64,7 @@ public class VideoCategoryController {
     /**
      * 获取视频父分类的子分类
      */
+    @MappingCostTime
     @GetMapping("/children/{id}")
     public R<List<AppVideoCategoryVo>> getParentCategoryChildrenList(@PathVariable("id") Long id) {
         return R.ok(videoCategoryService.getNormalChildrenCategory(id));
