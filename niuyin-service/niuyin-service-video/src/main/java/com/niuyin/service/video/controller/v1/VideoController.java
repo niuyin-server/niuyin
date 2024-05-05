@@ -1,5 +1,7 @@
 package com.niuyin.service.video.controller.v1;
 
+import com.niuyin.common.cache.annotations.DoubleCache;
+import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
@@ -28,6 +30,7 @@ import ws.schild.jave.info.MultimediaInfo;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 视频表(Video)表控制层
@@ -74,7 +77,7 @@ public class VideoController {
     }
 
     /**
-     * todo 前端在dto传入一个唯一业务字段 #videoPublishDto.uniqueKey
+     * todo 前端在dto传入一个唯一业务字段 #videoPublishDto.uniqueKey，这个唯一key可以使用雪花生成的视频id
      *
      * @param videoPublishDto
      * @return
@@ -85,7 +88,7 @@ public class VideoController {
         return R.ok();
     }
 
-//    /**
+    //    /**
 //     * 测试redisson分布式锁
 //     *
 //     * @return
@@ -95,6 +98,21 @@ public class VideoController {
 //    public R<String> testRateLimit() {
 //        return R.ok("test rate limit");
 //    }
+
+    /**
+     * 测试分布式锁
+     * 测试二级缓存
+     * http://127.0.0.1:9301/api/v1/testRedissonLock?id=123
+     *
+     * @param id
+     * @return
+     */
+    @DoubleCache(cachePrefix = "aaatest:double:cache", key = "#id", expire = 10, unit = TimeUnit.MINUTES)
+    @RedissonLock(prefixKey = "aaaredisson:lock", key = "#id")
+    @GetMapping("/testRedissonLock")
+    public R<String> testRedissonLock(@RequestParam("id") Long id) {
+        return R.ok("testRedissonLock");
+    }
 
     /**
      * 首页推送视频
