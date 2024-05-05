@@ -1,5 +1,6 @@
 package com.niuyin.service.search;
 
+import com.niuyin.common.cache.annotations.EnableCacheConfig;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @EnableScheduling
 @EnableCaching
+@EnableCacheConfig
 @EnableFeignClients(basePackages = "com.niuyin.feign")
 public class SearchApplication {
 

@@ -1,6 +1,6 @@
 package com.niuyin.service.creator;
 
-import com.niuyin.common.core.annotations.EnableRedisConfig;
+import com.niuyin.common.cache.annotations.EnableCacheConfig;
 import com.niuyin.common.core.annotations.EnableUserTokenInterceptor;
 import com.niuyin.common.core.config.MybatisPlusConfig;
 import com.niuyin.common.core.swagger.Swagger2Configuration;
@@ -18,8 +18,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * CreatorApplication
  *
@@ -30,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
-@EnableRedisConfig
+@EnableCacheConfig
 @EnableScheduling
 @EnableAsync
 @EnableCaching

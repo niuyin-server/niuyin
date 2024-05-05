@@ -1,6 +1,6 @@
 package com.niuyin.service.recommend;
 
-import com.niuyin.common.core.annotations.EnableRedisConfig;
+import com.niuyin.common.cache.annotations.EnableCacheConfig;
 import com.niuyin.common.core.annotations.EnableUserTokenInterceptor;
 import com.niuyin.common.core.config.MybatisPlusConfig;
 import com.niuyin.common.core.swagger.Swagger2Configuration;
@@ -23,7 +23,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
-@EnableRedisConfig
+@EnableCacheConfig
 @EnableAsync
 @EnableDubbo
 @Import({MybatisPlusConfig.class, Swagger2Configuration.class})

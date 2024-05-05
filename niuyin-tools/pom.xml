@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>com.niuyin</groupId>
-            <artifactId>niuyin-common-core</artifactId>
+            <artifactId>niuyin-common-cache</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

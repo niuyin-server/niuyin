@@ -1,7 +1,7 @@
 package com.niuyin.service.video.aspectj;
 
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.spring.SpElUtils;
 import com.niuyin.service.video.annotation.VideoRepeatSubmit;
 import org.aspectj.lang.JoinPoint;

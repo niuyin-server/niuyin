@@ -1,4 +1,4 @@
-package com.niuyin.common.core.service;
+package com.niuyin.common.cache.service;
 
 import cn.hutool.core.util.BooleanUtil;
 import lombok.AllArgsConstructor;
@@ -17,6 +17,37 @@ import java.util.concurrent.TimeUnit;
 public class RedisService {
 
     public RedisTemplate redisTemplate;
+
+    /**
+     * string 批量 set
+     *
+     * @param map      组装的key，value，例如
+     *                 map.put("user:userid1", new User());
+     * @param time     过期时间
+     * @param timeUnit 过期时间单位
+     * @param <T>      具体set的值对象类型
+     */
+    public <T> void mSet(Map<String, T> map, long time, TimeUnit timeUnit) {
+        redisTemplate.opsForValue().multiSet(map);
+        map.forEach((key, value) -> {
+            expire(key, time, timeUnit);
+        });
+    }
+
+    /**
+     * string 批量获取
+     *
+     * @param keys key 的集合
+     * @param <T>  返回对象类型
+     * @return List<T>
+     */
+    public <T> List<T> mGet(Collection<String> keys) {
+        List<T> list = redisTemplate.opsForValue().multiGet(keys);
+        if (Objects.isNull(list)) {
+            return new ArrayList<>();
+        }
+        return list;
+    }
 
     /**
      * 缓存基本的对象，Integer、String、实体类等

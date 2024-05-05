@@ -111,6 +111,13 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- common cache -->
+            <dependency>
+                <groupId>com.niuyin</groupId>
+                <artifactId>niuyin-common-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.niuyin</groupId>
                 <artifactId>niuyin-model</artifactId>

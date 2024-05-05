@@ -1,6 +1,6 @@
 package com.niuyin.service.video;
 
-import com.niuyin.common.core.annotations.EnableRedisConfig;
+import com.niuyin.common.cache.annotations.EnableCacheConfig;
 import com.niuyin.common.core.annotations.EnableUserTokenInterceptor;
 import com.niuyin.common.core.config.MybatisPlusConfig;
 import com.niuyin.common.core.swagger.Swagger2Configuration;
@@ -28,13 +28,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
-@EnableRedisConfig
+@EnableCacheConfig
 @EnableScheduling
 @EnableCaching
 @EnableAsync
 @EnableDubbo
 @Import({MybatisPlusConfig.class, Swagger2Configuration.class})
 public class VideoApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(VideoApplication.class, args);
     }

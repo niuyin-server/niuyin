@@ -1,6 +1,6 @@
 package com.niuyin.service.social;
 
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.service.social.service.IUserFollowService;

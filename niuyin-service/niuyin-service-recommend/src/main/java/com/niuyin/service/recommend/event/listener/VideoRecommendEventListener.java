@@ -1,7 +1,7 @@
 package com.niuyin.service.recommend.event.listener;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.service.recommend.event.VideoRecommendEvent;
 import com.niuyin.service.recommend.service.VideoRecommendLoadBalancer;
 import lombok.extern.slf4j.Slf4j;

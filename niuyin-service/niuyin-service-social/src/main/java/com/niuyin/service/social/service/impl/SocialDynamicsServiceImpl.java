@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.common.dto.PageDTO;
