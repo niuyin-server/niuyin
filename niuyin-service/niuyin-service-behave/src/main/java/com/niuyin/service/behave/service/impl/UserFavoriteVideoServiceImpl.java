@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.exception.CustomException;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.behave.domain.UserFavoriteVideo;
