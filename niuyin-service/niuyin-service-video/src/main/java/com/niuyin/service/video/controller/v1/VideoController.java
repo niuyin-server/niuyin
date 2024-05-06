@@ -202,6 +202,14 @@ public class VideoController {
     /**
      * 通过ids获取video集合
      */
+    @GetMapping("/videoVO/{videoId}")
+    public R<VideoVO> queryVideoVOByVideoId(@PathVariable("videoId") String videoId) {
+        return R.ok(videoService.getVideoVOById(videoId));
+    }
+
+    /**
+     * 通过ids获取video集合
+     */
     @GetMapping("{videoIds}")
     public R<List<Video>> queryVideoByVideoIds(@PathVariable("videoIds") List<String> videoIds) {
         return R.ok(videoService.queryVideoByVideoIds(videoIds));
