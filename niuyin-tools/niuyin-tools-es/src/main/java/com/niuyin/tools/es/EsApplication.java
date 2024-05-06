@@ -1,6 +1,6 @@
 package com.niuyin.tools.es;
 
-import com.niuyin.common.core.annotations.EnableRedisConfig;
+import com.niuyin.common.cache.annotations.EnableCacheConfig;
 import com.niuyin.common.core.config.MybatisPlusConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Import;
  * @DATE: 2023/11/14
  **/
 @SpringBootApplication
-@EnableRedisConfig
+@EnableCacheConfig
 @Import({MybatisPlusConfig.class})
 @MapperScan("com.niuyin.tools.es.mapper")
 public class EsApplication {

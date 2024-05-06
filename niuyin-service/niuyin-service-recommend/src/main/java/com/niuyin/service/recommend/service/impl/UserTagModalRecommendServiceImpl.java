@@ -1,6 +1,6 @@
 package com.niuyin.service.recommend.service.impl;
 
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.service.recommend.service.UserTagModalRecommendService;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.niuyin.service.video.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.service.video.service.UserFollowVideoPushService;
 import lombok.SneakyThrows;

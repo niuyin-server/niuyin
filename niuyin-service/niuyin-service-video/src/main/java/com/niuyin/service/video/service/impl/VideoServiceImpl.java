@@ -8,10 +8,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
+import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.exception.CustomException;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.audit.SensitiveWordUtil;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.date.DateUtils;
@@ -187,6 +188,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @param videoPublishDto
      * @return
      */
+    @RedissonLock(prefixKey = "redisson:video", key = "#videoPublishDto.videoUrl")
     @Transactional
     @Override
     public String videoPublish(VideoPublishDto videoPublishDto) {
@@ -1285,5 +1287,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 .eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode())
                 .orderByDesc(Video::getCreateTime);
         return this.list(queryWrapper);
+    }
+
+    @Override
+    public VideoVO getVideoVOById(String videoId) {
+        Video video = videoRedisBatchCache.get(videoId);
+        VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
+        CompletableFuture<Void> future = packageVideoVOAsync(videoVO, UserContext.getUserId());
+        future.join();
+        return videoVO;
     }
 }

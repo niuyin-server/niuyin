@@ -1,4 +1,4 @@
-package com.niuyin.common.core.config;
+package com.niuyin.common.cache.config;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.ParserConfig;

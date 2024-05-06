@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.niuyin.common.core.exception.CustomException;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.uniqueid.IdGenerator;
 import com.niuyin.common.core.utils.video.FfmpegUtil;
@@ -633,6 +633,25 @@ public class VideoTestApplication {
     void getVideoParentCategoryListTest() {
         List<VideoCategory> videoParentCategoryList = videoCategoryService.getVideoParentCategoryList();
         videoParentCategoryList.forEach(System.out::println);
+    }
+
+    @Test
+    void testRedisMSet() {
+        HashMap<String, Video> map = new HashMap<>();
+        Video video = new Video();
+        video.setVideoTitle("video title 1");
+        map.put("video:aaatest:videoid_1", video);
+        map.put("video:aaatest:videoid_2", new Video());
+        redisService.mSet(map, 120, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void testRedisMGet() {
+        ArrayList<String> list = new ArrayList<>();
+        list.add("video:aaatest:videoid_1");
+        list.add("video:aaatest:videoid_2");
+        List<Video> objects = redisService.mGet(list);
+        objects.forEach(System.out::println);
     }
 
 }

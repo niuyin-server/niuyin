@@ -24,17 +24,21 @@
     </modules>
 
     <dependencies>
-        <!--caffeine集成-->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-common-cache</artifactId>
+        </dependency>
+        <!--cache依赖-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
+        <!--caffeine集成-->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.6.0</version>
         </dependency>
-
         <!-- 引入依赖模块 -->
         <dependency>
             <groupId>com.niuyin</groupId>

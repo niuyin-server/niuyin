@@ -1,11 +1,16 @@
-package com.niuyin.common.core.config;
+package com.niuyin.common.cache.config;
 
+import com.niuyin.common.cache.service.LockService;
+import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * redis引入fastjson序列化器
+ */
 @Configuration
 public class RedisConfig {
 
@@ -27,5 +32,10 @@ public class RedisConfig {
 
         template.afterPropertiesSet();
         return template;
+    }
+
+    @Bean
+    public LockService lockService(RedissonClient redissonClient) {
+        return new LockService(redissonClient);
     }
 }

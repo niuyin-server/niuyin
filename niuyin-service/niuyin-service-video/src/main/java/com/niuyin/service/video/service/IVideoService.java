@@ -201,4 +201,5 @@ public interface IVideoService extends IService<Video> {
 
     List<Video> exitsByVideoIds(List<String> videoIds);
 
+    VideoVO getVideoVOById(String videoId);
 }

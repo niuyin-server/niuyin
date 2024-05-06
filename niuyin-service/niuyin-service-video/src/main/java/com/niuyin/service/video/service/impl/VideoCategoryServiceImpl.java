@@ -4,8 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.cache.annotations.DoubleCache;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
@@ -280,7 +281,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
 //            }
 //        }
         List<Long> categoryIds = categoryList.stream().map(VideoCategory::getId).collect(Collectors.toList());
-        categoryIds.forEach(id->{
+        categoryIds.forEach(id -> {
             List<String> strings = pullVideoIdsByCategoryId(id);
             results.addAll(strings);
         });
@@ -297,7 +298,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         return videoPushVOList;
     }
 
-    public List<String> pullVideoIdsByCategoryId(Long categoryId){
+    public List<String> pullVideoIdsByCategoryId(Long categoryId) {
         String categoryKey = VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX + categoryId;
         List<Object> list = redisTemplate.opsForSet().randomMembers(categoryKey, 10);
         return list.stream().map(Object::toString).collect(Collectors.toList());
@@ -410,6 +411,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      * @param id
      * @return
      */
+    @DoubleCache(cachePrefix = "video:category:children", key = "#id", expire = 1, unit = TimeUnit.HOURS)
     @Override
     public List<AppVideoCategoryVo> getNormalChildrenCategory(Long id) {
         VideoCategory byId = getById(id);
@@ -494,9 +496,11 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
 
     /**
      * 获取视频父分类集合
+     * 添加二级缓存
      *
      * @return
      */
+    @DoubleCache(cachePrefix = "video:category:parent_list", expire = 1, unit = TimeUnit.HOURS)
     @Override
     public List<VideoCategory> getVideoParentCategoryList() {
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();

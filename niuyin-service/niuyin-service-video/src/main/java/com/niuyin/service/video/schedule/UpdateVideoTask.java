@@ -1,11 +1,10 @@
 package com.niuyin.service.video.schedule;
 
-import com.niuyin.common.core.service.RedisService;
-import com.niuyin.model.video.domain.Video;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.model.constants.VideoCacheConstants;
+import com.niuyin.model.video.domain.Video;
 import com.niuyin.service.video.service.IVideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
  * 日期：2023/10/31 10:58
  */
 @Slf4j
-@Component
+//@Component
 public class UpdateVideoTask {
 
     @Resource

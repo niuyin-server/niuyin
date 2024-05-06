@@ -1,6 +1,6 @@
 package com.niuyin.service.recommend;
 
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.service.recommend.event.VideoRecommendEvent;
 import com.niuyin.service.recommend.mapper.UserVideoBehaveMapper;
 import com.niuyin.service.recommend.service.VideoRecommendLoadBalancer;

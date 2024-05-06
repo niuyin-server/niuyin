@@ -2,9 +2,8 @@ package com.niuyin.service.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.common.core.service.RedisService;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -56,7 +55,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
