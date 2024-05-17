@@ -858,38 +858,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public PageDataInfo getHotVideos(PageDTO pageDTO) {
-//        int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
-//        int endIndex = startIndex + pageDTO.getPageSize() - 1;
-//        Set videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
-//        Long hotCount = redisService.getCacheZSetZCard(VideoCacheConstants.VIDEO_HOT);
-//        List<VideoVO> videoVOList = new ArrayList<>();
-//        // 使用 parallelStream 并行流相较于 stream 流，性能更高
-//        List<CompletableFuture<Void>> futures = (List<CompletableFuture<Void>>) videoIds.parallelStream()
-//                .map(vid -> CompletableFuture.supplyAsync(() -> {
-//                    Video video = this.getById((String) vid);
-//                    Member user = new Member();
-//                    try {
-//                        // 作者信息批量查询，相较于单条查询性能更高
-//                        List<Member> authors = videoMapper.batchSelectVideoAuthor(Collections.singletonList(video.getUserId()));
-//                        if (!authors.isEmpty()) {
-//                            user = authors.get(0);
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                    VideoVO videoVO = BeanCopyUtils.copyBean(video, VideoVO.class);
-//                    if (StringUtils.isNotNull(user)) {
-//                        videoVO.setUserNickName(user.getNickName());
-//                        videoVO.setUserAvatar(user.getAvatar());
-//                    }
-//                    // todo 是否关注
-//                    videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
-//                    videoVOList.add(videoVO);
-//                    return videoVO;
-//                })).collect(Collectors.toList());
-//        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-//        allFutures.join();
-//        return PageDataInfo.genPageData(videoVOList, hotCount);
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
         Set<Object> videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
@@ -905,6 +873,26 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     videoVO.setUserAvatar(user.getAvatar());
                     // todo 是否关注
                     videoVO.setHotScore(redisService.getZSetScore(VideoCacheConstants.VIDEO_HOT, (String) vid));
+                    // 图文
+                    if (videoVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
+                        Object imgsCacheObject = redisService.getCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId());
+                        if (StringUtils.isNotNull(imgsCacheObject)) {
+                            if (imgsCacheObject instanceof JSONArray) {
+                                JSONArray jsonArray = (JSONArray) imgsCacheObject;
+                                videoVO.setImageList(jsonArray.toArray(new String[0]));
+                            } else if (imgsCacheObject instanceof String) {
+                                String jsonString = (String) imgsCacheObject;
+                                videoVO.setImageList(JSON.parseObject(jsonString, String[].class));
+                            }
+                        } else {
+                            List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(videoVO.getVideoId());
+                            String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+                            videoVO.setImageList(imgs);
+                            // 重建缓存
+                            redisService.setCacheObject(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId(), imgs);
+                            redisService.expire(VIDEO_IMAGES_PREFIX_KEY + videoVO.getVideoId(), 1, TimeUnit.DAYS);
+                        }
+                    }
                     return videoVO;
                 })).collect(Collectors.toList());
 
