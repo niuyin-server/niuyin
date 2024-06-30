@@ -1,8 +1,9 @@
 server:
-  port: 9701
+  port: 9801
+
 spring:
   application:
-    name: niuyin-notice
+    name: niuyin-creator
   profiles:
     active: roydon
   cloud:
@@ -20,4 +21,5 @@ spring:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

@@ -4,21 +4,20 @@ spring:
   application:
     name: niuyin-social
   profiles:
-    active: dev
+    active: roydon
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        group: DEFAULT_GROUP
       config:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-logging:
-  level:
-    com.niuyin: debug
-    org.springframework: warn
+          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

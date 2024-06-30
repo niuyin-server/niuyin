@@ -6,34 +6,37 @@ spring:
   application:
     name: niuyin-gateway
   profiles:
-    active: dev
+    active: roydon
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        group: DEFAULT_GROUP
       config:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        group: DEFAULT_GROUP
         file-extension: yml
+        shared-configs:
+          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
     gateway:
       httpclient:
-        #        response-timeout: PT10S # 全局的响应超时时间，网络链接后，后端服务多久不返回网关就报错 The response timeout.
+        #        response-timeout: PT10S # 全局的响应超时时间，网络连接后，后端服务多久不返回网关就报错 The response timeout.
         connect-timeout: 5000 # 全局的TCP连接超时时间默认时间是45秒，修改为5秒
-        # 链接池配置
+        # 连接池配置
         pool:
           max-connections: 10000 # 最大连接数
           max-life-time: 10 # 最大连接时间
           acquire-timeout: 10 # 返回时间
           max-idle-time: 10000 # 最大空闲时间
-          type: ELASTIC # 设置固定链接池
-    #ELASTIC：弹性链接池，连接数上限为Integer.MAX，默认值就是这个类型
-    #FIXED: 固定连接池，最大连接数采用spring.cloud.gateway.httpclient.pool.max-connections的配置
-    #DISABLED：不使用任何连接池
+          type: ELASTIC # 设置固定链接池 #ELASTIC：弹性连接池，连接数上限为Integer.MAX，默认值 #FIXED: 固定连接池，最大连接数采用spring.cloud.gateway.httpclient.pool.max-connections的配置 #DISABLED：不使用任何连接池
+
     sentinel:
       transport:
-        dashboard: 106.14.105.101:8090
-      #        dashboard: localhost:8080
+        #        dashboard: 106.14.105.101:8090
+        dashboard: localhost:8080
       eager: true
       http-method-specify: true
       # nacos配置持久化
@@ -45,7 +48,3 @@ spring:
             groupId: DEFAULT_GROUP
             data-type: json
             rule-type: gw-flow
-logging:
-  level:
-    com.niuyin: debug
-    org.springframework: warn

@@ -5,21 +5,44 @@ spring:
   application:
     name: niuyin-video
   profiles:
-    active: dev
+    active: roydon
   cloud:
     nacos:
       discovery:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        group: DEFAULT_GROUP
       config:
         server-addr: 106.14.105.101:8848
-        namespace: c8a5722f-83fa-478c-b82d-f0e8b5015351
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-logging:
-  level:
-    com.niuyin: debug
-    org.springframework: warn
+          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+ribbon:
+  eager-load:
+    enabled: true
+# dubbo
+#dubbo:
+#  protocol:
+#    name: dubbo
+#    port: -1
+#  registry:
+#    address: nacos://106.14.105.101:8848   # nacos注册中心
+#    parameters[namespace]: 0427586a-d828-4518-bd27-b38d404c9f5e
+#    group: dubbo
+#  metadata-report:
+#    address: nacos://106.14.105.101:8848
+#    parameters[namespace]: 0427586a-d828-4518-bd27-b38d404c9f5e
+#  consumer:
+#    check: false   #dubbo默认有启动检查
+#    retries: 0     #dubbo内置的重试机制，重试 1 次
+#  scan:
+#    base-packages: com.niuyin.service.video.dubbo
+#  cloud:
+#    subscribed-services: niuyin-member,niuyin-behave
+
