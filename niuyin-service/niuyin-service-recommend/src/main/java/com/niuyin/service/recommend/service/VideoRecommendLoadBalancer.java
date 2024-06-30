@@ -49,15 +49,6 @@ public class VideoRecommendLoadBalancer {
         return method.run(userId);
     }
 
-//    public static void main(String[] args) {
-//        VideoRecommendLoadBalancer loadBalancer = new VideoRecommendLoadBalancer();
-//
-//        for (int i = 0; i < 5; i++) {
-//            List<String> result = loadBalancer.callNextMethod();
-//            System.out.println("Result: " + result);
-//        }
-//    }
-
     @FunctionalInterface
     interface MethodWithReturn {
         List<String> run(Long userId);

@@ -1,8 +1,10 @@
 package com.niuyin.model.video.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoPosition;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * VideoVO
@@ -29,6 +31,9 @@ public class VideoVO extends Video {
     private String[] imageList;
     // 位置信息
     private VideoPosition position;
+    // 视频所在视频合集
+    @JsonIgnore
+    private UserVideoCompilationInfoVO userVideoCompilationInfoVO;
 
     // 热力值
     private Double hotScore;

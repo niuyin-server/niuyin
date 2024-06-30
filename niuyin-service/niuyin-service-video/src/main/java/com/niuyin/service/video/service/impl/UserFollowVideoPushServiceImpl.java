@@ -10,13 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.niuyin.model.constants.VideoConstants.IN_FOLLOW;
 import static com.niuyin.model.constants.VideoConstants.OUT_FOLLOW;
@@ -110,10 +108,10 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
     public void initFollowVideoFeed(Long userId, List<Long> followIds) {
         // 当前时间
         Date curDate = DateUtils.getNowDate();
-        // 前7天时间
-        Date limitDate = DateUtils.addDays(curDate, -7);
+        // 前30天时间
+        Date limitDate = DateUtils.addDays(curDate, -30);
         Set<ZSetOperations.TypedTuple<String>> typedTuples = redisService.zRangeWithScores(IN_FOLLOW + userId, -1, -1);
-        if (!ObjectUtils.isEmpty(typedTuples)) {
+        if (!CollectionUtils.isEmpty(typedTuples)) {
             Double oldTime = typedTuples.iterator().next().getScore();
             init(userId, oldTime.longValue(), new Date().getTime(), followIds);
         } else {

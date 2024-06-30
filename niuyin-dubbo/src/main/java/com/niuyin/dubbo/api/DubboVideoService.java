@@ -4,6 +4,7 @@ import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
+import com.niuyin.model.video.vo.UserVideoCompilationInfoVO;
 import com.niuyin.model.video.vo.VideoVO;
 
 import java.util.List;
@@ -100,4 +101,13 @@ public interface DubboVideoService {
      * @return
      */
     VideoPosition apiGetVideoPositionByVideoId(String videoId);
+
+    /**
+     * 根据视频获取所在视频合集
+     *
+     * @param videoId
+     * @return
+     */
+    UserVideoCompilationInfoVO apiGetUserVideoCompilationInfoVO(String videoId);
+
 }

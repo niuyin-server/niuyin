@@ -6,7 +6,7 @@ import com.niuyin.model.video.domain.UserVideoCompilation;
 import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.dto.UpdateUserVideoCompilationDTO;
 import com.niuyin.model.video.dto.UserVideoCompilationPageDTO;
-import com.niuyin.model.video.vo.UserVideoCompilationVO;
+import com.niuyin.model.video.vo.UserVideoCompilationInfoVO;
 
 /**
  * 用户视频合集表(UserVideoCompilation)表服务接口
@@ -61,4 +61,12 @@ public interface IUserVideoCompilationService extends IService<UserVideoCompilat
      * 合集视频分页
      */
     PageDataInfo compilationVideoPage(CompilationVideoPageDTO pageDTO);
+
+    /**
+     * 根据视频id获取合集信息
+     *
+     * @param videoId
+     * @return
+     */
+    UserVideoCompilationInfoVO getCompilationInfoVOByVideoId(String videoId);
 }
