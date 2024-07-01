@@ -8,11 +8,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 106.14.105.101:8848
+        server-addr: 43.240.221.8:8848
         namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         group: DEFAULT_GROUP
       config:
-        server-addr: 106.14.105.101:8848
+        server-addr: 43.240.221.8:8848
         namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         group: DEFAULT_GROUP
         file-extension: yml

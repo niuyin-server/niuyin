@@ -10,11 +10,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 106.14.105.101:8848
+        server-addr: 43.240.221.8:8848
         namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         group: DEFAULT_GROUP
       config:
-        server-addr: 106.14.105.101:8848
+        server-addr: 43.240.221.8:8848
         namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         group: DEFAULT_GROUP
         file-extension: yml
@@ -35,7 +35,7 @@ spring:
 
     sentinel:
       transport:
-        #        dashboard: 106.14.105.101:8090
+        #        dashboard: 43.240.221.8:8090
         dashboard: localhost:8080
       eager: true
       http-method-specify: true
@@ -43,7 +43,7 @@ spring:
       datasource:
         ds1:
           nacos:
-            server-addr: 106.14.105.101:8848
+            server-addr: 43.240.221.8:8848
             dataId: sentinel-niuyin-gateway
             groupId: DEFAULT_GROUP
             data-type: json

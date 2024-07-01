@@ -5,22 +5,19 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
-import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.http.MethodType;
-import com.aliyuncs.profile.DefaultProfile;
 import com.niuyin.starter.sms.config.AliyunSmsConfig;
 import com.niuyin.starter.sms.config.AliyunSmsConfigProperties;
 import com.niuyin.starter.sms.domain.model.AliyunSmsResponse;
-import com.niuyin.starter.sms.service.AliyunSmsService;
 import com.niuyin.starter.sms.enums.AliyunSmsTemplateType;
+import com.niuyin.starter.sms.service.AliyunSmsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
