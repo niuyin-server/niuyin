@@ -5,16 +5,17 @@ spring:
   application:
     name: niuyin-recommend
   profiles:
-    active: roydon
+    active: pro
   cloud:
     nacos:
       discovery:
         server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
         group: DEFAULT_GROUP
+        ip: 8.130.182.227
       config:
         server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
         group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:

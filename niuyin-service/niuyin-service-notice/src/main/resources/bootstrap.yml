@@ -15,6 +15,7 @@ spring:
       config:
         server-addr: 43.240.221.8:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+        group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
