@@ -14,6 +14,7 @@ import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.dto.UpdateUserVideoCompilationDTO;
 import com.niuyin.model.video.dto.UserVideoCompilationPageDTO;
 import com.niuyin.model.video.vo.CompilationVideoVO;
+import com.niuyin.model.video.vo.UserVideoCompilationInfoVO;
 import com.niuyin.model.video.vo.UserVideoCompilationVO;
 import com.niuyin.service.video.mapper.UserVideoCompilationMapper;
 import com.niuyin.service.video.service.IUserVideoCompilationRelationService;
@@ -169,5 +170,27 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
     public PageDataInfo compilationVideoPage(CompilationVideoPageDTO pageDTO) {
         List<CompilationVideoVO> vo = userVideoCompilationRelationService.compilationVideoPageList(pageDTO);
         return PageDataInfo.genPageData(vo, userVideoCompilationRelationService.compilationVideoPageCount(pageDTO.getCompilationId()));
+    }
+
+    /**
+     * 根据视频id获取合集信息
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public UserVideoCompilationInfoVO getCompilationInfoVOByVideoId(String videoId) {
+        Long compilationIdByVideoId = userVideoCompilationRelationService.getCompilationIdByVideoId(videoId);
+        if (compilationIdByVideoId != null) {
+            // 查询合集详情
+            UserVideoCompilation byId = this.getById(compilationIdByVideoId);
+            UserVideoCompilationInfoVO userVideoCompilationInfoVO = BeanCopyUtils.copyBean(byId, UserVideoCompilationInfoVO.class);
+            userVideoCompilationInfoVO.setPlayCount(1000L);
+            userVideoCompilationInfoVO.setVideoCount(20L);
+            userVideoCompilationInfoVO.setWeatherFollow(false);
+            // 查询视频数量 todo 让前端做
+            return userVideoCompilationInfoVO;
+        }
+        return null;
     }
 }

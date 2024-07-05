@@ -5,6 +5,7 @@ import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.vo.UserModel;
+import com.niuyin.model.video.vo.UserVideoCompilationInfoVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.video.mapper.VideoMapper;
 import com.niuyin.service.video.service.*;
@@ -45,6 +46,12 @@ public class DubboVideoServiceImpl implements DubboVideoService {
 
     @Resource
     private VideoRedisBatchCache videoRedisBatchCache;
+
+    @Resource
+    private IUserVideoCompilationRelationService userVideoCompilationRelationService;
+
+    @Resource
+    private IUserVideoCompilationService userVideoCompilationService;
 
     /**
      * 同步视频标签库
@@ -175,5 +182,16 @@ public class DubboVideoServiceImpl implements DubboVideoService {
     @Override
     public VideoPosition apiGetVideoPositionByVideoId(String videoId) {
         return videoPositionService.queryPositionByVideoId(videoId);
+    }
+
+    /**
+     * 根据视频获取所在视频合集
+     *
+     * @param videoId
+     * @return
+     */
+    @Override
+    public UserVideoCompilationInfoVO apiGetUserVideoCompilationInfoVO(String videoId) {
+        return userVideoCompilationService.getCompilationInfoVOByVideoId(videoId);
     }
 }

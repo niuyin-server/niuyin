@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
@@ -156,34 +157,39 @@ public class InterestPushServiceImpl implements InterestPushService {
             List<UserModelField> models = userModel.getModels();
             // 获取用户模型
             String key = VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX + userId;
+            // 原始模型
             Map<Object, Object> modelMap = redisTemplate.opsForHash().entries(key);
             log.debug("modelMap:{}", modelMap);
-            if (StringUtils.isNull(modelMap)) {
+            if (CollectionUtils.isEmpty(modelMap)) {
                 modelMap = new HashMap<>();
             }
             for (UserModelField model : models) {
                 // 修改用户模型
                 if (modelMap.containsKey(model.getTagId().toString())) {
-                    modelMap.put(model.getTagId().toString(), Double.parseDouble(modelMap.get(model.getTagId().toString()).toString()) + model.getScore());
-                    Object o = modelMap.get(model.getTagId().toString());
-                    if (o == null || Double.parseDouble(o.toString()) > 0.0) {
-                        modelMap.remove(o);
-                    }
+                    // 源标签存在
+                    modelMap.put(model.getTagId().toString(), (Double.parseDouble(modelMap.get(model.getTagId().toString()).toString()) + model.getScore()));
                 } else {
                     modelMap.put(model.getTagId().toString(), model.getScore());
                 }
             }
 
-            // 每个标签概率同等加上标签数，再同等除以标签数  防止数据膨胀
-            int tagSize = modelMap.keySet().size();
+            // 模型归一化
+            double sum = 0;
+            for (Object value : modelMap.values()) {
+                sum += Double.parseDouble(value.toString());
+            }
             for (Object o : modelMap.keySet()) {
-                modelMap.put(o.toString(), (Double.parseDouble(modelMap.get(o.toString()).toString()) + tagSize) / tagSize);
+                modelMap.put(o.toString(), (Double.parseDouble(modelMap.get(o.toString()).toString()) * 100) / sum);
+                // ConcurrentModificationException
+//                Object v = modelMap.get(o.toString());
+//                if (v == null || Double.parseDouble(modelMap.get(o.toString()).toString()) < 1.00) {
+//                    modelMap.remove(o.toString());
+//                }
             }
             // 更新用户模型
-            log.debug("modelMap:{}", modelMap);
+            log.debug("modelMap new:{}", modelMap);
             redisTemplate.opsForHash().putAll(key, modelMap);
         }
-
     }
 
     /**
@@ -362,6 +368,7 @@ public class InterestPushServiceImpl implements InterestPushService {
 
     /**
      * 初始化概率数组 -> 保存的元素是标签id
+     * todo 优化->模型归一化，防止概率小于1的无推荐结果
      */
     public String[] initProbabilityArray(Map<String, Double> modelMap) {
         // key: 标签id  value：概率

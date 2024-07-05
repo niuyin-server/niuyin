@@ -1,6 +1,8 @@
 package com.niuyin.service.video;
 
 import com.niuyin.common.cache.service.RedisService;
+import com.niuyin.common.core.annotations.MappingCostTime;
+import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.member.domain.Member;
@@ -55,6 +57,9 @@ public class InterestPushTest {
     @Resource
     private RedisService redisService;
 
+    @Resource
+    private UserFollowVideoPushService userFollowVideoPushService;
+
     @Test
     @DisplayName("初始化标签视频库")
     void initTagVideos() {
@@ -62,6 +67,17 @@ public class InterestPushTest {
         videoList.forEach(v -> {
             // 存入标签库
             interestPushService.cacheVideoToTagRedis(v.getVideoId(), videoTagRelationService.queryVideoTagIdsByVideoId(v.getVideoId()));
+        });
+
+    }
+
+    @Test
+    @DisplayName("初始化用户视频发件箱")
+    void initUserVideoInBox() {
+        List<Video> videoList = videoService.list();
+        videoList.forEach(v -> {
+            // 存入用户视频发件箱
+            userFollowVideoPushService.pusOutBoxFeed(v.getUserId(), v.getVideoId(), DateUtils.toDate(v.getCreateTime()).getTime());
         });
 
     }
@@ -77,6 +93,7 @@ public class InterestPushTest {
 
     }
 
+    @MappingCostTime
     @Test
     @DisplayName("根据分类随机推送视频")
     void randomPushCategoryVideo() {
@@ -115,6 +132,37 @@ public class InterestPushTest {
     @DisplayName("初始化视频观看历史")
     void initVideoViewHistory() {
 
+    }
+
+    @Test
+    void testUserModelPlan() {
+        // 初始化hmap
+        HashMap<String, Double> hmap = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            hmap.put("key" + i, 10.00);
+        }
+
+        // 增加某个元素的值
+        hmap.put("key0", hmap.get("key0") + 2);
+
+        // 点赞视频
+        hmap.put("key10", 2.00);
+
+        // 计算总和
+        double sum = 0;
+        for (double value : hmap.values()) {
+            sum += value;
+        }
+
+        // 重新计算每个元素的值
+        for (Map.Entry<String, Double> entry : hmap.entrySet()) {
+            hmap.put(entry.getKey(), entry.getValue() * 100 / sum);
+        }
+
+        // 打印结果
+        for (Map.Entry<String, Double> entry : hmap.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
     }
 
     @Test

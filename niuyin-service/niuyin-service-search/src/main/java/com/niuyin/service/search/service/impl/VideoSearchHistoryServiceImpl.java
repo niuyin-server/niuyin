@@ -124,7 +124,7 @@ public class VideoSearchHistoryServiceImpl implements VideoSearchHistoryService 
      */
     @Override
     public List<VideoSearchHistory> findTodaySearchRecord() {
-        return mongoTemplate.find(Query.query(Criteria.where("createdTime").gte(DateUtils.getTodayStartLocalDateTime())), VideoSearchHistory.class);
+        return mongoTemplate.find(Query.query(Criteria.where("createdTime").gte(DateUtils.getTodayMinusStartLocalDateTime(300))), VideoSearchHistory.class);
     }
 
     /**

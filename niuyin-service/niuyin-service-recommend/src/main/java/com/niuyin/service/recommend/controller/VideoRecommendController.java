@@ -1,5 +1,6 @@
 package com.niuyin.service.recommend.controller;
 
+import com.niuyin.common.core.annotations.MappingCostTime;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.recommend.service.VideoRecommendService;
@@ -34,6 +35,7 @@ public class VideoRecommendController {
     /**
      * 获取推荐视频流
      */
+    @MappingCostTime
     @GetMapping("/feed")
     public R<List<VideoVO>> videoFeed() {
         return R.ok(videoRecommendService.pullVideoFeed());

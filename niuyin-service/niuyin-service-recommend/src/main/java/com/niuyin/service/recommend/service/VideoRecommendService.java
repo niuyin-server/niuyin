@@ -16,6 +16,7 @@ import com.niuyin.model.video.domain.VideoPosition;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.model.video.enums.PositionFlag;
 import com.niuyin.model.video.enums.PublishType;
+import com.niuyin.model.video.vo.UserVideoCompilationInfoVO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.recommend.event.VideoRecommendEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -99,12 +100,11 @@ public class VideoRecommendService {
      */
     public List<VideoVO> pullVideoFeed() {
         if (UserContext.hasLogin()) {
-            long startTime = System.currentTimeMillis();
             Long userId = UserContext.getUserId();
             String listKey = "recommend:user_recommend_videos:" + userId;
 //            List<String> top10Items = lpopItemsFromRedisList(listKey, VIDEO_RECOMMEND_COUNT); // 耗时占了30% 400ms =》优化后 33ms
             List<String> top10Items = lpopItemsFromRedisListOptimized(redisTemplate, listKey, VIDEO_RECOMMEND_COUNT); // 优化后 33ms
-            if (llengthOfRedisList(listKey) < PULL_VIDEO_RECOMMEND_THRESHOLDS) {
+            if (sizeOfRedisList(listKey) < PULL_VIDEO_RECOMMEND_THRESHOLDS) {
                 // redis list 推荐列表小于 阈值 发送事件补充推荐列表
                 applicationEventPublisher.publishEvent(new VideoRecommendEvent(this, userId));
             }
@@ -120,16 +120,10 @@ public class VideoRecommendService {
                     .map(vo -> packageUserVideoVOAsync(vo, userId))
                     .toArray(CompletableFuture[]::new));
             allFutures.join();
-            long endTime = System.currentTimeMillis();
-
-            // 计算方法的执行时间
-            long duration = endTime - startTime;
-
-            System.out.println("方法执行时间：" + duration + " 毫秒");
             return videoVOList;
         } else {
             // todo 未登录 用户未登录如何推送
-            Long userIdUnLogin = 2l;
+            Long userIdUnLogin = 2L;
             List<String> videoIdsByUserModel = userTagModalRecommendService.getVideoIdsByUserModel(userIdUnLogin);
             List<Video> videoList = dubboVideoService.apiGetVideoListByVideoIds(videoIdsByUserModel);
             List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(videoList, VideoVO.class);
@@ -144,11 +138,8 @@ public class VideoRecommendService {
 
     /**
      * redis list长度
-     *
-     * @param key
-     * @return
      */
-    public Long llengthOfRedisList(String key) {
+    public Long sizeOfRedisList(String key) {
         ListOperations<String, String> listOps = redisTemplate.opsForList();
         return listOps.size(key);
     }
@@ -169,6 +160,14 @@ public class VideoRecommendService {
         return items;
     }
 
+    /**
+     * redis list lpop优化
+     *
+     * @param redisTemplate
+     * @param key
+     * @param count
+     * @return
+     */
     public List<String> lpopItemsFromRedisListOptimized(RedisTemplate<String, String> redisTemplate, String key, int count) {
         // 使用Redis Script执行批量LPOP操作
         DefaultRedisScript<List> script = new DefaultRedisScript<>(
@@ -199,13 +198,15 @@ public class VideoRecommendService {
         CompletableFuture<Void> socialDataAsync = packageVideoSocialDataAsync(videoVO, loginUserId);
         CompletableFuture<Void> tagDataAsync = packageVideoTagDataAsync(videoVO);
         CompletableFuture<Void> positionDataAsync = packageVideoPositionDataAsync(videoVO);
+        CompletableFuture<Void> videoCompilationDataAsync = packageVideoCompilationDataAsync(videoVO);
         CompletableFuture.allOf(
                 behaveDataFuture,
                 memberDataFuture,
                 imageDataFuture,
                 socialDataAsync,
                 tagDataAsync,
-                positionDataAsync
+                positionDataAsync,
+                videoCompilationDataAsync
         ).join();
     }
 
@@ -239,10 +240,13 @@ public class VideoRecommendService {
         return CompletableFuture.runAsync(() -> packageVideoPositionData(videoVO));
     }
 
+    @Async
+    public CompletableFuture<Void> packageVideoCompilationDataAsync(VideoVO videoVO) {
+        return CompletableFuture.runAsync(() -> packageVideoCompilationData(videoVO));
+    }
+
     /**
      * 封装视频行为数据
-     *
-     * @param videoVO
      */
     @Async
     public void packageVideoBehaveData(VideoVO videoVO) {
@@ -260,8 +264,6 @@ public class VideoRecommendService {
 
     /**
      * 封装用户数据
-     *
-     * @param videoVO
      */
     @Async
     public void packageMemberData(VideoVO videoVO) {
@@ -273,8 +275,6 @@ public class VideoRecommendService {
 
     /**
      * 封装视频社交数据
-     *
-     * @param videoVO
      */
     @Async
     public void packageVideoSocialData(VideoVO videoVO, Long loginUserId) {
@@ -302,8 +302,6 @@ public class VideoRecommendService {
 
     /**
      * 封装图文数据
-     *
-     * @param videoVO
      */
     @Async
     public void packageVideoImageData(VideoVO videoVO) {
@@ -330,8 +328,6 @@ public class VideoRecommendService {
 
     /**
      * 封装视频定位数据
-     *
-     * @param videoVO
      */
     @Async
     public void packageVideoPositionData(VideoVO videoVO) {
@@ -348,6 +344,17 @@ public class VideoRecommendService {
                 redisService.setCacheObject(VIDEO_POSITION_PREFIX_KEY + videoVO.getVideoId(), videoPosition);
                 redisService.expire(VIDEO_POSITION_PREFIX_KEY + videoVO.getVideoId(), 1, TimeUnit.DAYS);
             }
+        }
+    }
+
+    /**
+     * 查询视频合集
+     */
+    @Async
+    public void packageVideoCompilationData(VideoVO videoVO) {
+        UserVideoCompilationInfoVO userVideoCompilationInfoVO = dubboVideoService.apiGetUserVideoCompilationInfoVO(videoVO.getVideoId());
+        if (Objects.nonNull(userVideoCompilationInfoVO)) {
+            videoVO.setUserVideoCompilationInfoVO(userVideoCompilationInfoVO);
         }
     }
 

@@ -1,24 +1,25 @@
 server:
-  port: 9601
+  port: 9801
+
 spring:
   application:
-    name: niuyin-behave
+    name: niuyin-creator
   profiles:
-    active: pro
+    active: roydon
   cloud:
     nacos:
       discovery:
         server-addr: 43.240.221.8:8848
-        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         group: DEFAULT_GROUP
-        ip: 47.120.41.21
       config:
         server-addr: 43.240.221.8:8848
-        namespace: 3f598f78-c669-409b-9189-ea72adc21d30
+        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
         group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:
           - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

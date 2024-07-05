@@ -1,5 +1,7 @@
 package com.niuyin.dubbo.api;
 
+import com.niuyin.model.search.dubbo.VideoBehaveData;
+
 /**
  * DubboBehaveService
  *
@@ -56,4 +58,7 @@ public interface DubboBehaveService {
     boolean apiWeatherLikeVideo(String videoId, Long userId);
 
     boolean apiWeatherFavoriteVideo(String videoId, Long userId);
+
+    VideoBehaveData apiGetVideoBehaveData(String videoId);
+
 }

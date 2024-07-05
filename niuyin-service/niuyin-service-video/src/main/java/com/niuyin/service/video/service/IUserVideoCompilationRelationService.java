@@ -3,8 +3,6 @@ package com.niuyin.service.video.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.video.domain.UserVideoCompilationRelation;
-import com.niuyin.model.video.domain.Video;
-import com.niuyin.model.video.domain.VideoCategoryRelation;
 import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.vo.CompilationVideoVO;
 
@@ -51,4 +49,5 @@ public interface IUserVideoCompilationRelationService extends IService<UserVideo
     List<CompilationVideoVO> compilationVideoPageList(CompilationVideoPageDTO pageDTO);
     Long compilationVideoPageCount(Long compilationId);
 
+    Long getCompilationIdByVideoId(String videoId);
 }

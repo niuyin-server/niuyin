@@ -5,22 +5,22 @@ spring:
   application:
     name: niuyin-tools-es
   datasource:
-    url: jdbc:mysql://106.14.105.101:3306/niuyin_short_video_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: roydon
-    password: roydon#Mysql
+    url: jdbc:mysql://43.240.221.8:3306/cheese-blast?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: cheese-blast
+    password: adMbbpDFiF88Zcns
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
-    host: 8.132.211.245
+    host: 43.240.221.8
     port: 6379
-    password: roydon#Redis
-    database: 14
+    password: FyTzQC3bOhgflaDc
+    database: 1
   data:
     mongodb:
-      host: 47.120.41.21
+      host: 43.240.221.8
       port: 27017
-      username: qiniu
-      password: qiniuMongo
-      database: qiniu-video
+      username: cheeseBlast
+      password: A8X6CsPNYTJmfsaZ
+      database: cheeseblast
 
 # mybatis配置
 mybatis-plus:
@@ -30,7 +30,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 elasticsearch:
-  host: 106.14.105.101
+  host: 43.240.221.8
   port: 9200
 
 logging:

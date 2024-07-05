@@ -81,4 +81,12 @@ public class UserVideoCompilationRelationServiceImpl extends ServiceImpl<UserVid
     public Long compilationVideoPageCount(Long compilationId) {
         return userVideoCompilationRelationMapper.selectCompilationVideoPageCount(compilationId);
     }
+
+    @Override
+    public Long getCompilationIdByVideoId(String videoId) {
+        LambdaQueryWrapper<UserVideoCompilationRelation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserVideoCompilationRelation::getVideoId, videoId);
+        UserVideoCompilationRelation one = this.getOne(queryWrapper);
+        return one == null ? null : one.getCompilationId();
+    }
 }

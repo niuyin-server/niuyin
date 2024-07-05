@@ -1,6 +1,7 @@
 package com.niuyin.service.behave.dubbo;
 
 import com.niuyin.dubbo.api.DubboBehaveService;
+import com.niuyin.model.search.dubbo.VideoBehaveData;
 import com.niuyin.service.behave.service.IVideoUserCommentService;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
@@ -100,5 +101,15 @@ public class DubboBehaveServiceImpl implements DubboBehaveService {
     @Override
     public boolean apiWeatherFavoriteVideo(String videoId, Long userId) {
         return videoUserFavoritesService.weatherFavoriteVideo(videoId, userId);
+    }
+
+    @Override
+    public VideoBehaveData apiGetVideoBehaveData(String videoId) {
+        VideoBehaveData videoBehaveData = new VideoBehaveData();
+        videoBehaveData.setViewCount(100L);
+        videoBehaveData.setLikeCount(videoUserLikeService.getVideoLikeNum(videoId));
+        videoBehaveData.setCommentCount(videoUserCommentService.queryCommentCountByVideoId(videoId));
+        videoBehaveData.setFavoriteCount(videoUserFavoritesService.getFavoriteCountByVideoId(videoId));
+        return videoBehaveData;
     }
 }

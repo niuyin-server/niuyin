@@ -58,7 +58,7 @@ public class UserFollowVideoPushTest {
     @Test
     @DisplayName("获取某用户最近一周朋友的动态")
     void testGetFriend() {
-        long time = DateUtils.addDays(DateUtils.getNowDate(), -7).getTime();
+        long time = DateUtils.addDays(DateUtils.getNowDate(), -30).getTime();
         log.debug("last week time:{}", time);
         // 获取用户关注列表
         Long userId = 2L;

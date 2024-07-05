@@ -3,7 +3,9 @@ package com.niuyin.service.search.schedule;
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.seg.common.Term;
 import com.niuyin.common.cache.service.RedisService;
+import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
+import com.niuyin.model.search.dubbo.VideoBehaveData;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.domain.VideoSearchVO;
@@ -13,9 +15,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,6 +40,9 @@ public class HotSearchSchedule {
 
     @Resource
     private VideoSearchService videoSearchService;
+
+    @Resource
+    private DubboBehaveService dubboBehaveService;
 
     /**
      * 计算热搜 定时任务 todo 添加分布式锁
@@ -74,29 +81,28 @@ public class HotSearchSchedule {
         List<VideoSearchVO> videoSearchVOS = new ArrayList<>();
         int i = 0;
         for (String s : keyList) {
-            if (i < 5) {
+            if (i < 10) {
                 VideoSearchKeywordDTO videoSearchKeywordDTO = new VideoSearchKeywordDTO();
                 videoSearchKeywordDTO.setKeyword(s);
                 videoSearchKeywordDTO.setPageNum(0);
                 videoSearchKeywordDTO.setPageSize(1);
                 List<VideoSearchVO> searchVOS = videoSearchService.searchAllVideoFromES(videoSearchKeywordDTO);
-                if (!searchVOS.isEmpty()) {
+                if (!CollectionUtils.isEmpty(searchVOS)) {
                     videoSearchVOS.addAll(searchVOS);
                 }
                 i++;
-            } else {
-                break;
             }
         }
-        ArrayList<String> videoHotTitles = new ArrayList<>();
-        for (VideoSearchVO videoSearchVO : videoSearchVOS) {
-            videoHotTitles.add(videoSearchVO.getVideoTitle());
-        }
+        List<String> videoHotTitles = videoSearchVOS.stream().map(VideoSearchVO::getVideoTitle).collect(Collectors.toList());
         for (int j = 0; j < videoHotTitles.size(); j++) {
-            Integer videoViewNum = redisService.getCacheMapValue(VideoHotTitleCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, videoSearchVOS.get(j).getVideoId());
-            if (videoViewNum != null) {
-                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), ((double) videoViewNum) / 100);
+            VideoBehaveData videoBehaveData = dubboBehaveService.apiGetVideoBehaveData(videoSearchVOS.get(j).getVideoId());
+            // 算分
+            if (Objects.nonNull(videoBehaveData)) {
+                double score = videoBehaveData.getViewCount() + videoBehaveData.getLikeCount() * 2
+                        + videoBehaveData.getCommentCount() * 3 + videoBehaveData.getFavoriteCount() * 4;
+                redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), score);
             }
+
         }
     }
 
