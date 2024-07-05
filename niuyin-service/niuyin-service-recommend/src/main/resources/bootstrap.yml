@@ -12,7 +12,7 @@ spring:
         server-addr: 43.240.221.8:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
         group: DEFAULT_GROUP
-        ip: 8.130.182.227
+        ip: 8.130.76.248
       config:
         server-addr: 43.240.221.8:8848
         namespace: 3f598f78-c669-409b-9189-ea72adc21d30
