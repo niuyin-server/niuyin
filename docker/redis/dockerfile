@@ -4,10 +4,10 @@ FROM redis
 MAINTAINER roydon
 
 # 挂载目录
-VOLUME /home/niuyin/redis
+VOLUME /home/cheese-blast/redis
 # 创建目录
-RUN mkdir -p /home/niuyin/redis
+RUN mkdir -p /home/cheese-blast/redis
 # 指定路径
-WORKDIR /home/niuyin/redis
+WORKDIR /home/cheese-blast/redis
 # 复制conf文件到路径
-COPY ./conf/redis.conf /home/niuyin/redis/redis.conf
+COPY ./conf/redis.conf /home/cheese-blast/redis/redis.conf
