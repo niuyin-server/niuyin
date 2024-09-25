@@ -182,7 +182,7 @@ public class EsTest {
     @Test
     @DisplayName("测试ik分词器")
     public void testIkAnalyzer() {
-        AnalyzeRequest request = AnalyzeRequest.withGlobalAnalyzer("ik_smart", "原神，启动！");
+        AnalyzeRequest request = AnalyzeRequest.withGlobalAnalyzer("ik_smart", "芝士学爆");
         Set<String> res = new HashSet<>();
         try {
             AnalyzeResponse response = restHighLevelClient.indices().analyze(request, RequestOptions.DEFAULT);
@@ -191,7 +191,7 @@ public class EsTest {
                 int startOffset = token.getStartOffset();
                 int endOffset = token.getEndOffset();
                 String type = token.getType();
-//                System.out.println("Term: " + term + ", Start Offset: " + startOffset + ", End Offset: " + endOffset + ", Type: " + type);
+                System.out.println("Term: " + term + ", Start Offset: " + startOffset + ", End Offset: " + endOffset + ", Type: " + type);
                 res.add(term);
             });
         } catch (IOException e) {
