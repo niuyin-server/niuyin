@@ -1,14 +1,15 @@
 package com.niuyin.service.search.schedule;
 
-import com.hankcs.hanlp.HanLP;
-import com.hankcs.hanlp.seg.common.Term;
+import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dubbo.VideoBehaveData;
+import com.niuyin.model.video.enums.IkAnalyzeTypeEnum;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.domain.VideoSearchVO;
+import com.niuyin.service.search.service.EsIkAnalyzeService;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import com.niuyin.service.search.service.VideoSearchService;
 import lombok.SneakyThrows;
@@ -20,7 +21,6 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 /**
  * HotVideoTask
@@ -44,21 +44,29 @@ public class HotSearchSchedule {
     @Resource
     private DubboBehaveService dubboBehaveService;
 
+    @Resource
+    private EsIkAnalyzeService esIkAnalyzeService;
+
+    public final static String SEARCH_KEY = "search:hot_search_task_lock";
+
     /**
-     * 计算热搜 定时任务 todo 添加分布式锁
+     * 计算热搜 定时任务
+     * 添加分布式锁
      */
+//    @RedissonLock(prefixKey = SEARCH_KEY)
     @SneakyThrows
     @Scheduled(fixedRate = 1000 * 60 * 10)
     public void computeHotSearch() {
-        ArrayList<String> list = new ArrayList<>();
-        List<Term> termList;
+        List<String> list = new ArrayList<>();
+//        List<Term> termList;
 
         //将分词存入集合中
         for (VideoSearchHistory allSearch : videoSearchHistoryService.findTodaySearchRecord()) {
-            termList = HanLP.segment(allSearch.getKeyword());
-            for (Term term : termList) {
-                if (term.word.length() != 1) {
-                    list.add(term.word);
+            Set<String> ikAnalyzeSetResult = esIkAnalyzeService.getIkAnalyzeSetResult(allSearch.getKeyword(), IkAnalyzeTypeEnum.IK_SMART);
+//            termList = HanLP.segment(allSearch.getKeyword());
+            for (String term : ikAnalyzeSetResult) {
+                if (term.length() != 1) {
+                    list.add(term);
                 }
             }
         }

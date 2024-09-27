@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -23,6 +24,8 @@ import reactor.core.publisher.Mono;
 @Order(-100) //优先级设置  值越小  优先级越高
 @Component
 public class AuthorizeFilter implements GlobalFilter {
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     @SneakyThrows
     @Override
@@ -79,6 +82,36 @@ public class AuthorizeFilter implements GlobalFilter {
             exchange.mutate().request(serverHttpRequest);
             return chain.filter(exchange);//放行
         }
+
+        // 定义不需要拦截的路径列表
+//        String[] excludePatterns = {
+//                "/login",
+//                "/sms-login",
+//                "/register",
+//                "/app/sms-register",
+//                "/swagger-ui/**",
+//                "/api/v1/feed",
+//                "/api/v1/pushVideo",
+//                "/api/v1/app/recommend",
+//                "/api/v1/app/hotVideo",
+//                "/api/v1/app/video/hotSearch",
+//                "/api/v1/hot",
+//                "/api/v1/video/search/hot",
+//                "/websocket",
+//                "/userVideoBehave/syncViewBehave",
+//                "/api/v1/video/feed",
+//                "/api/v1/category/tree",
+//                "/api/v1/category/parentList",
+//                "/api/v1/category/children",
+//                "/api/v1/category/pushVideo",
+//                "/auth/**"
+//        };
+//
+//        for (String pattern : excludePatterns) {
+//            if (PATH_MATCHER.match(pattern, request.getURI().getPath())) {
+//                // 表示该路径被排除，不应被拦截
+//            }
+//        }
 
         //3.获取token
         String token = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
