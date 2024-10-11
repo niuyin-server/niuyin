@@ -106,8 +106,7 @@ public class HotSearchSchedule {
             VideoBehaveData videoBehaveData = dubboBehaveService.apiGetVideoBehaveData(videoSearchVOS.get(j).getVideoId());
             // 算分
             if (Objects.nonNull(videoBehaveData)) {
-                double score = videoBehaveData.getViewCount() + videoBehaveData.getLikeCount() * 2
-                        + videoBehaveData.getCommentCount() * 3 + videoBehaveData.getFavoriteCount() * 4;
+                double score = videoBehaveData.getViewCount() + videoBehaveData.getLikeCount() * 2 + videoBehaveData.getCommentCount() * 3 + videoBehaveData.getFavoriteCount() * 4;
                 redisService.setCacheZSet(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, videoHotTitles.get(j), score);
             }
 

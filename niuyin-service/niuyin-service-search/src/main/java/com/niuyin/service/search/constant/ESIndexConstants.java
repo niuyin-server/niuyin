@@ -8,5 +8,6 @@ package com.niuyin.service.search.constant;
  **/
 public class ESIndexConstants {
     public static final String INDEX_VIDEO = "search_video";
+    public static final String INDEX_USER = "doc_user";
 
 }
