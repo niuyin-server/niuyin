@@ -28,7 +28,7 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-dubbo</artifactId>
         </dependency>
-        <!--        dubbo api-->
+        <!-- dubbo api-->
         <dependency>
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-dubbo</artifactId>
