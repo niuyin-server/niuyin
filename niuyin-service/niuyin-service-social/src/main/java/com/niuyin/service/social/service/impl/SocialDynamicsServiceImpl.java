@@ -49,11 +49,11 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
     private DubboMemberService dubboMemberService;
 
     /**
-     * 初始化用户收件箱 拉模式 从关注列表用户发件箱主动拉取最近一月视频数据存入收件箱
+     * 初始化用户收件箱 拉模式 从关注列表用户发件箱主动拉取最近一年视频数据存入收件箱
      */
     @Override
     public void initUserFollowInBox(Long userId) {
-        long time = DateUtils.addDays(DateUtils.getNowDate(), -30).getTime();
+        long time = DateUtils.addDays(DateUtils.getNowDate(), -365).getTime();
         log.debug("last week time:{}", time);
         // 获取用户关注列表
         Set followUserIds = redisService.getCacheZSetRange(FOLLOW + userId, 0, -1);
@@ -87,7 +87,7 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
                 // todo 查库
             }
             redisService.setCacheZSet(SOCIAL_DYNAMICS + userId, dynamicUser, stringTypedTuple.getScore());
-            redisService.expire(SOCIAL_DYNAMICS + userId, 30, TimeUnit.DAYS);
+            redisService.expire(SOCIAL_DYNAMICS + userId, 365, TimeUnit.DAYS);
         }
         final ObjectMapper objectMapper = new ObjectMapper();
         // 将视频信息存入redis用户收件箱
@@ -101,7 +101,7 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
                     throw new RuntimeException(e);
                 }
                 // 过期时间一月
-                connection.expire(key, 30 * 24 * 60 * 60L);
+                connection.expire(key, 365 * 24 * 60 * 60L);
             }
             return null;
         });

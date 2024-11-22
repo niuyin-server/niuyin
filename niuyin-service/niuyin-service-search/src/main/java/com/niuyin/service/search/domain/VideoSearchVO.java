@@ -5,6 +5,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.util.Date;
 
+import static com.niuyin.service.search.constant.ESIndexConstants.INDEX_VIDEO;
+
 /**
  * VideoSearchVO
  *
@@ -13,7 +15,7 @@ import java.util.Date;
  * 视频搜索返回体
  **/
 @Data
-@Document(indexName = "search_video", createIndex = true)
+@Document(indexName = INDEX_VIDEO, createIndex = true)
 public class VideoSearchVO {
 
     // 视频id

@@ -21,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,26 +81,5 @@ public class EsVideoTest {
 
     }
 
-    @Test
-    public void testEsInsertOneVideo() {
-        Video video = videoMapper.selectById("1183178243432251392f0c31774");
-        VideoSearchVO videoSearchVO = new VideoSearchVO();
-        videoSearchVO.setVideoId(video.getVideoId());
-        videoSearchVO.setVideoTitle(video.getVideoTitle());
-        videoSearchVO.setPublishTime(Date.from(video.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
-        videoSearchVO.setCoverImage(video.getCoverImage());
-        videoSearchVO.setVideoUrl(video.getVideoUrl());
-        videoSearchVO.setUserId(2L);
-
-        IndexRequest indexRequest = new IndexRequest("search_video");
-        indexRequest.id(videoSearchVO.getVideoId())
-                .source(JSON.toJSONString(videoSearchVO), XContentType.JSON);
-        try {
-            restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.error("sync es error ==> {}", e.getMessage());
-        }
-    }
 
 }
