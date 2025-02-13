@@ -15,9 +15,10 @@ import java.time.LocalDateTime;
 @Data
 public class VideoRecommendVO {
     private String videoId;
-    private String videoTitle; //标题
-    private String coverImage; //封面
-    private Long viewNum; //观看量
+    private String videoTitle; // 标题
+    private String coverImage; // 封面
+    private String videoUrl; // 视频地址
+    private Long viewNum; // 观看量
     private Long likeNum;  // 点赞量
     private Long favoriteNum;  // 收藏量
     private Long commentNum; //评论量
