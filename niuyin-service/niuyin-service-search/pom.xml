@@ -13,11 +13,11 @@
 
     <dependencies>
         <!--分词器-->
-        <dependency>
-            <groupId>com.hankcs</groupId>
-            <artifactId>hanlp</artifactId>
-            <version>portable-1.7.6</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.hankcs</groupId>-->
+<!--            <artifactId>hanlp</artifactId>-->
+<!--            <version>portable-1.7.6</version>-->
+<!--        </dependency>-->
         <!--elasticsearch-->
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
@@ -72,6 +72,12 @@
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-dubbo</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <!--        TextRank-->
+        <dependency>
+            <groupId>org.ansj</groupId>
+            <artifactId>ansj_seg</artifactId>
+            <version>5.1.6</version>
         </dependency>
     </dependencies>
 

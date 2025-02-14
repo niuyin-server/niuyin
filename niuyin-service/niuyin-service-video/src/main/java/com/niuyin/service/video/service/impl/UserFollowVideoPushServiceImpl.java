@@ -108,8 +108,8 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
     public void initFollowVideoFeed(Long userId, List<Long> followIds) {
         // 当前时间
         Date curDate = DateUtils.getNowDate();
-        // 前30天时间
-        Date limitDate = DateUtils.addDays(curDate, -30);
+        // 前365天时间
+        Date limitDate = DateUtils.addDays(curDate, -365);
         Set<ZSetOperations.TypedTuple<String>> typedTuples = redisService.zRangeWithScores(IN_FOLLOW + userId, -1, -1);
         if (!CollectionUtils.isEmpty(typedTuples)) {
             Double oldTime = typedTuples.iterator().next().getScore();
@@ -143,8 +143,8 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
                         }
-                        // 过期时间一个月
-                        connection.expire(key, 30 * 24 * 60 * 60L);
+                        // 过期时间一年
+                        connection.expire(key, 365 * 24 * 60 * 60L);
                     }
                 }
             }
