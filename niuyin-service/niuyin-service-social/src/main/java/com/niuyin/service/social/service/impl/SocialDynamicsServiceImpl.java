@@ -100,8 +100,8 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
-                // 过期时间一月
-                connection.expire(key, 365 * 24 * 60 * 60L);
+                // 过期时间一月 todo 这里是否需要对视频做过期处理
+//                connection.expire(key, 365 * 24 * 60 * 60L);
             }
             return null;
         });
