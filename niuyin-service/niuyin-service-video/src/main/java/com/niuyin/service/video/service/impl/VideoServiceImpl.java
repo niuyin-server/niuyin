@@ -1120,12 +1120,19 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Async(VIDEO_EXECUTOR)
     public void packageVideoRecommendVO(VideoRecommendVO vo) {
+        CompletableFuture<Void> videoDataFuture = packageVideoRecommendVOVideoDataAsync(vo);
         CompletableFuture<Void> behaveDataFuture = packageVideoRecommendVOBehaveDataAsync(vo);
         CompletableFuture<Void> memberDataFuture = packageVideoRecommendVODataAsync(vo);
         CompletableFuture.allOf(
+                videoDataFuture,
                 behaveDataFuture,
                 memberDataFuture
         ).join();
+    }
+
+    @Async(VIDEO_EXECUTOR)
+    public CompletableFuture<Void> packageVideoRecommendVOVideoDataAsync(VideoRecommendVO vo) {
+        return CompletableFuture.runAsync(() -> packageVideoRecommendVOVideoData(vo));
     }
 
     @Async(VIDEO_EXECUTOR)
@@ -1136,6 +1143,19 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Async(VIDEO_EXECUTOR)
     public CompletableFuture<Void> packageVideoRecommendVODataAsync(VideoRecommendVO vo) {
         return CompletableFuture.runAsync(() -> packageVideoRecommendVOMemberData(vo));
+    }
+
+    /**
+     * 封装视频数据
+     */
+    @Async(VIDEO_EXECUTOR)
+    public void packageVideoRecommendVOVideoData(VideoRecommendVO vo) {
+        // 图文视频
+        if (vo.getPublishType().equals(PublishType.IMAGE.getCode())) {
+            List<VideoImage> videoImageList = videoImageService.queryImagesByVideoId(vo.getVideoId());
+            String[] imgs = videoImageList.stream().map(VideoImage::getImageUrl).toArray(String[]::new);
+            vo.setImageList(imgs);
+        }
     }
 
     /**

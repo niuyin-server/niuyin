@@ -18,6 +18,8 @@ public class VideoRecommendVO {
     private String videoTitle; // 标题
     private String coverImage; // 封面
     private String videoUrl; // 视频地址
+    // 图片集合
+    private String[] imageList;
     private Long viewNum; // 观看量
     private Long likeNum;  // 点赞量
     private Long favoriteNum;  // 收藏量
