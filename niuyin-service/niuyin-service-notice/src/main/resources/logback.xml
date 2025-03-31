@@ -3,7 +3,7 @@
     <!-- 日志存放路径 -->
     <property name="log.path" value="/home/niuyin/logs/search"/>
     <!-- 日志输出格式 -->
-    <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} -[%highlight(%5level)]- [%t] %boldMagenta(%logger{20}) - [%method,%line] - %msg%n"/>
+    <property name="log.pattern" value="%boldGreen(%d{yyyy-MM-dd HH:mm:ss.SSS}) -[%highlight(%5level)]- %boldMagenta([%t]) %boldYellow(%logger{20}) - %boldBlue([%method,%line]) | %msg%n"/>
 
     <!-- 控制台输出 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">

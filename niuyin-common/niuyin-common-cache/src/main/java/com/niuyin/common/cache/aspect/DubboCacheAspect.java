@@ -45,7 +45,6 @@ public class DubboCacheAspect {
         for (int i = 0; i < paramNames.length; i++) {
             treeMap.put(paramNames[i], args[i]);
         }
-
         DoubleCache annotation = method.getAnnotation(DoubleCache.class);
         String realKey = annotation.cachePrefix();
         if (!StringUtils.isEmpty(annotation.key())) {

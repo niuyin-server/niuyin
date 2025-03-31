@@ -24,6 +24,7 @@ public class VideoRecommendLoadBalancer {
     private UserBasedCollaborativeFilterService userBasedCollaborativeFilterService;
     @Resource
     private UserTagModalRecommendService userTagModalRecommendService;
+    // todo 添加基于新稿件流量池的推荐，且推荐算法要用布隆过滤器过滤防止重复推荐
 
     private List<MethodWithReturn> methods = new ArrayList<>();
     private int currentIndex = 0;

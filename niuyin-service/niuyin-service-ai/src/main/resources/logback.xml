@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 日志存放路径 -->
-    <property name="log.path" value="/home/niuyin/logs/video"/>
+    <property name="log.path" value="/home/niuyin/logs/ai"/>
     <!-- 日志输出格式 -->
     <property name="log.pattern" value="%boldGreen(%d{yyyy-MM-dd HH:mm:ss.SSS}) -[%highlight(%5level)]- %boldMagenta([%t]) %boldYellow(%logger{20}) - %boldBlue([%method,%line]) | %msg%n"/>
 
@@ -74,7 +74,7 @@
     <!-- 系统模块日志级别控制  -->
     <logger name="com.niuyin" level="info"/>
     <!-- Spring日志级别控制  -->
-    <logger name="org.springframework" level="warn"/>
+    <logger name="org.springframework" level="info"/>
 
     <root level="info">
         <appender-ref ref="console"/>
