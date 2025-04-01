@@ -21,7 +21,7 @@
         <module>niuyin-service-behave</module>
         <module>niuyin-service-notice</module>
         <module>niuyin-service-recommend</module>
-        <module>niuyin-service-ai</module>
+<!--        <module>niuyin-service-ai</module>-->
     </modules>
 
     <dependencies>
