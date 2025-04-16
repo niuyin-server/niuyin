@@ -1,5 +1,7 @@
 package com.niuyin.common.core.domain.vo;
 
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.core.domain.R;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +38,16 @@ public class PageDataInfo<T> implements Serializable {
      * 总记录数
      */
     private long total;
+
+    /**
+     * 返回分页数据
+     */
+    public static <T> PageDataInfo<T> page(IPage<T> page) {
+        if (CollUtil.isEmpty(page.getRecords())) {
+            return emptyPage();
+        }
+        return new PageDataInfo<>(R.SUCCESS, "OK", page.getRecords(), page.getTotal());
+    }
 
     /**
      * 返回分页数据

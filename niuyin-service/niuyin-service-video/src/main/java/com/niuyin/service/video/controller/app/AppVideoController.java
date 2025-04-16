@@ -10,7 +10,8 @@ import com.niuyin.service.video.service.IVideoService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
 import java.util.List;
 
 /**
@@ -46,8 +47,8 @@ public class AppVideoController {
      * 热门视频分页
      */
     @PostMapping("/hotVideo")
-    @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
-    public PageDataInfo hotVideosForApp(@RequestBody PageDTO pageDTO) {
+    @Cacheable(value = "hotVideos", key = "'hotVideos'+ #pageDTO.pageNum + '_' + #pageDTO.pageSize")
+    public PageDataInfo<?> hotVideosForApp(@RequestBody PageDTO pageDTO) {
         return videoService.getHotVideos(pageDTO);
     }
 
@@ -55,7 +56,7 @@ public class AppVideoController {
      * 分页查询我的视频
      */
     @PostMapping("/myPage")
-    public PageDataInfo myPageForApp(@RequestBody VideoPageDto pageDto) {
+    public PageDataInfo<?> myPageForApp(@RequestBody VideoPageDto pageDto) {
         return videoService.queryMyVideoPageForApp(pageDto);
     }
 
@@ -63,7 +64,7 @@ public class AppVideoController {
      * 分页查询用户视频
      */
     @PostMapping("/userPage")
-    public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
+    public PageDataInfo<?> userPage(@RequestBody VideoPageDto pageDto) {
         return videoService.queryUserVideoPage(pageDto);
     }
 

@@ -6,16 +6,16 @@ spring:
   application:
     name: niuyin-gateway
   profiles:
-    active: roydon
+    active: dev
   cloud:
     nacos:
       discovery:
-        server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
       config:
-        server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:
@@ -23,28 +23,34 @@ spring:
           - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
     gateway:
       httpclient:
-        #        response-timeout: PT10S # 全局的响应超时时间，网络连接后，后端服务多久不返回网关就报错 The response timeout.
-        connect-timeout: 5000 # 全局的TCP连接超时时间默认时间是45秒，修改为5秒
+#        response-timeout: 60000
+        connect-timeout: 60000 # 全局的TCP连接超时时间默认时间是45秒，修改为5秒
         # 连接池配置
-        pool:
-          max-connections: 10000 # 最大连接数
-          max-life-time: 10 # 最大连接时间
-          acquire-timeout: 10 # 返回时间
-          max-idle-time: 10000 # 最大空闲时间
-          type: ELASTIC # 设置固定链接池 #ELASTIC：弹性连接池，连接数上限为Integer.MAX，默认值 #FIXED: 固定连接池，最大连接数采用spring.cloud.gateway.httpclient.pool.max-connections的配置 #DISABLED：不使用任何连接池
-
+      #        pool:
+      #          max-connections: 10000 # 最大连接数
+      #          max-life-time: 30 # 最大连接时间
+      #          acquire-timeout: 30 # 返回时间
+      #          max-idle-time: 10000 # 最大空闲时间
+      #          type: ELASTIC # 设置固定链接池 #ELASTIC：弹性连接池，连接数上限为Integer.MAX，默认值 #FIXED: 固定连接池，最大连接数采用spring.cloud.gateway.httpclient.pool.max-connections的配置 #DISABLED：不使用任何连接池
+      #      streaming-media-types:
+      #        - text/event-stream
+      #        - application/stream+json
+      default-filters:
+        - SetResponseHeader=Content-Type, text/event-stream
     sentinel:
       transport:
-        #        dashboard: 43.240.221.8:8090
-        dashboard: localhost:8080
+        dashboard: localhost:8083
       eager: true
       http-method-specify: true
       # nacos配置持久化
       datasource:
         ds1:
           nacos:
-            server-addr: 43.240.221.8:8848
+            server-addr: localhost:8848
             dataId: sentinel-niuyin-gateway
             groupId: DEFAULT_GROUP
             data-type: json
             rule-type: gw-flow
+  webflux:
+    codec:
+      max-in-memory-size: 10MB

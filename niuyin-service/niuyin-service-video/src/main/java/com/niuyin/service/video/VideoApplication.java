@@ -3,7 +3,6 @@ package com.niuyin.service.video;
 import com.niuyin.common.cache.annotations.EnableCacheConfig;
 import com.niuyin.common.core.annotations.EnableUserTokenInterceptor;
 import com.niuyin.common.core.config.MybatisPlusConfig;
-import com.niuyin.common.core.swagger.Swagger2Configuration;
 import com.niuyin.feign.config.FeignConfig;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -24,16 +23,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @AUTHOR: roydon
  * @DATE: 2023/10/25
  **/
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.niuyin"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
 @EnableCacheConfig
 @EnableScheduling
 @EnableCaching
-@EnableAsync
 @EnableDubbo
-@Import({MybatisPlusConfig.class, Swagger2Configuration.class})
+@EnableAsync
+@Import({MybatisPlusConfig.class})
 public class VideoApplication {
 
     public static void main(String[] args) {

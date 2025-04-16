@@ -3,12 +3,11 @@ package com.niuyin.service.notice.controller.v1;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.model.notice.vo.WebSocketBaseResp;
 import com.niuyin.service.notice.enums.WebSocketMsgType;
+import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.ws.rs.PathParam;
 
 /**
  * WebSocketController

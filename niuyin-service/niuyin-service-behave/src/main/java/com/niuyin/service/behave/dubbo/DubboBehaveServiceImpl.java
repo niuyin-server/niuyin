@@ -7,7 +7,7 @@ import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import org.apache.dubbo.config.annotation.DubboService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * DubboBehaveServiceImpl

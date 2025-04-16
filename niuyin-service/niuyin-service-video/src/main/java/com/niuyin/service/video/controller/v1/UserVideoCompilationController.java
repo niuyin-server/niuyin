@@ -10,7 +10,7 @@ import com.niuyin.model.video.dto.UserVideoCompilationPageDTO;
 import com.niuyin.service.video.service.IUserVideoCompilationService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**

@@ -10,9 +10,10 @@ import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.vo.CompilationVideoVO;
 import com.niuyin.service.video.mapper.UserVideoCompilationRelationMapper;
 import com.niuyin.service.video.service.IUserVideoCompilationRelationService;
+import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -21,10 +22,10 @@ import java.util.List;
  * @author roydon
  * @since 2023-12-08 20:21:13
  */
-@Service("userVideoCompilationRelationService")
+@RequiredArgsConstructor
+@Service
 public class UserVideoCompilationRelationServiceImpl extends ServiceImpl<UserVideoCompilationRelationMapper, UserVideoCompilationRelation> implements IUserVideoCompilationRelationService {
-    @Resource
-    private UserVideoCompilationRelationMapper userVideoCompilationRelationMapper;
+    private final UserVideoCompilationRelationMapper userVideoCompilationRelationMapper;
 
     /**
      * 将视频添加到合集

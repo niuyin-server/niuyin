@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 
 import static com.niuyin.model.constants.VideoConstants.IN_FOLLOW;
@@ -45,7 +45,6 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
      * @param videoId 视频id
      * @param time    视频发布时间戳
      */
-    @Async
     @Override
     public void pusOutBoxFeed(Long userId, String videoId, Long time) {
         redisService.setCacheZSet(OUT_FOLLOW + userId, videoId, time);
@@ -58,7 +57,6 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
      * @param videoId 视频id
      * @param time    视频发布时间戳
      */
-    @Async
     @Override
     public void pushInBoxFeed(Long userId, String videoId, Long time) {
         // todo 主动推模式暂时不用（当粉丝数据过多或者僵尸粉丝带来过大性能开销）
@@ -72,7 +70,6 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
      * @param fans    粉丝ids
      * @param videoId 视频id 需要删除的
      */
-    @Async
     @Override
     public void deleteOutBoxFeed(Long userId, List<Long> fans, String videoId) {
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -91,7 +88,6 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
      * @param userId
      * @param videoIds 关注人发的视频id
      */
-    @Async
     @Override
     public void deleteInBoxFeed(Long userId, List<String> videoIds) {
         redisTemplate.opsForZSet().remove(IN_FOLLOW + userId, videoIds.toArray());
@@ -103,7 +99,6 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
      * @param userId
      * @param followIds
      */
-    @Async
     @Override
     public void initFollowVideoFeed(Long userId, List<Long> followIds) {
         // 当前时间

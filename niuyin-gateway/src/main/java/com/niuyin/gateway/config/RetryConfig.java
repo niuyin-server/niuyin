@@ -14,4 +14,5 @@ public class RetryConfig {
     public RetryGatewayFilterFactory retryGatewayFilterFactory() {
         return new RetryGatewayFilterFactory();
     }
+
 }

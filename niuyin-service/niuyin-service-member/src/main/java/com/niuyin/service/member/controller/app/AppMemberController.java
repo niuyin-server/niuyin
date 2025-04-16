@@ -4,14 +4,13 @@ import com.niuyin.common.core.domain.R;
 import com.niuyin.model.member.vo.app.AppMemberInfoVO;
 import com.niuyin.service.member.service.IMemberInfoService;
 import com.niuyin.service.member.service.IMemberService;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * UserController
@@ -36,7 +35,6 @@ public class AppMemberController {
      * @param userId
      * @return
      */
-    @ApiOperation("根据id获取用户信息")
     @GetMapping("/{userId}")
     public R<AppMemberInfoVO> userInfoById(@PathVariable Long userId) {
         return R.ok(memberInfoService.getUserInfoById(userId));

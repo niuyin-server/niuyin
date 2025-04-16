@@ -1,8 +1,6 @@
 package com.niuyin.model.video.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,19 +13,16 @@ import java.io.Serializable;
  */
 @Data
 @TableName("video_category_relation")
-@ApiModel("视频分类关联表")
 public class VideoCategoryRelation implements Serializable {
     private static final long serialVersionUID = -53464330298328844L;
 
     /**
      * 视频id
      */
-    @ApiModelProperty("视频id")
     private String videoId;
     /**
      * 分类id
      */
-    @ApiModelProperty("分类id")
     private Long categoryId;
 
 

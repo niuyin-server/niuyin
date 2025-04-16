@@ -1,9 +1,8 @@
 package com.niuyin.model.search.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.validation.constraints.NotBlank;
 
 /**
  * UserSearchKeywordDTO

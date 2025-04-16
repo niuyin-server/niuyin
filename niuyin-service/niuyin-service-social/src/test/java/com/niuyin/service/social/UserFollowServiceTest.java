@@ -5,10 +5,10 @@ import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.social.service.IUserFollowService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * UserFollowServiceTest

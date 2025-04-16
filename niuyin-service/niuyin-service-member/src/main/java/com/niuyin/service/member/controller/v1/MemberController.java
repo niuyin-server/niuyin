@@ -23,12 +23,11 @@ import com.niuyin.service.member.service.IMemberService;
 import com.niuyin.service.member.strategy.context.LoginStrategyContext;
 import com.niuyin.starter.file.service.AliyunOssService;
 import com.niuyin.starter.file.service.FileStorageService;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -68,7 +67,6 @@ public class MemberController {
      * @param loginUserDTO
      * @return
      */
-    @ApiOperation("登录")
     @PostMapping("/login")
     public R<Map<String, String>> login(@RequestBody LoginUserDTO loginUserDTO) {
         log.debug("登录用户：{}", loginUserDTO);
@@ -81,11 +79,7 @@ public class MemberController {
 
     /**
      * 注册
-     *
-     * @param registerBody
-     * @return
      */
-    @ApiOperation("注册")
     @PostMapping("/register")
     public R<Boolean> register(@RequestBody RegisterBody registerBody) {
         log.debug("注册用户：{}", registerBody);
@@ -95,11 +89,7 @@ public class MemberController {
 
     /**
      * 更新用户信息
-     *
-     * @param user
-     * @return
      */
-    @ApiOperation("更新信息")
     @PutMapping("/update")
     public R<Member> save(@RequestBody Member user) {
         // 校验邮箱
@@ -115,11 +105,7 @@ public class MemberController {
 
     /**
      * 获取用户信息
-     *
-     * @param userId
-     * @return
      */
-    @ApiOperation("根据id获取用户信息")
     @GetMapping("/{userId}")
     public R<Member> userInfoById(@PathVariable Long userId) {
         return R.ok(getUserFromCache(userId));
@@ -129,7 +115,6 @@ public class MemberController {
     /**
      * 通过token获取用户信息
      */
-    @ApiOperation("获取用户信息")
     @GetMapping("/userinfo")
     public R<MemberInfoVO> userInfo() {
         Long userId = UserContext.getUser().getUserId();
@@ -168,7 +153,6 @@ public class MemberController {
      * @param dto 原密码，新密码，确认密码
      * @return user
      */
-    @ApiOperation("修改密码")
     @PostMapping("/updatepass")
     public R<Boolean> updatePass(@RequestBody UpdatePasswordDTO dto) {
         return R.ok(memberService.updatePass(dto));
@@ -180,7 +164,6 @@ public class MemberController {
      * @param file 图片文件，大小限制1M
      * @return url
      */
-    @ApiOperation("上传头像")
     @PostMapping("/avatar")
     public R<String> avatar(@RequestParam("file") MultipartFile file) {
         String originalFilename = file.getOriginalFilename();

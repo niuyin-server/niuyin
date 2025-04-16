@@ -1,5 +1,6 @@
 package com.niuyin.service.ai.controller;
 
+import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -31,12 +32,12 @@ public class ChatbotController {
         return chatClient.prompt(request.message())
                 .advisors(new MessageChatMemoryAdvisor(inMemoryChatMemory, userId, 10), new SimpleLoggerAdvisor())
                 .stream().content().map(content -> ServerSentEvent.builder(content).event("message").build())
-                //问题回答结速标识,以便前端消息展示处理
+                //问题回答结束标识,以便前端消息展示处理
                 .concatWithValues(ServerSentEvent.builder("[DONE]").build())
                 .onErrorResume(e -> Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build()));
     }
 
     record ChatRequest(String userId, String message) {
-
     }
+
 }

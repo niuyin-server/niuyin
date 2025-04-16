@@ -35,7 +35,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import ws.schild.jave.info.MultimediaInfo;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -569,7 +570,7 @@ public class VideoTestApplication {
 
     @Test
     void testVideoInfoAllSync() {
-        List<Video> videoList = videoService.list(null);
+        List<Video> videoList = videoService.list();
         videoList.forEach(v -> {
             rabbitTemplate.convertAndSend(EXCHANGE_VIDEO_DIRECT, DIRECT_KEY_INFO, v.getVideoId());
             log.debug(" ==> {} 发送了一条消息 ==> {}", EXCHANGE_VIDEO_DIRECT, v.getVideoId());

@@ -1,7 +1,8 @@
 package com.niuyin.gateway.util;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -24,7 +25,6 @@ public class WebUtils {
             e.printStackTrace();
         }
     }
-
 
     public static void setDownLoadHeader(String filename, ServletContext context, HttpServletResponse response) throws UnsupportedEncodingException {
         String mimeType = context.getMimeType(filename);//获取文件的mime类型

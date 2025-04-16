@@ -17,11 +17,14 @@ import java.util.function.Supplier;
  * @DATE: 2024/5/5
  **/
 @Slf4j
-@AllArgsConstructor
 @Service
 public class LockService {
 
     private RedissonClient redissonClient;
+
+    public LockService(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
 
     public <T> T executeWithLockThrows(String key, int waitTime, TimeUnit unit, SupplierThrow<T> supplier) throws Throwable {
         RLock lock = redissonClient.getLock(key);

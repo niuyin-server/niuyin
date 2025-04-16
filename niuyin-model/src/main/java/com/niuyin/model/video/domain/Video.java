@@ -3,10 +3,9 @@ package com.niuyin.model.video.domain;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -16,7 +15,6 @@ import java.io.Serializable;
  * @author roydon
  * @since 2023-10-25 20:33:10
  */
-@ApiModel("视频表-video")
 @Data
 @TableName("video")
 public class Video implements Serializable {

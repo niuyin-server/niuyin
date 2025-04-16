@@ -5,8 +5,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.cache.annotations.DoubleCache;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.cache.enums.CacheType;
 import com.niuyin.common.cache.service.RedisService;
+import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
@@ -29,6 +30,7 @@ import com.niuyin.service.video.service.IVideoCategoryService;
 import com.niuyin.service.video.service.IVideoImageService;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.service.cache.VideoRedisBatchCache;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,7 +38,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +53,7 @@ import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATE
  * @since 2023-10-30 19:41:14
  */
 @Slf4j
-@Service("videoCategoryService")
+@Service
 public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, VideoCategory> implements IVideoCategoryService {
     @Resource
     private VideoCategoryMapper videoCategoryMapper;
@@ -138,12 +139,10 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         return PageDataInfo.genPageData(videoList, videoCount);
     }
 
-    @Async
     public CompletableFuture<Void> packageUserVideoVOAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageUserVideoVO(videoVO));
     }
 
-    @Async
     public void packageUserVideoVO(VideoVO videoVO) {
         CompletableFuture<Void> behaveDataFuture = packageVideoBehaveDataAsync(videoVO);
         CompletableFuture<Void> memberDataFuture = packageMemberDataAsync(videoVO);
@@ -156,17 +155,14 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         ).join();
     }
 
-    @Async
     public CompletableFuture<Void> packageVideoBehaveDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoBehaveData(videoVO));
     }
 
-    @Async
     public CompletableFuture<Void> packageMemberDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageMemberData(videoVO));
     }
 
-    @Async
     public CompletableFuture<Void> packageVideoImageDataAsync(VideoVO videoVO) {
         return CompletableFuture.runAsync(() -> packageVideoImageData(videoVO));
     }
@@ -176,7 +172,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      *
      * @param videoVO
      */
-    @Async
     public void packageVideoBehaveData(VideoVO videoVO) {
         log.debug("packageVideoBehaveData开始");
         // 封装观看量、点赞数、收藏量 todo java.lang.IllegalArgumentException: non null hash key required
@@ -194,7 +189,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      *
      * @param videoVO
      */
-    @Async
     public void packageMemberData(VideoVO videoVO) {
         log.debug("packageMemberData开始");
         // 封装用户信息
@@ -215,7 +209,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      *
      * @param videoVO
      */
-    @Async
     public void packageVideoImageData(VideoVO videoVO) {
         log.debug("packageVideoImageData开始");
         // 若是图文则封装图片集合
@@ -307,7 +300,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     /**
      * 封装视频作者
      */
-    @Async
     public void asyncPackageAuthor(VideoPushVO videoPushVO) {
         Member member = dubboMemberService.apiGetById(videoPushVO.getUserId());
         Author author = BeanCopyUtils.copyBean(member, Author.class);
@@ -317,7 +309,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     /**
      * 封装视频图文
      */
-    @Async
     public void asyncPackageVideoImage(VideoPushVO videoPushVO) {
         // 封装图文
         if (videoPushVO.getPublishType().equals(PublishType.IMAGE.getCode())) {
@@ -344,6 +335,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     /**
      * 获取视频分类树
      */
+    @DoubleCache(cachePrefix = "video:category:tree", expire = 1, unit = TimeUnit.DAYS, type = CacheType.FULL)
     @Override
     public List<VideoCategoryTree> getCategoryTree() {
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
@@ -395,6 +387,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     /**
      * 获取所有可用视频父分类
      */
+    @DoubleCache(cachePrefix = "video:category:parent_list", expire = 1, unit = TimeUnit.HOURS)
     @Override
     public List<AppVideoCategoryVo> getNormalParentCategory() {
         LambdaQueryWrapper<VideoCategory> queryWrapper = new LambdaQueryWrapper<>();
@@ -444,12 +437,10 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         return PageDataInfo.genPageData(categoryVideoVoList, videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getId()));
     }
 
-    @Async
     public CompletableFuture<Void> packageCategoryVideoVoAsync(CategoryVideoVo vo) {
         return CompletableFuture.runAsync(() -> packageCategoryVideoVo(vo));
     }
 
-    @Async
     public void packageCategoryVideoVo(CategoryVideoVo vo) {
         // 点赞量
         CompletableFuture<Void> behaveDataFuture = packageCategoryVideoVoBehaveDataAsync(vo);
@@ -462,12 +453,10 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     }
 
 
-    @Async
     public CompletableFuture<Void> packageCategoryVideoVoBehaveDataAsync(CategoryVideoVo vo) {
         return CompletableFuture.runAsync(() -> packageCategoryVideoVoBehaveData(vo));
     }
 
-    @Async
     public CompletableFuture<Void> packageCategoryVideoVoMemberDataAsync(CategoryVideoVo vo) {
         return CompletableFuture.runAsync(() -> packageCategoryVideoVoMemberData(vo));
     }
@@ -475,7 +464,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     /**
      * 封装视频行为数据
      */
-    @Async
     public void packageCategoryVideoVoBehaveData(CategoryVideoVo vo) {
         // 封装观看量、点赞数、收藏量 todo java.lang.IllegalArgumentException: non null hash key required
         Integer cacheViewNum = redisService.getCacheMapValue(VideoCacheConstants.VIDEO_VIEW_NUM_MAP_KEY, vo.getVideoId());
@@ -486,7 +474,6 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
     /**
      * 封装用户数据
      */
-    @Async
     public void packageCategoryVideoVoMemberData(CategoryVideoVo vo) {
         // 封装用户信息
         Member member = dubboMemberService.apiGetById(vo.getUserId());

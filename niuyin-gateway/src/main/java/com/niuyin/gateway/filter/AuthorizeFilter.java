@@ -1,5 +1,6 @@
 package com.niuyin.gateway.filter;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.alibaba.fastjson2.JSON;
 import com.niuyin.gateway.constant.TokenConstants;
 import com.niuyin.gateway.util.JwtUtil;
@@ -7,7 +8,6 @@ import com.niuyin.gateway.util.R;
 import io.jsonwebtoken.Claims;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.annotation.Order;
@@ -54,6 +54,8 @@ public class AuthorizeFilter implements GlobalFilter {
                 || request.getURI().getPath().contains("/api/v1/category/parentList")
                 || request.getURI().getPath().contains("/api/v1/category/children")
                 || request.getURI().getPath().contains("/api/v1/category/pushVideo")
+                || request.getURI().getPath().contains("/chat/stream")
+                || request.getURI().getPath().contains("/test")
         ) {
             //若存在token获取token解析token
             String token = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);

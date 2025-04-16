@@ -1,6 +1,5 @@
 package com.niuyin.model.member.dto;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -15,13 +14,11 @@ public class SmsRegisterBody{
     /**
      * 用户名
      */
-    @ApiModelProperty("账号")
     private String telephone;
 
     /**
      * 用户密码
      */
-    @ApiModelProperty("密码")
     private String password;
 
     /**

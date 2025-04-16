@@ -1,8 +1,7 @@
 package com.niuyin.model.video.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * 分类视频分页dto

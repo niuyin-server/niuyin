@@ -7,7 +7,7 @@ import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.service.behave.service.IUserFavoriteService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * (UserFavorite)表控制层

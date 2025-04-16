@@ -7,7 +7,7 @@ import com.niuyin.service.video.service.IVideoTagService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 视频标签表(VideoTag)表控制层

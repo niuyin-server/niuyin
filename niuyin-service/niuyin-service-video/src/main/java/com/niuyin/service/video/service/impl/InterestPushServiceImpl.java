@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -53,7 +53,6 @@ public class InterestPushServiceImpl implements InterestPushService {
     /**
      * 将标签对应的视频集合存入redis的set
      */
-    @Async
     @Override
     public void cacheVideoToTagRedis(String videoId, List<Long> tagsIds) {
 //        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -67,7 +66,6 @@ public class InterestPushServiceImpl implements InterestPushService {
         });
     }
 
-    @Async
     @Override
     public void cacheVideoToCategoryRedis(String videoId, List<Long> categoryIds) {
         categoryIds.forEach(id -> {
@@ -75,7 +73,6 @@ public class InterestPushServiceImpl implements InterestPushService {
         });
     }
 
-    @Async
     @Override
     public void deleteVideoFromTagRedis(String videoId, List<Long> tagsIds) {
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -86,7 +83,6 @@ public class InterestPushServiceImpl implements InterestPushService {
         });
     }
 
-    @Async
     @Override
     public void deleteVideoFromCategoryRedis(Video video, List<Long> categoryIds) {
         categoryIds.forEach(id -> {
@@ -124,7 +120,6 @@ public class InterestPushServiceImpl implements InterestPushService {
      * @param userId 用户id
      * @param tagIds
      */
-    @Async
     @Override
     public void initUserModel(Long userId, List<Long> tagIds) {
         String key = VIDEO_MEMBER_MODEL_CACHE_KEY_PREFIX + userId;
@@ -148,7 +143,6 @@ public class InterestPushServiceImpl implements InterestPushService {
      *
      * @param userModel
      */
-    @Async
     @Override
     public void updateUserModel(UserModel userModel) {
         log.debug("userModel:{}", userModel);

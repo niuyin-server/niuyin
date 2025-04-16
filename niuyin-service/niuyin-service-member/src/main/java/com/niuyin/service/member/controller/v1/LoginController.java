@@ -7,12 +7,11 @@ import com.niuyin.model.member.enums.LoginTypeEnum;
 import com.niuyin.service.member.service.LoginService;
 import com.niuyin.service.member.strategy.context.LoginStrategyContext;
 import com.niuyin.starter.sms.domain.model.SmsCode;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +38,6 @@ public class LoginController {
      * @param telephone 电话
      * @return code
      */
-    @ApiOperation("登录验证码")
     @GetMapping("/loginAuthCode/{telephone}")
     public R<String> sendCode(@PathVariable("telephone") String telephone) {
         SmsCode smsCode = loginService.sendLoginAuthCode(telephone);
@@ -49,7 +47,6 @@ public class LoginController {
     /**
      * 手机短信登录
      */
-    @ApiOperation("手机短信登录")
     @PostMapping("/sms-login")
     public R<Map<String, String>> smsLogin(@Validated @RequestBody SmsLoginDTO smsLoginDTO) {
 //        String token = loginService.smsLogin(smsLoginDTO);

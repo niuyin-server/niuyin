@@ -1,20 +1,23 @@
 server:
-  port: 9301
+  port: 9302
+  shutdown: graceful
 
 spring:
   application:
     name: niuyin-video
   profiles:
-    active: roydon
+    active: dev
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   cloud:
     nacos:
       discovery:
-        server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
       config:
-        server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:
@@ -23,9 +26,17 @@ spring:
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-ribbon:
-  eager-load:
-    enabled: true
+    loadbalancer:
+      ribbon:
+        enabled: false
+#ribbon:
+#  eager-load:
+#    enabled: true
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.niuyin.**.domain
+
 # dubbo
 #dubbo:
 #  protocol:

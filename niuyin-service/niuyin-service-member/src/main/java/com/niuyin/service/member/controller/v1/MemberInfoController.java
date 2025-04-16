@@ -11,7 +11,7 @@ import com.niuyin.starter.file.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 会员详情表(MemberInfo)表控制层

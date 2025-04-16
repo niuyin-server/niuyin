@@ -1,7 +1,7 @@
 package com.niuyin.service.video.listener;
 
-import com.niuyin.model.video.mq.VideoDelayedQueueConstant;
 import com.niuyin.service.video.service.IVideoService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -9,8 +9,6 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.*;
 
@@ -22,11 +20,11 @@ import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.*;
  * video视频服务mq监听器
  **/
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class VideoRabbitListener {
 
-    @Resource
-    private IVideoService videoService;
+    private final IVideoService videoService;
 
     /**
      * video info 消息

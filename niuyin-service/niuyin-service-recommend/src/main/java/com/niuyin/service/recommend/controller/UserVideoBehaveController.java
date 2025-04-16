@@ -4,7 +4,7 @@ import com.niuyin.service.recommend.service.IUserVideoBehaveService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 用户视频行为表(UserVideoBehave)表控制层

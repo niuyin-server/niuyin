@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
@@ -15,7 +17,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @Configuration
-public class AsyncConfig implements AsyncConfigurer {
+//@EnableAsync
+public class AsyncConfig  implements AsyncConfigurer{
 
     @Value("${video-async-executor.core-size}")
     private int coreSize;
@@ -33,21 +36,27 @@ public class AsyncConfig implements AsyncConfigurer {
     public static final String VIDEO_EXECUTOR_PREFIX = "video-async-executor-";
 
     @Override
-    public Executor getAsyncExecutor() {
+    public TaskExecutor getAsyncExecutor() {
         return videoAsyncExecutor();
     }
 
-    @Bean(VIDEO_EXECUTOR)
+    @Bean(name = VIDEO_EXECUTOR, destroyMethod = "shutdown")
     @Primary
     public ThreadPoolTaskExecutor videoAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(coreSize); // 核心线程数
-        executor.setMaxPoolSize(maxSize); // 最大线程数
-        executor.setQueueCapacity(queueCapacity); // 队列容量
-        executor.setThreadNamePrefix(VIDEO_EXECUTOR_PREFIX); // 线程名称前缀
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());//满了调用线程执行，认为重要任务
+        executor.setCorePoolSize(coreSize);
+        executor.setMaxPoolSize(maxSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix(VIDEO_EXECUTOR_PREFIX);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+
+        // 新增建议配置（Spring Boot 3 优化项）
+//        executor.setTaskDecorator(new MDCTaskDecorator()); // 支持MDC上下文传递
+        executor.setWaitForTasksToCompleteOnShutdown(true); // 优雅停机等待任务完成
+        executor.setAwaitTerminationSeconds(30); // 等待超时时间
+
         executor.initialize();
-        log.debug("videoAsyncExecutor init {}", executor.getCorePoolSize());
+        log.info("Video async executor initialized: core={}, max={}, queue={}", coreSize, maxSize, queueCapacity);
         return executor;
     }
 

@@ -53,7 +53,8 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+
+import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.*;

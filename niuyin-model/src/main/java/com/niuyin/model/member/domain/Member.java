@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.io.Serializable;
  * @author roydon
  * @since 2023-10-24 19:18:25
  */
-@ApiModel("用户表-member")
 @Data
 @TableName("member")
 public class Member implements Serializable {

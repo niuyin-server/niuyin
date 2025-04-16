@@ -3,7 +3,7 @@ package com.niuyin.service.video.controller.v1;
 import com.niuyin.service.video.service.IVideoPositionService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 视频定位表(VideoPosition)表控制层

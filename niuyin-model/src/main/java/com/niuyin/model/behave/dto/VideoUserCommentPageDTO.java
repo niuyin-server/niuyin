@@ -1,8 +1,7 @@
 package com.niuyin.model.behave.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * VideoUserCommentPageDTO

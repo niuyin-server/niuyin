@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.ESSYNC_DELAYED_EXCHANGE;

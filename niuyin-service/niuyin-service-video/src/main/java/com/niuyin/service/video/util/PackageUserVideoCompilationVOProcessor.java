@@ -5,7 +5,8 @@ import com.niuyin.model.video.vo.UserVideoCompilationVO;
 import com.niuyin.service.video.service.IUserVideoCompilationService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+
+import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 

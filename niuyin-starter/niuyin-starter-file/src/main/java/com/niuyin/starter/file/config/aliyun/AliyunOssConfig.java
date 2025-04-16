@@ -1,12 +1,12 @@
 package com.niuyin.starter.file.config.aliyun;
 
+import jakarta.annotation.Resource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.aliyun.oss.OSSClient;
 
 import lombok.Data;
-import javax.annotation.Resource;
 
 /**
  * AliyunOssConfig

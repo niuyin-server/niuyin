@@ -1,0 +1,2 @@
+com.niuyin.starter.file.service.impl.QiniuFileStorageService
+com.niuyin.starter.file.service.impl.AliyunOssServiceImpl

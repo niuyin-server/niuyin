@@ -1,9 +1,8 @@
 package com.niuyin.service.video.controller.v1;
 
 import com.niuyin.service.video.service.IUserVideoCompilationRelationService;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * 用户视频合集与视频关联表(UserVideoCompilationRelation)表控制层

@@ -7,7 +7,7 @@ import com.niuyin.service.video.mapper.VideoPositionMapper;
 import com.niuyin.service.video.service.IVideoPositionService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 视频定位表(VideoPosition)表服务实现类

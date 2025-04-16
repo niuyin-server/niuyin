@@ -7,7 +7,7 @@ import com.niuyin.service.video.mapper.VideoImageMapper;
 import com.niuyin.service.video.service.IVideoImageService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -16,7 +16,7 @@ import java.util.List;
  * @author roydon
  * @since 2023-11-20 21:19:00
  */
-@Service("videoImageService")
+@Service
 public class VideoImageServiceImpl extends ServiceImpl<VideoImageMapper, VideoImage> implements IVideoImageService {
     @Resource
     private VideoImageMapper videoImageMapper;

@@ -7,7 +7,7 @@ import com.niuyin.service.notice.service.INoticeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 通知表(Notice)表控制层

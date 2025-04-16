@@ -14,7 +14,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import javax.annotation.Resource;
+
+import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;

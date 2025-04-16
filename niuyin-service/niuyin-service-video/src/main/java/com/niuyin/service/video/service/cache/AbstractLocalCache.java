@@ -4,14 +4,11 @@ import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Iterables;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,7 +47,7 @@ public abstract class AbstractLocalCache<IN, OUT> implements BatchCache<IN, OUT>
                     }
 
                     @Override
-                    public @NonNull Map<IN, OUT> loadAll(@NonNull Iterable<? extends IN> keys) {
+                    public Map<? extends IN, ? extends OUT> loadAll(Set<? extends IN> keys) throws Exception {
                         IN[] ins = Iterables.toArray(keys, inClass);
                         return AbstractLocalCache.this.load(Arrays.asList(ins));
                     }

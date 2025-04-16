@@ -1,7 +1,7 @@
 package com.niuyin.common.cache.service;
 
 import cn.hutool.core.util.BooleanUtil;
-import lombok.AllArgsConstructor;
+import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
  **/
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 @Component
-@AllArgsConstructor
 public class RedisService {
 
+    @Resource
     public RedisTemplate redisTemplate;
 
     /**

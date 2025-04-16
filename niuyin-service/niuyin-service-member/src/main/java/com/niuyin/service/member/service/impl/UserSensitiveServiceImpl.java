@@ -6,7 +6,7 @@ import com.niuyin.model.member.domain.UserSensitive;
 import com.niuyin.service.member.mapper.UserSensitiveMapper;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 用户敏感词信息表(UserSensitive)表服务实现类

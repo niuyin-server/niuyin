@@ -14,7 +14,7 @@ import ws.schild.jave.info.MultimediaInfo;
 import ws.schild.jave.process.ProcessWrapper;
 import ws.schild.jave.process.ffmpeg.DefaultFFMPEGLocator;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

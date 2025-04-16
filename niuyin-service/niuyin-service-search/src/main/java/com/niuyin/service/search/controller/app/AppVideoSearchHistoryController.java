@@ -5,7 +5,8 @@ import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

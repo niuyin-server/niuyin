@@ -6,13 +6,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.video.domain.VideoTag;
 import com.niuyin.service.video.mapper.VideoTagMapper;
 import com.niuyin.service.video.service.IVideoTagService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

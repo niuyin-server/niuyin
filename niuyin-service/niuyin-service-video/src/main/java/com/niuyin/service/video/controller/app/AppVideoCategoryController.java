@@ -5,10 +5,11 @@ import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.video.dto.CategoryVideoPageDTO;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.service.video.service.IVideoCategoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -17,12 +18,12 @@ import java.util.List;
  * @author lzq
  * @since 2023-10-30 19:41:13
  */
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/app/category")
 public class AppVideoCategoryController {
 
-    @Resource
-    private IVideoCategoryService videoCategoryService;
+    private final IVideoCategoryService videoCategoryService;
 
     /**
      * 获取所有可用视频父分类
@@ -42,12 +43,9 @@ public class AppVideoCategoryController {
 
     /**
      * 分页分类视频
-     *
-     * @param pageDTO
-     * @return
      */
     @PostMapping("/videoPage")
-    public PageDataInfo getVideoByCategoryId(@Validated @RequestBody CategoryVideoPageDTO pageDTO) {
+    public PageDataInfo<?> getVideoByCategoryId(@Validated @RequestBody CategoryVideoPageDTO pageDTO) {
         return videoCategoryService.getVideoPageByCategoryId(pageDTO);
     }
 

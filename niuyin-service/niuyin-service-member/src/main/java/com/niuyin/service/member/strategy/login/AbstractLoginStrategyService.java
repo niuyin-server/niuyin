@@ -2,8 +2,7 @@ package com.niuyin.service.member.strategy.login;
 
 import com.niuyin.common.core.utils.JwtUtil;
 import com.niuyin.service.member.strategy.LoginStrategy;
-
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * AbstractLoginStrategyService

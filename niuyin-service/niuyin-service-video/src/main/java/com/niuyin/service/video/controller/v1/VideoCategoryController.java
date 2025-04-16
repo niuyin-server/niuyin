@@ -9,7 +9,7 @@ import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.service.video.service.IVideoCategoryService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ public class VideoCategoryController {
     }
 
     @PostMapping("/page")
-    public PageDataInfo categoryVideoPage(@RequestBody VideoCategoryPageDTO pageDTO) {
+    public PageDataInfo<?> categoryVideoPage(@RequestBody VideoCategoryPageDTO pageDTO) {
         return videoCategoryService.selectVideoByCategory(pageDTO);
     }
 

@@ -2,6 +2,7 @@ package com.niuyin.common.cache.config;
 
 import com.niuyin.common.cache.service.LockService;
 import org.redisson.api.RedissonClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

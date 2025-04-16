@@ -9,7 +9,7 @@ import com.niuyin.service.creator.service.CreatorService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * CreatorController

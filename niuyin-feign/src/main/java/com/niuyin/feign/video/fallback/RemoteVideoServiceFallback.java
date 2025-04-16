@@ -3,7 +3,7 @@ package com.niuyin.feign.video.fallback;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.model.video.domain.Video;
-import feign.hystrix.FallbackFactory;
+import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

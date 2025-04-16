@@ -4,7 +4,8 @@ import com.niuyin.dubbo.api.DubboSocialService;
 import com.niuyin.service.social.service.IUserFollowService;
 import org.apache.dubbo.config.annotation.DubboService;
 
-import javax.annotation.Resource;
+
+import jakarta.annotation.Resource;
 
 /**
  * DubboSocialServiceImpl

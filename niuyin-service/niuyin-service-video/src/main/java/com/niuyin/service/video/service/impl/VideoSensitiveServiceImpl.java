@@ -7,7 +7,7 @@ import com.niuyin.service.video.mapper.VideoSensitiveMapper;
 import com.niuyin.service.video.service.IVideoSensitiveService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 敏感词信息表(VideoSensitive)表服务实现类

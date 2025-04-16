@@ -3,7 +3,7 @@ package com.niuyin.service.video.controller.v1;
 import com.niuyin.service.video.service.IVideoImageService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 视频图片关联表(VideoImage)表控制层

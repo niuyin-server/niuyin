@@ -5,7 +5,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.service.member.service.IMemberService;
 import org.apache.dubbo.config.annotation.DubboService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

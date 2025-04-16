@@ -3,8 +3,8 @@ package com.niuyin.common.core.utils;
 import com.alibaba.fastjson.JSON;
 import com.niuyin.common.core.utils.string.StringUtils;
 import eu.bitwalker.useragentutils.UserAgent;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;

@@ -12,7 +12,7 @@ import com.niuyin.service.video.service.*;
 import com.niuyin.service.video.service.cache.VideoRedisBatchCache;
 import org.apache.dubbo.config.annotation.DubboService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

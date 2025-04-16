@@ -6,7 +6,8 @@ import com.niuyin.service.recommend.mapper.UserVideoBehaveMapper;
 import com.niuyin.service.recommend.service.UserBasedCollaborativeFilterService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+
+import jakarta.annotation.Resource;
 import java.util.*;
 
 /**

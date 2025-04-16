@@ -1,14 +1,13 @@
 package com.niuyin.service.behave;
 
 import com.niuyin.model.behave.vo.UserFavoriteVideoVO;
-import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.mapper.VideoUserFavoritesMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

@@ -21,9 +21,10 @@ import com.niuyin.service.video.service.IUserVideoCompilationRelationService;
 import com.niuyin.service.video.service.IUserVideoCompilationService;
 import com.niuyin.service.video.service.IVideoService;
 import com.niuyin.service.video.util.PackageUserVideoCompilationVOProcessor;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
     private UserVideoCompilationMapper userVideoCompilationMapper;
 
     @Resource
+    @Lazy
     private PackageUserVideoCompilationVOProcessor packageUserVideoCompilationVOProcessor;
 
     @Resource

@@ -4,12 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -19,7 +17,6 @@ import java.time.LocalDateTime;
  * @author lzq
  * @since 2023-10-30 19:41:13
  */
-@ApiModel("视频分类表")
 @Data
 @TableName("video_category")
 public class VideoCategory implements Serializable {
@@ -27,13 +24,11 @@ public class VideoCategory implements Serializable {
     /**
      * 视频分类id
      */
-    @ApiModelProperty("视频分类id")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 视频分类名称
      */
-    @ApiModelProperty("视频分类名称")
     @NotBlank
     @Size(max = 100, message = "视频分类名称不能超过100个字符")
     private String name;
@@ -41,7 +36,6 @@ public class VideoCategory implements Serializable {
     /**
      * 视频分类描述
      */
-    @ApiModelProperty("视频分类描述")
     @Size(max = 200, message = "视频分类描述不能超过200个字符")
     private String description;
     /**
