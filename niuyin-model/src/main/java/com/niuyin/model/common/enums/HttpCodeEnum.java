@@ -11,6 +11,7 @@ public enum HttpCodeEnum {
     // 登录授权
     NEED_LOGIN(401, "需要登录后操作"),
     NO_OPERATOR_AUTH(403, "无权限操作"),
+    TOO_MANY_REQUESTS(429, "请求过于频繁，请稍后重试"),
 
     HAS_ERROR(500, "出现异常"),
     SYSTEM_ERROR(502, "系统异常"),

@@ -11,8 +11,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
 @Slf4j
-@RestControllerAdvice  //控制器增强类
-public class ExceptionCatch {
+@RestControllerAdvice
+public class GlobalExceptionCatch {
 
     /**
      * 处理不可控异常

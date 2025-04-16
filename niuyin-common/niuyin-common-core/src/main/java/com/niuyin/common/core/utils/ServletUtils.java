@@ -1,5 +1,6 @@
 package com.niuyin.common.core.utils;
 
+import cn.hutool.extra.servlet.JakartaServletUtil;
 import com.alibaba.fastjson2.JSON;
 import com.niuyin.common.core.constant.Constants;
 import com.niuyin.common.core.domain.R;
@@ -280,5 +281,13 @@ public class ServletUtils {
         R<?> result = R.fail(code, value.toString());
         DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(result).getBytes());
         return response.writeWith(Mono.just(dataBuffer));
+    }
+
+    public static String getClientIP() {
+        HttpServletRequest request = getRequest();
+        if (request == null) {
+            return null;
+        }
+        return JakartaServletUtil.getClientIP(request);
     }
 }

@@ -71,10 +71,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId> <!-- 用于JSON序列化 -->
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.github.xiaoymin</groupId> &lt;!&ndash; 接口文档 &ndash;&gt;-->
 <!--            <artifactId>knife4j-gateway-spring-boot-starter</artifactId>-->
 <!--        </dependency>-->
+
     </dependencies>
 
     <build>

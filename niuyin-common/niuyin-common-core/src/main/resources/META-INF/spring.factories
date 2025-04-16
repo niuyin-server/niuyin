@@ -1,5 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.niuyin.common.core.exception.ExceptionCatch,\
+  com.niuyin.common.core.exception.GlobalExceptionCatch,\
   com.niuyin.common.core.swagger.SwaggerConfiguration,\
   com.niuyin.common.core.swagger.Swagger2Configuration,\
   com.niuyin.common.core.config.WebMvcConfig,\

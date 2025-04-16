@@ -4,3 +4,4 @@ com.niuyin.common.cache.config.CaffeineConfig
 com.niuyin.common.cache.config.RedisConfig
 com.niuyin.common.cache.service.RedisService
 com.niuyin.common.cache.service.LockService
+com.niuyin.common.cache.ratelimiter.config.RateLimiterConfiguration
