@@ -22,7 +22,7 @@ public class GlobalExceptionCatch {
      */
     @ExceptionHandler(Throwable.class)
     public R<?> exception(Throwable e) {
-        log.error("catch exception:{}", e);
+        log.error("Catch exception:{}", e);
         return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), e.getMessage());
     }
 
