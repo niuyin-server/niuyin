@@ -1,5 +1,6 @@
 package com.niuyin.service.ai.controller;
 
+import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
 import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @RequiredArgsConstructor
 @CrossOrigin("*")
@@ -24,6 +27,7 @@ public class ChatbotController {
     private final ChatClient chatClient;
     private final InMemoryChatMemory inMemoryChatMemory;
 
+    @RateLimiter(count = 10, time = 1, timeUnit = TimeUnit.HOURS)
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> streamChat(@RequestBody ChatRequest request) {
         //用户id
