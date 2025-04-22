@@ -35,8 +35,6 @@ spring:
       #      streaming-media-types:
       #        - text/event-stream
       #        - application/stream+json
-      default-filters:
-        - SetResponseHeader=Content-Type, text/event-stream
     sentinel:
       transport:
         dashboard: localhost:8083

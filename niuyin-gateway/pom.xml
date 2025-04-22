@@ -79,7 +79,27 @@
 <!--            <groupId>com.github.xiaoymin</groupId> &lt;!&ndash; 接口文档 &ndash;&gt;-->
 <!--            <artifactId>knife4j-gateway-spring-boot-starter</artifactId>-->
 <!--        </dependency>-->
-
+        <!--        解决因为jdk版本过高jwt解析失败问题-->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>

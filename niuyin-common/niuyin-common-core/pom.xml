@@ -48,10 +48,10 @@
             <artifactId>feign-okhttp</artifactId>
         </dependency>
         <!-- 自定义验证注解 -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-validation</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-validation</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
@@ -107,26 +107,26 @@
         <!--            <artifactId>spring-boot-starter-amqp</artifactId>-->
         <!--        </dependency>-->
         <!--swagger-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-swagger2</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-swagger-ui</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.springfox</groupId>-->
+        <!--            <artifactId>springfox-swagger2</artifactId>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.springfox</groupId>-->
+        <!--            <artifactId>springfox-swagger-ui</artifactId>-->
+        <!--        </dependency>-->
         <!-- swagger3 start -->
-<!--        <dependency>-->
-<!--            <groupId>org.springdoc</groupId>-->
-<!--            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
-<!--            <version>2.7.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springdoc</groupId>-->
+        <!--            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+        <!--            <version>2.7.0</version>-->
+        <!--        </dependency>-->
         <!-- swagger3 end -->
 
-<!--        <dependency>-->
-<!--            <groupId>com.github.xiaoymin</groupId>-->
-<!--            <artifactId>knife4j-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.xiaoymin</groupId>-->
+        <!--            <artifactId>knife4j-spring-boot-starter</artifactId>-->
+        <!--        </dependency>-->
         <!-- jackson消息转换器，防止乱码 -->
         <!--        <dependency>-->
         <!--            <groupId>com.fasterxml.jackson.dataformat</groupId>-->
@@ -147,10 +147,10 @@
             <version>2.10.5</version>
         </dependency>
         <!-- SpringWeb模块 -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework</groupId>-->
-<!--            <artifactId>spring-web</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework</groupId>-->
+        <!--            <artifactId>spring-web</artifactId>-->
+        <!--        </dependency>-->
         <!-- 解析客户端操作系统、浏览器等 -->
         <dependency>
             <groupId>eu.bitwalker</groupId>
@@ -158,10 +158,10 @@
         </dependency>
 
         <!-- servlet包 -->
-<!--        <dependency>-->
-<!--            <groupId>javax.servlet</groupId>-->
-<!--            <artifactId>javax.servlet-api</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>javax.servlet</groupId>-->
+        <!--            <artifactId>javax.servlet-api</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -240,6 +240,27 @@
         <dependency>
             <groupId>com.qiniu</groupId>
             <artifactId>qiniu-java-sdk</artifactId>
+        </dependency>
+        <!--        解决因为jdk版本过高jwt解析失败问题-->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
         </dependency>
 
     </dependencies>

@@ -2,12 +2,14 @@ package com.niuyin.common.core.domain;
 
 import com.niuyin.common.core.constant.Constants;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * 统一响应体
  */
 public class R<T> implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final int SUCCESS = Constants.SUCCESS;

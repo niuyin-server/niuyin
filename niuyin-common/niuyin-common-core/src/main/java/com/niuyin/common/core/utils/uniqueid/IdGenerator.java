@@ -9,8 +9,7 @@ public class IdGenerator {
 
     public static String generatorId() {
         long id = SnowflakeIdWorker.getInstance().nextId();
-        String uuid = IdUtils.simpleUUID();
-        return String.format("%d%s", id, uuid);
+        return String.format("%d", id);
     }
 
     public static String generatorShortId() {
@@ -21,5 +20,6 @@ public class IdGenerator {
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println(generatorShortId());
+        System.out.println(generatorId());
     }
 }
