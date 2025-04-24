@@ -2,21 +2,31 @@ package com.niuyin.service.ai.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
+import com.niuyin.common.core.compont.SnowFlake;
+import com.niuyin.model.ai.domain.ChatConversationDO;
+import com.niuyin.model.ai.domain.ChatMessageDO;
+import com.niuyin.service.ai.service.IChatConversationService;
+import com.niuyin.service.ai.service.IChatMessageService;
 import jakarta.annotation.security.PermitAll;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -27,15 +37,34 @@ public class ChatbotController {
 
     private final ChatClient chatClient;
     private final InMemoryChatMemory inMemoryChatMemory;
+    private final IChatConversationService chatConversationService;
+    private final IChatMessageService chatMessageService;
+    private final SnowFlake snowFlake;
 
     @RateLimiter(count = 10, time = 1, timeUnit = TimeUnit.HOURS, message = "请求达到上限，可以过一个时辰再来试试哦o_0")
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> streamChat(@RequestBody ChatRequest request) {
-        //用户id
-        String userId = request.userId();
+    public Flux<ServerSentEvent<String>> streamChat(@Validated @RequestBody ChatRequest request) {
+        // 校验对话是否存在
+        ChatConversationDO conversationDO= chatConversationService.getById(request.conversationId());
+        if (Objects.isNull(conversationDO)) {
+            return Flux.just(ServerSentEvent.builder("Error: 对话不存在").event("error").build());
+        }
+        // 插入用户提问
+        ChatMessageDO userMessage = new ChatMessageDO();
+        userMessage.setId(snowFlake.nextId());
+        userMessage.setConversationId(request.conversationId());
+        userMessage.setUserId(request.userId());
+        userMessage.setMessageType(MessageType.USER.getValue());
+        userMessage.setContent(request.message());
+        userMessage.setUseContext("1");
+        userMessage.setCreateTime(LocalDateTime.now());
+        chatMessageService.save(userMessage);
+
+        // todo 构建 Prompt，使用对话上下文
+
         StringBuffer contentBuffer = new StringBuffer();
         return chatClient.prompt(request.message())
-                .advisors(new MessageChatMemoryAdvisor(inMemoryChatMemory, userId, 10), new SimpleLoggerAdvisor())
+                .advisors(new MessageChatMemoryAdvisor(inMemoryChatMemory, request.conversationId().toString(), 10), new SimpleLoggerAdvisor())
                 .stream().content().map((content) -> {
                     contentBuffer.append(StrUtil.nullToDefault(content, ""));
                     return ServerSentEvent.builder(content).event("message").build();
@@ -43,13 +72,28 @@ public class ChatbotController {
                 //问题回答结束标识,以便前端消息展示处理
                 .concatWithValues(ServerSentEvent.builder("[DONE]").build())
                 .doOnComplete(() -> {
-                    log.info("用户:{}的提问:{}已结束", userId, request.message());
-                    // todo 插入对话消息记录
+                    log.info("用户的提问:{}已结束", request.message());
+                    // 插入ai回复
+                    ChatMessageDO assistantMessage = new ChatMessageDO();
+                    assistantMessage.setId(snowFlake.nextId());
+                    assistantMessage.setConversationId(request.conversationId());
+                    assistantMessage.setUserId(request.userId());
+                    assistantMessage.setReplyId(userMessage.getReplyId());
+                    assistantMessage.setMessageType(MessageType.ASSISTANT.getValue());
+                    assistantMessage.setContent(contentBuffer.toString());
+                    assistantMessage.setUseContext("1");
+                    assistantMessage.setCreateTime(LocalDateTime.now());
+                    chatMessageService.save(assistantMessage);
+                    // 更新对话的最后一次回复时间
+                    conversationDO.setUpdateTime(LocalDateTime.now());
+                    chatConversationService.updateById(conversationDO);
                 })
                 .onErrorResume(e -> Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build()));
     }
 
-    record ChatRequest(Long conversationId, String userId, String message) {
+    record ChatRequest(@NotNull(message = "请选择对话") Long conversationId,
+                       Long userId,
+                       @NotNull(message = "请输入内容") String message) {
     }
 
 }
