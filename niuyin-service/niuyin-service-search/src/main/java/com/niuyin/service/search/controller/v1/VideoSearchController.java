@@ -7,7 +7,6 @@ import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.dubbo.api.DubboVideoService;
-import com.niuyin.feign.member.RemoteMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
@@ -15,12 +14,11 @@ import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
 import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;
+import jakarta.annotation.Resource;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
-
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -36,9 +34,6 @@ public class VideoSearchController {
     @Resource
     private VideoSearchService videoSearchService;
 
-    @Resource
-    private RemoteMemberService remoteMemberService;
-
     @DubboReference
     private DubboMemberService dubboMemberService;
 
@@ -50,10 +45,6 @@ public class VideoSearchController {
 
     /**
      * 分页搜索视频
-     *
-     * @param dto
-     * @return
-     * @throws Exception
      */
     @PostMapping()
     public R<List<VideoSearchUserVO>> searchVideo(@RequestBody VideoSearchKeywordDTO dto) {
@@ -91,9 +82,6 @@ public class VideoSearchController {
 
     /**
      * 牛音热搜
-     *
-     * @param pageDTO
-     * @return
      */
     @PostMapping("/search/hot")
     @Cacheable(value = "hotSearchs", key = "'hotSearchs' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
@@ -103,9 +91,6 @@ public class VideoSearchController {
 
     /**
      * 视频搜索建议
-     *
-     * @param videoSearchSuggestDTO
-     * @return
      */
     @PostMapping("/suggest")
     public R<?> getVideoSearchSuggest(@RequestBody VideoSearchSuggestDTO videoSearchSuggestDTO) {

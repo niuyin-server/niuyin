@@ -119,8 +119,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     /**
      * 更新视频索引文档
-     *
-     * @param json
      */
     @Override
     public void updateVideoDoc(String json) {
@@ -138,7 +136,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     /**
      * 删除文档
      *
-     * @param videoId
+     * @param videoId 视频ID
      */
     @Override
     public void deleteVideoDoc(String videoId) {
@@ -154,12 +152,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     /**
      * es分页搜索视频
-     *
-     * @param dto String keyword;
-     *            private Integer pageNum;
-     *            private Integer pageSize;
-     *            最小时间  minBehotTime;
-     * @return
      */
     @Override
     public List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) {
@@ -295,11 +287,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         return new String[0];
     }
 
-    /**
-     * @param dto
-     * @return
-     * @throws Exception
-     */
     @Override
     public List<VideoSearchVO> searchAllVideoFromES(VideoSearchKeywordDTO dto) throws Exception {
         //1.参数校验
@@ -360,8 +347,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     /**
      * 从redis中获取热搜排行榜
-     *
-     * @return
      */
     @Override
     public Set findSearchHot(PageDTO pageDTO) {
@@ -373,9 +358,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     /**
      * 视频搜索推荐
-     *
-     * @param videoSearchSuggestDTO
-     * @return
      */
     @SneakyThrows
     @Override
@@ -436,9 +418,6 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
     /**
      * 构建app视频搜索请求（仅搜索视频标题
-     *
-     * @param videoSearchKeywordDTO
-     * @return
      */
     private SearchRequest buildAppVideoSearchRequest(VideoSearchKeywordDTO videoSearchKeywordDTO) {
         SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);

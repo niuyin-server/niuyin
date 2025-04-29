@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableCacheConfig
 @EnableAsync
 @EnableDubbo
-@Import({MybatisPlusConfig.class, Swagger2Configuration.class})
+@Import({MybatisPlusConfig.class})
 public class BehaveApplication {
     public static void main(String[] args) {
         SpringApplication.run(BehaveApplication.class, args);

@@ -38,20 +38,16 @@ public class CacheSearchConfig {
     public CacheManager cacheManager(Ticker ticker) {
         SimpleCacheManager manager = new SimpleCacheManager();
         if (specs != null) {
-            List<CaffeineCache> caches =
-                    specs.entrySet().stream()
-                            .map(entry -> buildCache(entry.getKey(),
-                                    entry.getValue(),
-                                    ticker))
-                            .collect(Collectors.toList());
+            List<CaffeineCache> caches = specs.entrySet()
+                    .stream().map(entry -> buildCache(entry.getKey(), entry.getValue(), ticker))
+                    .collect(Collectors.toList());
             manager.setCaches(caches);
         }
         return manager;
     }
 
     private CaffeineCache buildCache(String name, CacheSearchConfig.CacheSpec cacheSpec, Ticker ticker) {
-        final Caffeine<Object, Object> caffeineBuilder
-                = Caffeine.newBuilder()
+        final Caffeine<Object, Object> caffeineBuilder = Caffeine.newBuilder()
                 .expireAfterWrite(cacheSpec.getExpireTime(), TimeUnit.MINUTES)
                 .maximumSize(cacheSpec.getMaxSize())
                 .ticker(ticker);

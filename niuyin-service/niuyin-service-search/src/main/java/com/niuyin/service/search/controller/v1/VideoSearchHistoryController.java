@@ -1,12 +1,9 @@
 package com.niuyin.service.search.controller.v1;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
-import org.springframework.web.bind.annotation.*;
-
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * VideoSearchHistoryController

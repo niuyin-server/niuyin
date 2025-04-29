@@ -4,16 +4,16 @@ spring:
   application:
     name: niuyin-notice
   profiles:
-    active: roydon
+    active: dev
   cloud:
     nacos:
       discovery:
-        server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
       config:
-        server-addr: 43.240.221.8:8848
-        namespace: 0427586a-d828-4518-bd27-b38d404c9f5e
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
         file-extension: yml
         shared-configs:

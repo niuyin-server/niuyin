@@ -3,6 +3,7 @@ package com.niuyin.service.ai.controller;
 import cn.hutool.core.util.StrUtil;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
 import com.niuyin.common.core.compont.SnowFlake;
+import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.ai.domain.ChatConversationDO;
 import com.niuyin.model.ai.domain.ChatMessageDO;
 import com.niuyin.service.ai.service.IChatConversationService;
@@ -16,6 +17,8 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.messages.MessageType;
+import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.image.observation.ImageModelObservationContext;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
@@ -36,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class ChatbotController {
 
     private final ChatClient chatClient;
+    private final ImageModel imageModel;
     private final InMemoryChatMemory inMemoryChatMemory;
     private final IChatConversationService chatConversationService;
     private final IChatMessageService chatMessageService;
@@ -45,7 +49,7 @@ public class ChatbotController {
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> streamChat(@Validated @RequestBody ChatRequest request) {
         // 校验对话是否存在
-        ChatConversationDO conversationDO= chatConversationService.getById(request.conversationId());
+        ChatConversationDO conversationDO = chatConversationService.getById(request.conversationId());
         if (Objects.isNull(conversationDO)) {
             return Flux.just(ServerSentEvent.builder("Error: 对话不存在").event("error").build());
         }
@@ -60,12 +64,15 @@ public class ChatbotController {
         userMessage.setCreateTime(LocalDateTime.now());
         chatMessageService.save(userMessage);
 
-        // todo 构建 Prompt，使用对话上下文
+        // todo @roydon 构建 Prompt，使用对话上下文
+        ChatClient.ChatClientRequestSpec prompt = chatClient.prompt(request.message());
+        if (StringUtils.isNotEmpty(conversationDO.getSystemMessage())) {
+            prompt.system(conversationDO.getSystemMessage());
+        }
+        prompt.advisors(new MessageChatMemoryAdvisor(inMemoryChatMemory, request.conversationId().toString(), 10), new SimpleLoggerAdvisor());
 
         StringBuffer contentBuffer = new StringBuffer();
-        return chatClient.prompt(request.message())
-                .advisors(new MessageChatMemoryAdvisor(inMemoryChatMemory, request.conversationId().toString(), 10), new SimpleLoggerAdvisor())
-                .stream().content().map((content) -> {
+        return prompt.stream().content().map((content) -> {
                     contentBuffer.append(StrUtil.nullToDefault(content, ""));
                     return ServerSentEvent.builder(content).event("message").build();
                 })
@@ -85,6 +92,7 @@ public class ChatbotController {
                     assistantMessage.setCreateTime(LocalDateTime.now());
                     chatMessageService.save(assistantMessage);
                     // 更新对话的最后一次回复时间
+                    conversationDO.setLastMessage(contentBuffer.substring(0, Math.min(contentBuffer.length(), 64)));
                     conversationDO.setUpdateTime(LocalDateTime.now());
                     chatConversationService.updateById(conversationDO);
                 })

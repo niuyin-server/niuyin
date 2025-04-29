@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCacheConfig
 @EnableAsync
 @EnableScheduling
-@Import({MybatisPlusConfig.class, Swagger2Configuration.class})
+@Import({MybatisPlusConfig.class})
 public class NoticeApplication {
     public static void main(String[] args) {
         SpringApplication.run(NoticeApplication.class, args);

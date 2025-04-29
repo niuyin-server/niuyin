@@ -20,7 +20,7 @@ public interface VideoSearchService {
     /**
      * 视频同步新增到es
      *
-     * @param videoId
+     * @param videoId 视频ID
      */
     void videoSync(String videoId);
 
@@ -36,34 +36,23 @@ public interface VideoSearchService {
 
     /**
      * es分页搜索视频 、保存搜索记录，查询搜索记录
-     *
-     * @param dto
      */
     List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto);
 
-    PageDataInfo searchVideoFromESForApp(VideoSearchKeywordDTO dto);
+    PageDataInfo<?> searchVideoFromESForApp(VideoSearchKeywordDTO dto);
 
     /**
      * 查询当天所有的搜索记录
-     *
-     * @param dto
-     * @return
-     * @throws Exception
      */
     List<VideoSearchVO> searchAllVideoFromES(VideoSearchKeywordDTO dto) throws Exception;
 
     /**
      * 从redis中获取热搜排行榜
-     *
-     * @return
      */
     Set findSearchHot(PageDTO pageDTO);
 
     /**
      * 视频搜索推荐
-     *
-     * @param videoSearchSuggestDTO
-     * @return
      */
     List<String> pushVideoSearchSuggest(VideoSearchSuggestDTO videoSearchSuggestDTO);
 }

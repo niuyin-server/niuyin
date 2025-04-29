@@ -3,10 +3,11 @@ package com.niuyin.service.search.controller.app;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.service.search.domain.VideoSearchHistory;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
-import org.springframework.web.bind.annotation.*;
-
-
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 /**

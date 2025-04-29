@@ -62,5 +62,9 @@ public class ChatConversationDO extends BaseDO {
      * 上下文的最大 Message 数量
      */
     private Integer maxContexts;
+    /**
+     * 最后一次回复的内容
+     */
+    private String lastMessage;
 
 }

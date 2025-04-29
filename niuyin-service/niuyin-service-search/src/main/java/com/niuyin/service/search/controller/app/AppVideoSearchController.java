@@ -5,11 +5,12 @@ import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.service.VideoSearchService;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.*;
-
-
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * VideoSearchController
@@ -28,7 +29,7 @@ public class AppVideoSearchController {
      * 分页搜索视频
      */
     @PostMapping()
-    public PageDataInfo searchVideoForApp(@RequestBody VideoSearchKeywordDTO dto) {
+    public PageDataInfo<?> searchVideoForApp(@RequestBody VideoSearchKeywordDTO dto) {
         return videoSearchService.searchVideoFromESForApp(dto);
     }
 

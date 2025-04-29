@@ -33,7 +33,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @EnableCaching
 @EnableDubbo
-@Import({MybatisPlusConfig.class, Swagger2Configuration.class})
+@Import({MybatisPlusConfig.class})
 public class CreatorApplication {
 
     public static void main(String[] args) {

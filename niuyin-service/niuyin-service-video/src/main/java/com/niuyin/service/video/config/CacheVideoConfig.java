@@ -47,8 +47,7 @@ public class CacheVideoConfig {
     }
 
     private CaffeineCache buildCache(String name, CacheVideoConfig.CacheSpec cacheSpec, Ticker ticker) {
-        final Caffeine<Object, Object> caffeineBuilder
-                = Caffeine.newBuilder()
+        final Caffeine<Object, Object> caffeineBuilder = Caffeine.newBuilder()
                 .expireAfterWrite(cacheSpec.getExpireTime(), TimeUnit.MINUTES)
                 .maximumSize(cacheSpec.getMaxSize())
                 .ticker(ticker);

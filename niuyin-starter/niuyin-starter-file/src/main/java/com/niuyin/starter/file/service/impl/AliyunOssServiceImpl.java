@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -259,5 +260,23 @@ public class AliyunOssServiceImpl implements AliyunOssService {
         ossClient.deleteObject(BUCKET_NAME, replace);
         ossClient.shutdown();
     }
+
+//    /**
+//     * 上传图片链接
+//     */
+//    private void putImageUrl(String url) {
+//        try {
+//            InputStream inputStream = new URL(url).openStream();
+//            String filePath = PathUtils.generateFilePath(Objects.requireNonNull(url));
+//            // 文件存储名称：服务名称/2023/11/11/uuid.jpg
+//            String ossFileName = "image/" + filePath;
+//            ossClient.putObject(BUCKET_NAME, ossFileName, inputStream);
+//            //关闭 OSSClient
+////            ossClient.shutdown();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        }
+//    }
 
 }

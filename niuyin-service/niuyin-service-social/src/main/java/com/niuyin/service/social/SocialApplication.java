@@ -27,7 +27,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableCacheConfig
 @EnableAsync
 @EnableDubbo
-@Import({MybatisPlusConfig.class, Swagger2Configuration.class})
+@Import({MybatisPlusConfig.class})
 public class SocialApplication {
     public static void main(String[] args) {
         SpringApplication.run(SocialApplication.class, args);
