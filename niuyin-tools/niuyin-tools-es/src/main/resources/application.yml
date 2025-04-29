@@ -9,18 +9,25 @@ spring:
     username: roydon
     password: roydon#Mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
-  redis:
-    host: 43.240.221.8
-    port: 6379
-    password: roydon#Redis
-    database: 1
   data:
+    redis:
+      host: 43.240.221.8
+      port: 6379
+      password: roydon#Redis
+      database: 1
     mongodb:
       host: 43.240.221.8
       port: 27017
       username: cheeseblast
       database: cheeseblast
       password: n3f55MhYix6CPjKw
+  elasticsearch:
+    uris:
+      - http://127.0.0.1:9201
+    username: elastic
+    password: 59dvgj*+lUycsEHuClU4
+    connection-timeout: 5s
+    socket-timeout: 60s
 
 # mybatis配置
 mybatis-plus:
@@ -29,9 +36,9 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-elasticsearch:
-  host: 43.240.221.8
-  port: 9200
+#elasticsearch:
+#  host: 43.240.221.8
+#  port: 9200
 
 logging:
   level:

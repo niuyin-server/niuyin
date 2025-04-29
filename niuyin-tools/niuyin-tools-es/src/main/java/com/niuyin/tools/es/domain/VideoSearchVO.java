@@ -1,6 +1,7 @@
 package com.niuyin.tools.es.domain;
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.Date;
 public class VideoSearchVO {
 
     // 视频id
+    @Id
     private String videoId;
     // 标题
     private String videoTitle;
