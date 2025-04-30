@@ -4,7 +4,7 @@ import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
-import com.niuyin.service.search.domain.VideoSearchVO;
+import com.niuyin.model.search.vo.VideoSearchVO;
 
 import java.util.List;
 import java.util.Set;

@@ -1,7 +1,7 @@
 package com.niuyin.service.search.domain.vo;
 
+import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.VideoPosition;
-import com.niuyin.service.search.domain.VideoSearchVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

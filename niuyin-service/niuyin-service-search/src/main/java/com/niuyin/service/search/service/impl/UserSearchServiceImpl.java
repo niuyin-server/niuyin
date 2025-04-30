@@ -1,146 +1,109 @@
 package com.niuyin.service.search.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.HighlightField;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
-import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.search.dto.UserSearchKeywordDTO;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.domain.UserEO;
-import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.UserSearchVO;
 import com.niuyin.service.search.service.UserSearchService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.*;
 import org.springframework.stereotype.Service;
 
-
-import jakarta.annotation.Resource;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static com.niuyin.service.search.constant.ESQueryConstants.*;
+import static com.niuyin.service.search.constant.ESQueryConstants.Highlight_postTags;
+import static com.niuyin.service.search.constant.ESQueryConstants.Highlight_preTags;
 
-/**
- * UserSearchServiceImpl
- *
- * @AUTHOR: roydon
- * @DATE: 2024/10/11
- **/
 @Slf4j
 @Service
 public class UserSearchServiceImpl implements UserSearchService {
 
     @Resource
-    private RestHighLevelClient restHighLevelClient;
+    private ElasticsearchClient elasticsearchClient;
 
-    /**
-     * 从es分页搜索用户
-     *
-     * @param dto
-     */
     @Override
     public List<UserSearchVO> searchUserFromES(UserSearchKeywordDTO dto) {
-        // 1.0 构建搜索请求
-        SearchRequest searchRequest = buildUserSearchRequest(dto);
         try {
-            // 执行查询请求
-            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            // 构建搜索请求
+            SearchRequest searchRequest = buildUserSearchRequest(dto);
 
-            // 处理搜索结果
-            List<UserEO> userEOS = processUserSearchResponse(searchResponse);
+            // 执行搜索
+            SearchResponse<UserEO> response = elasticsearchClient.search(searchRequest, UserEO.class);
 
-            // 封装vo
-            List<UserSearchVO> userSearchVOS = BeanCopyUtils.copyBeanList(userEOS, UserSearchVO.class);
+            // 处理结果
+            return processSearchResponse(response);
 
-            return userSearchVOS;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("用户搜索失败", e);
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
     }
 
     private SearchRequest buildUserSearchRequest(UserSearchKeywordDTO dto) {
-        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_USER);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        // 设置分页
-        searchSourceBuilder.from((dto.getPageNum() - 1) * dto.getPageSize());
-        searchSourceBuilder.size(dto.getPageSize());
-
-        // 构建查询条件
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-
-        // 构建多字段匹配查询
-        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(dto.getKeyword(), UserEO.USERNAME, UserEO.NICK_NAME);
-        boolQueryBuilder.must(multiMatchQueryBuilder);
-
-        searchSourceBuilder.query(boolQueryBuilder);
-
-        // 设置高亮显示
-        HighlightBuilder highlightBuilder = new HighlightBuilder()
-                .boundaryScannerLocale(zh_CN)
-                .field(UserEO.USERNAME)
-                .field(UserEO.NICK_NAME)
-                .preTags(Highlight_preTags)
-                .postTags(Highlight_postTags);
-        searchSourceBuilder.highlighter(highlightBuilder);
-
-        // 设置排序
-        ScoreSortBuilder scoreSortField = SortBuilders.scoreSort().order(SortOrder.DESC);
-        searchSourceBuilder.sort(scoreSortField);
-
-        searchRequest.source(searchSourceBuilder);
-
-        return searchRequest;
+        return SearchRequest.of(s -> s
+                .index(ESIndexConstants.INDEX_USER)
+                .query(q -> q
+                        .bool(b -> b
+                                .must(m -> m
+                                        .multiMatch(mm -> mm
+                                                .query(dto.getKeyword())
+                                                .fields(UserEO.USERNAME, UserEO.NICK_NAME)
+                                        )
+                                )
+                        )
+                )
+                .from((dto.getPageNum() - 1) * dto.getPageSize())
+                .size(dto.getPageSize())
+                .highlight(h -> h
+                        .fields(UserEO.USERNAME, f -> f
+                                .preTags(Highlight_preTags)
+                                .postTags(Highlight_postTags)
+                        )
+                        .fields(UserEO.NICK_NAME, f -> f
+                                .preTags(Highlight_preTags)
+                                .postTags(Highlight_postTags)
+                        )
+                )
+                .sort(so -> so.score(sort -> sort.order(SortOrder.Desc))
+                )
+        );
     }
 
-    private List<UserEO> processUserSearchResponse(SearchResponse searchResponse) {
-        // 处理搜索结果
-        SearchHit[] hits = searchResponse.getHits().getHits();
-        List<UserEO> res = new ArrayList<>();
-        for (SearchHit hit : hits) {
-            // 处理每个搜索结果
-            // 获取高亮字段
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            HighlightField usernameHighlightField = highlightFields.get(UserEO.USERNAME);
-            HighlightField nickNameHighlightField = highlightFields.get(UserEO.NICK_NAME);
-            // 处理高亮显示的片段
-            String highlightedUsername = getHighlightedText(usernameHighlightField);
-            String highlightedNickName = getHighlightedText(nickNameHighlightField);
-            // 结果封装
-            Map<String, Object> sourceMap = hit.getSourceAsMap();
-            UserEO searchVO = JSON.parseObject(JSON.toJSONString(sourceMap), UserEO.class);
-            searchVO.setUsername(StringUtils.isBlank(highlightedUsername) ? searchVO.getUsername() : highlightedUsername);
-            searchVO.setNickName(StringUtils.isBlank(highlightedNickName) ? searchVO.getNickName() : highlightedNickName);
-            res.add(searchVO);
+    private List<UserSearchVO> processSearchResponse(SearchResponse<UserEO> response) {
+        return response.hits().hits().stream()
+                .map(hit -> {
+                    UserEO userEO = hit.source();
+                    UserSearchVO vo = BeanCopyUtils.copyBean(userEO, UserSearchVO.class);
+
+                    // 处理高亮
+                    if (hit.highlight() != null) {
+                        handleHighlight(hit.highlight(), vo);
+                    }
+
+                    return vo;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void handleHighlight(Map<String, List<String>> highlightFields, UserSearchVO vo) {
+        List<String> usernameHighlights = highlightFields.get(UserEO.USERNAME);
+        List<String> nickNameHighlights = highlightFields.get(UserEO.NICK_NAME);
+
+        if (usernameHighlights != null && !usernameHighlights.isEmpty()) {
+            vo.setUsername(String.join("", usernameHighlights));
         }
-        return res;
-    }
-
-    private String getHighlightedText(HighlightField field) {
-        if (field != null) {
-            Text[] fragments = field.fragments();
-            StringBuilder highlightedText = new StringBuilder();
-            for (Text fragment : fragments) {
-                highlightedText.append(fragment.string());
-            }
-            return highlightedText.toString();
+        if (nickNameHighlights != null && !nickNameHighlights.isEmpty()) {
+            vo.setNickName(String.join("", nickNameHighlights));
         }
-        return "";
     }
-
 }

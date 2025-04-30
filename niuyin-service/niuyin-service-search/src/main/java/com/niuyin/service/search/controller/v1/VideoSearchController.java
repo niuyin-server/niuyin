@@ -11,7 +11,7 @@ import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
-import com.niuyin.service.search.domain.VideoSearchVO;
+import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.service.search.domain.vo.VideoSearchUserVO;
 import com.niuyin.service.search.service.VideoSearchService;
 import jakarta.annotation.Resource;
@@ -84,7 +84,7 @@ public class VideoSearchController {
      * 牛音热搜
      */
     @PostMapping("/search/hot")
-    @Cacheable(value = "hotSearchs", key = "'hotSearchs' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
+    @Cacheable(value = "hotSearch", key = "'hotSearch' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
     public R<?> getSearchHot(@RequestBody PageDTO pageDTO) {
         return R.ok(videoSearchService.findSearchHot(pageDTO));
     }

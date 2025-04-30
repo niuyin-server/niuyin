@@ -1,9 +1,16 @@
 package com.niuyin.service.search.service.impl;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.Refresh;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.indices.AnalyzeResponse;
+import co.elastic.clients.json.JsonData;
 import com.alibaba.fastjson.JSON;
+import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -12,6 +19,7 @@ import com.niuyin.dubbo.api.DubboVideoService;
 import com.niuyin.model.common.enums.VideoPlatformEnum;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.model.search.dto.PageDTO;
+import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
 import com.niuyin.model.search.enums.VideoSearchScreenPublishTime;
 import com.niuyin.model.search.vo.app.AppVideoSearchVO;
@@ -21,40 +29,18 @@ import com.niuyin.model.video.vo.Author;
 import com.niuyin.service.search.constant.ESIndexConstants;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.domain.VideoSearchHistory;
-import com.niuyin.service.search.service.VideoSearchService;
-import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
-import com.niuyin.service.search.domain.VideoSearchVO;
+import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
-import lombok.SneakyThrows;
+import com.niuyin.service.search.service.VideoSearchService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.AnalyzeRequest;
-import org.elasticsearch.client.indices.AnalyzeResponse;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-
-import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.*;
@@ -73,7 +59,7 @@ import static com.niuyin.service.search.constant.ESQueryConstants.*;
 public class VideoSearchServiceImpl implements VideoSearchService {
 
     @Resource
-    private RestHighLevelClient restHighLevelClient;
+    private ElasticsearchClient elasticsearchClient;
 
     @Resource
     private VideoSearchHistoryService videoSearchHistoryService;
@@ -91,11 +77,25 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     private MongoTemplate mongoTemplate;
 
     /**
-     * 视频同步新增到es
+     * 视频同步新增到ES
      */
     @Override
     public void videoSync(String videoId) {
-        Video video = dubboVideoService.apiGetVideoByVideoId(videoId);
+        try {
+            Video video = dubboVideoService.apiGetVideoByVideoId(videoId);
+            VideoSearchVO searchVO = convertToSearchVO(video);
+
+            elasticsearchClient.index(i -> i
+                    .index(ESIndexConstants.INDEX_VIDEO)
+                    .id(searchVO.getVideoId())
+                    .document(searchVO)
+            );
+        } catch (IOException e) {
+            log.error("同步视频到ES失败, videoId: {}, 错误: {}", videoId, e.getMessage(), e);
+        }
+    }
+
+    private VideoSearchVO convertToSearchVO(Video video) {
         VideoSearchVO searchVO = new VideoSearchVO();
         searchVO.setVideoId(video.getVideoId());
         searchVO.setVideoTitle(video.getVideoTitle());
@@ -104,17 +104,11 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         searchVO.setVideoUrl(video.getVideoUrl());
         searchVO.setPublishType(video.getPublishType());
         searchVO.setUserId(video.getUserId());
-        searchVO.setTags(dubboVideoService.apiGetVideoTagStack(videoId).stream().map(VideoTag::getTag).toArray(String[]::new));
-
-        IndexRequest indexRequest = new IndexRequest(ESIndexConstants.INDEX_VIDEO);
-        indexRequest.id(searchVO.getVideoId())
-                .source(JSON.toJSONString(searchVO), XContentType.JSON);
-        try {
-            restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.error("sync es error ==> {}", e.getMessage());
-        }
+        searchVO.setTags(dubboVideoService.apiGetVideoTagStack(video.getVideoId())
+                .stream()
+                .map(VideoTag::getTag)
+                .toArray(String[]::new));
+        return searchVO;
     }
 
     /**
@@ -122,398 +116,395 @@ public class VideoSearchServiceImpl implements VideoSearchService {
      */
     @Override
     public void updateVideoDoc(String json) {
-        VideoSearchVO videoSearchVO = JSON.parseObject(json, VideoSearchVO.class);
-        UpdateRequest updateRequest = new UpdateRequest(ESIndexConstants.INDEX_VIDEO, videoSearchVO.getVideoId());
-        updateRequest.doc(json, XContentType.JSON);
-        updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
         try {
-            restHighLevelClient.update(updateRequest, RequestOptions.DEFAULT);
+            VideoSearchVO videoSearchVO = JSON.parseObject(json, VideoSearchVO.class);
+            elasticsearchClient.update(u -> u
+                            .index(ESIndexConstants.INDEX_VIDEO)
+                            .id(videoSearchVO.getVideoId())
+                            .doc(videoSearchVO)
+                            .refresh(Refresh.True),
+                    VideoSearchVO.class
+            );
         } catch (IOException e) {
-            log.error("failed to update document to elasticsearch,the doc is:{},the exception is {}", json, e.getMessage());
+            log.error("更新ES文档失败, json: {}, 错误: {}", json, e.getMessage(), e);
         }
     }
 
     /**
      * 删除文档
-     *
-     * @param videoId 视频ID
      */
     @Override
     public void deleteVideoDoc(String videoId) {
-        DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(ESIndexConstants.INDEX_VIDEO);
-        deleteByQueryRequest.setQuery(new TermsQueryBuilder("videoId", videoId));
-        deleteByQueryRequest.setRefresh(true);
         try {
-            restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            elasticsearchClient.deleteByQuery(d -> d
+                    .index(ESIndexConstants.INDEX_VIDEO)
+                    .query(q -> q
+                            .term(t -> t
+                                    .field("videoId")
+                                    .value(videoId)
+                            )
+                    )
+                    .refresh(true)
+            );
         } catch (IOException e) {
-            log.error("failed to delete the document in elasticsearch,the doc id is:{},the exception is {}", videoId, e.getMessage());
+            log.error("删除ES文档失败, videoId: {}, 错误: {}", videoId, e.getMessage(), e);
         }
     }
 
     /**
-     * es分页搜索视频
+     * ES分页搜索视频
      */
     @Override
     public List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto) {
         if (StringUtils.isEmpty(dto.getKeyword())) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
-        // 保存搜索记录到mongodb
+
+        // 保存搜索记录
+        saveSearchHistory(dto);
+
+        try {
+            SearchResponse<VideoSearchVO> response = elasticsearchClient.search(buildVideoSearchRequest(dto), VideoSearchVO.class);
+
+            return processSearchResponse(response);
+        } catch (IOException e) {
+            log.error("视频搜索失败, keyword: {}, 错误: {}", dto.getKeyword(), e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+    private void saveSearchHistory(VideoSearchKeywordDTO dto) {
         Long userId = UserContext.getUserId();
         if (StringUtils.isNotNull(userId) && dto.getFromIndex() == 0) {
             videoSearchHistoryService.insert(dto.getKeyword(), userId);
         }
-        // 构建查询请求
-        String publishTimeLimit = dto.getPublishTimeLimit();
-        if (StringUtils.isNotNull(publishTimeLimit) && !publishTimeLimit.equals(VideoSearchScreenPublishTime.NO_LIMIT.getCode())) {
-            long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-Objects.requireNonNull(VideoSearchScreenPublishTime.findByCode(publishTimeLimit)).getLimit());
-            dto.setMinBehotTime(new Date(dayStartLong));
-        }
-        SearchRequest searchRequest = buildSearchRequest(dto);
-
-        try {
-            // 执行查询请求
-            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-
-            // 处理搜索结果
-            return processSearchResponse(searchResponse);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
     }
 
-    private SearchRequest buildSearchRequest(VideoSearchKeywordDTO videoSearchKeywordDTO) {
-        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
+    private SearchRequest buildVideoSearchRequest(VideoSearchKeywordDTO dto) {
+        // 处理发布时间限制
+        Date minBehotTime = processPublishTimeLimit(dto);
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        // 设置分页
-        searchSourceBuilder.from((videoSearchKeywordDTO.getPageNum() - 1) * videoSearchKeywordDTO.getPageSize());
-        searchSourceBuilder.size(videoSearchKeywordDTO.getPageSize());
-
-        // 构建查询条件
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-
-        // 构建多字段匹配查询
-        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS);
-        boolQueryBuilder.must(multiMatchQueryBuilder);
-
-        // 构建范围过滤器
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(VideoSearchVO.PUBLISH_TIME)
-                .gte(videoSearchKeywordDTO.getMinBehotTime())
-                .lte(new Date().getTime());
-        boolQueryBuilder.filter(rangeQueryBuilder);
-
-        searchSourceBuilder.query(boolQueryBuilder);
-
-        // 设置高亮显示
-        HighlightBuilder highlightBuilder = new HighlightBuilder()
-                .boundaryScannerLocale(zh_CN)
-                .field(VideoSearchVO.VIDEO_TITLE)
-                .field(VideoSearchVO.TAGS)
-                .preTags(Highlight_preTags)
-                .postTags(Highlight_postTags);
-        searchSourceBuilder.highlighter(highlightBuilder);
-
-        // 设置排序
-        ScoreSortBuilder scoreSortField = SortBuilders.scoreSort().order(SortOrder.DESC);
-        FieldSortBuilder publishTimeSortField = SortBuilders.fieldSort(VideoSearchVO.PUBLISH_TIME).order(SortOrder.DESC).sortMode(SortMode.MAX);
-        searchSourceBuilder.sort(scoreSortField);
-        searchSourceBuilder.sort(publishTimeSortField);
-
-        searchRequest.source(searchSourceBuilder);
-
-        return searchRequest;
+        return SearchRequest.of(builder -> builder
+                .index(ESIndexConstants.INDEX_VIDEO)
+                .query(q -> q
+                        .bool(b -> b
+                                .must(m -> m
+                                        .multiMatch(mm -> mm
+                                                .query(dto.getKeyword())
+                                                .fields(VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS)
+                                        )
+                                )
+                                .filter(f -> f
+                                        .range(r -> r
+                                                .field(VideoSearchVO.PUBLISH_TIME)
+                                                .gte(JsonData.of(minBehotTime))
+                                                .lte(JsonData.of(new Date()))
+                                        )
+                                )
+                        )
+                )
+                .from((dto.getPageNum() - 1) * dto.getPageSize())
+                .size(dto.getPageSize())
+                .highlight(h -> h
+                        .preTags(Highlight_preTags)
+                        .postTags(Highlight_postTags)
+                        .requireFieldMatch(false) //多字段时，需要设置为false
+                        .fields(VideoSearchVO.VIDEO_TITLE, b -> b)
+                        .fields(VideoSearchVO.TAGS, b -> b)
+                ));
     }
 
-    private List<VideoSearchVO> processSearchResponse(SearchResponse searchResponse) {
-        // 处理搜索结果
-        SearchHit[] hits = searchResponse.getHits().getHits();
-        List<VideoSearchVO> res = new ArrayList<>();
-        for (SearchHit hit : hits) {
-            // 处理每个搜索结果
-            // 获取高亮字段
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
-            HighlightField tagsHighlightField = highlightFields.get(VideoSearchVO.TAGS);
-            // 处理高亮显示的片段
-            String highlightedTitle = getHighlightedText(titleHighlightField);
-            String[] highlightedTags = getHighlightedTags(tagsHighlightField);
-            // 结果封装
-            Map<String, Object> sourceMap = hit.getSourceAsMap();
-            VideoSearchVO searchVO = JSON.parseObject(JSON.toJSONString(sourceMap), VideoSearchVO.class);
-            searchVO.setVideoTitle(highlightedTitle.isEmpty() ? searchVO.getVideoTitle() : highlightedTitle);
-            if (highlightedTags.length > 0) {
-                String[] tags = searchVO.getTags();
-                for (int i = 0; i < tags.length; i++) {
-                    String originalTag = tags[i];
-                    for (String highlightedTag : highlightedTags) {
-                        String replacedTag = highlightedTag.replace(Highlight_preTags, "").replace(Highlight_postTags, "");
-                        if (originalTag.equals(replacedTag)) {
-                            tags[i] = highlightedTag;
-                            break;
-                        }
+    private Date processPublishTimeLimit(VideoSearchKeywordDTO dto) {
+        if (StringUtils.isNotNull(dto.getPublishTimeLimit()) &&
+                !dto.getPublishTimeLimit().equals(VideoSearchScreenPublishTime.NO_LIMIT.getCode())) {
+            long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-Objects.requireNonNull(VideoSearchScreenPublishTime.findByCode(dto.getPublishTimeLimit())).getLimit());
+            return new Date(dayStartLong);
+        }
+        return dto.getMinBehotTime();
+    }
+
+    private List<VideoSearchVO> processSearchResponse(SearchResponse<VideoSearchVO> response) {
+        return response.hits().hits().stream()
+                .map(hit -> {
+                    VideoSearchVO vo = hit.source();
+                    applyHighlight(hit.highlight(), vo);
+                    return vo;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void applyHighlight(Map<String, List<String>> highlights, VideoSearchVO vo) {
+        if (highlights == null) return;
+
+        // 处理标题高亮
+        List<String> titleHighlights = highlights.get(VideoSearchVO.VIDEO_TITLE);
+        if (titleHighlights != null && !titleHighlights.isEmpty()) {
+            vo.setVideoTitle(String.join("", titleHighlights));
+        }
+
+        // 处理标签高亮
+        List<String> tagsHighlights = highlights.get(VideoSearchVO.TAGS);
+        if (tagsHighlights != null && !tagsHighlights.isEmpty()) {
+            String[] tags = vo.getTags();
+            for (int i = 0; i < tags.length; i++) {
+                String originalTag = tags[i];
+                for (String highlightedTag : tagsHighlights) {
+                    String replacedTag = highlightedTag.replace(Highlight_preTags, "").replace(Highlight_postTags, "");
+                    if (originalTag.equals(replacedTag)) {
+                        tags[i] = highlightedTag;
+                        break;
                     }
                 }
-                searchVO.setTags(tags);
             }
-            res.add(searchVO);
+            vo.setTags(tags);
         }
-        return res;
-    }
-
-    private String getHighlightedText(HighlightField field) {
-        if (field != null) {
-            Text[] fragments = field.fragments();
-            StringBuilder highlightedText = new StringBuilder();
-            for (Text fragment : fragments) {
-                highlightedText.append(fragment.string());
-            }
-            return highlightedText.toString();
-        }
-        return "";
-    }
-
-    private String[] getHighlightedTags(HighlightField field) {
-        if (field != null) {
-            Text[] fragments = field.fragments();
-            String[] highlightedTags = new String[fragments.length];
-            for (int i = 0; i < fragments.length; i++) {
-                highlightedTags[i] = fragments[i].string();
-            }
-            return highlightedTags;
-        }
-        return new String[0];
-    }
-
-    @Override
-    public List<VideoSearchVO> searchAllVideoFromES(VideoSearchKeywordDTO dto) throws Exception {
-        //1.参数校验
-        if (StringUtils.isNull(dto) || StringUtils.isBlank(dto.getKeyword())) {
-            return null;
-        }
-        //2.设置查询条件
-        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        //布尔查询videoTitle或者userNickName
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        FuzzyQueryBuilder queryStringQueryBuilder = QueryBuilders.fuzzyQuery("videoTitle", dto.getKeyword());
-        boolQueryBuilder.must(queryStringQueryBuilder);
-        //查询小于mindate的数据
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("publishTime").lt(dto.getMinBehotTime() == null ? new Date().getTime() : dto.getMinBehotTime().getTime());
-        boolQueryBuilder.filter(rangeQueryBuilder);
-        //分页查询
-        searchSourceBuilder.from(dto.getPageNum());
-        searchSourceBuilder.size(dto.getPageSize());
-        //按照发布时间倒序查询
-        searchSourceBuilder.sort("publishTime", SortOrder.DESC);
-        //设置高亮  videoTitle
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-        highlightBuilder.field("videoTitle");
-        highlightBuilder.preTags("<font class='keyword-hint'>");
-        highlightBuilder.postTags("</font>");
-        searchSourceBuilder.highlighter(highlightBuilder);
-        searchSourceBuilder.query(boolQueryBuilder);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        //3.结果封装返回
-        List<VideoSearchVO> result = new ArrayList<>();
-
-        SearchHit[] hits = searchResponse.getHits().getHits();
-        String removeS1 = "<font class='keyword-hint'>";
-        String removeS2 = "</font>";
-        for (SearchHit hit : hits) {
-            String source = hit.getSourceAsString();
-            Map map = JSON.parseObject(source, Map.class);
-            //处理高亮
-            if (hit.getHighlightFields() != null && hit.getHighlightFields().size() > 0) {
-                Text[] titles = hit.getHighlightFields().get("videoTitle").getFragments();
-                String title = org.apache.commons.lang3.StringUtils.join(titles);
-                //高亮标题
-                map.put("videoTitle", title);
-            } else {
-                //原始标题
-                map.put("videoTitle", map.get("videoTitle"));
-            }
-            VideoSearchVO videoSearchVO = new VideoSearchVO();
-            BeanUtils.populate(videoSearchVO, map);
-            videoSearchVO.setVideoTitle(videoSearchVO.getVideoTitle().replace(removeS1, "").replace(removeS2, ""));
-            result.add(videoSearchVO);
-        }
-        result.forEach(System.out::println);
-        return result;
     }
 
     /**
-     * 从redis中获取热搜排行榜
+     * 搜索所有视频
+     */
+    @Override
+    public List<VideoSearchVO> searchAllVideoFromES(VideoSearchKeywordDTO dto) {
+        if (StringUtils.isNull(dto) || StringUtils.isBlank(dto.getKeyword())) {
+            return Collections.emptyList();
+        }
+
+        try {
+            SearchResponse<VideoSearchVO> response = elasticsearchClient.search(s -> s
+                            .index(ESIndexConstants.INDEX_VIDEO)
+                            .query(q -> q
+                                    .bool(b -> b
+                                            .must(m -> m
+                                                    .fuzzy(f -> f
+                                                            .field("videoTitle")
+                                                            .value(dto.getKeyword())
+                                                    )
+                                            )
+                                            .filter(f -> f
+                                                    .range(r -> r
+                                                            .field("publishTime")
+                                                            .lt(JsonData.of(dto.getMinBehotTime() != null ? dto.getMinBehotTime() : new Date()))
+                                                    )
+                                            )
+                                    )
+                            )
+                            .from((dto.getPageNum() - 1) * dto.getPageSize())
+                            .size(dto.getPageSize())
+                            .sort(so -> so
+                                    .field(f -> f
+                                            .field("publishTime")
+                                            .order(SortOrder.Desc)
+                                    )
+                            )
+                            .highlight(h -> h
+                                    .fields("videoTitle", f -> f
+                                            .preTags("<font class='keyword-hint'>")
+                                            .postTags("</font>")
+                                    )
+                            ),
+                    VideoSearchVO.class
+            );
+
+            return response.hits().hits().stream()
+                    .map(hit -> {
+                        VideoSearchVO vo = hit.source();
+                        if (hit.highlight() != null) {
+                            List<String> titleHighlights = hit.highlight().get("videoTitle");
+                            if (titleHighlights != null && !titleHighlights.isEmpty()) {
+                                vo.setVideoTitle(titleHighlights.get(0).replace("<font class='keyword-hint'>", "").replace("</font>", ""));
+                            }
+                        }
+                        return vo;
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("搜索所有视频失败, keyword: {}, 错误: {}", dto.getKeyword(), e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 从Redis中获取热搜排行榜
      */
     @Override
     public Set findSearchHot(PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
-        Set cacheZSetRange = redisService.getCacheZSetRange(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, startIndex, endIndex);
-        return cacheZSetRange;
+        return redisService.getCacheZSetRange(VideoHotTitleCacheConstants.VIDEO_HOT_TITLE_PREFIX, startIndex, endIndex);
     }
 
     /**
      * 视频搜索推荐
      */
-    @SneakyThrows
     @Override
     public List<String> pushVideoSearchSuggest(VideoSearchSuggestDTO videoSearchSuggestDTO) {
-        String keyword = videoSearchSuggestDTO.getKeyword();
-        if (StringUtils.isEmpty(keyword)) {
-            return new ArrayList<>();
+        if (StringUtils.isEmpty(videoSearchSuggestDTO.getKeyword())) {
+            return Collections.emptyList();
         }
-        AnalyzeRequest request = AnalyzeRequest.withGlobalAnalyzer("ik_smart", keyword);
-        Set<String> keywordRes = new HashSet<>();
-        AnalyzeResponse response = restHighLevelClient.indices().analyze(request, RequestOptions.DEFAULT);
-        response.getTokens().forEach(token -> {
-            String term = token.getTerm();
-            keywordRes.add(term);
-        });
-        // 构建模糊查询条件
-        Criteria criteria = Criteria.where("keyword").regex(String.join("|", keywordRes), "i"); // "i" 表示不区分大小写
 
-        // 构建聚合管道
-        MatchOperation matchOperation = Aggregation.match(criteria);
-        GroupOperation groupOperation = Aggregation.group("keyword").first("$$ROOT").as("doc");
-        SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Direction.DESC, "doc.createdTime"));
-        LimitOperation limitOperation = Aggregation.limit(10);
-        SampleOperation sampleOperation = Aggregation.sample(10);
+        try {
+            // 使用IK分词器分析关键词
+            AnalyzeResponse response = elasticsearchClient.indices().analyze(a -> a
+                    .analyzer("ik_smart")
+                    .text(videoSearchSuggestDTO.getKeyword())
+            );
 
-        Aggregation aggregation = Aggregation.newAggregation(matchOperation, groupOperation, sortOperation, limitOperation, sampleOperation);
+            Set<String> keywordRes = response.tokens().stream()
+                    .map(t -> t.token())
+                    .collect(Collectors.toSet());
 
-        // 执行聚合查询
-        List<VideoSearchHistory> videoSearchHistory = mongoTemplate.aggregate(aggregation, "video_search_history", VideoSearchHistory.class).getMappedResults();
-        // 结果集添加高亮标签
+            // MongoDB聚合查询
+            Criteria criteria = Criteria.where("keyword").regex(String.join("|", keywordRes), "i");
+            MatchOperation matchOperation = Aggregation.match(criteria);
+            GroupOperation groupOperation = Aggregation.group("keyword").first("$$ROOT").as("doc");
+            SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Direction.DESC, "doc.createdTime"));
+            LimitOperation limitOperation = Aggregation.limit(10);
+            SampleOperation sampleOperation = Aggregation.sample(10);
 
-        return videoSearchHistory.stream().map(VideoSearchHistory::getId).collect(Collectors.toList());
+            Aggregation aggregation = Aggregation.newAggregation(
+                    matchOperation, groupOperation, sortOperation, limitOperation, sampleOperation
+            );
+
+            return mongoTemplate.aggregate(aggregation, "video_search_history", VideoSearchHistory.class)
+                    .getMappedResults()
+                    .stream()
+                    .map(VideoSearchHistory::getId)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("获取视频搜索推荐失败, keyword: {}, 错误: {}", videoSearchSuggestDTO.getKeyword(), e.getMessage(), e);
+            return Collections.emptyList();
+        }
     }
 
-    @SneakyThrows
+    /**
+     * APP端视频搜索
+     */
     @Override
     public PageDataInfo searchVideoFromESForApp(VideoSearchKeywordDTO dto) {
         if (StringUtils.isEmpty(dto.getKeyword())) {
             return PageDataInfo.emptyPage();
         }
-        // 保存搜索记录到 mongodb
+
+        // 保存搜索记录
+        saveAppSearchHistory(dto);
+
+        try {
+            SearchResponse<VideoSearchVO> response = elasticsearchClient.search(buildAppVideoSearchRequest(dto), VideoSearchVO.class);
+
+            return processAppVideoSearchResponse(response);
+        } catch (IOException e) {
+            log.error("APP视频搜索失败, keyword: {}, 错误: {}", dto.getKeyword(), e.getMessage(), e);
+            return PageDataInfo.emptyPage();
+        }
+    }
+
+    private void saveAppSearchHistory(VideoSearchKeywordDTO dto) {
         Long userId = UserContext.getUserId();
         if (StringUtils.isNotNull(userId) && userId != 0L && dto.getFromIndex() == 0) {
             videoSearchHistoryService.insertPlatform(userId, dto.getKeyword(), VideoPlatformEnum.APP);
         }
-        // 构建查询请求
-        String publishTimeLimit = dto.getPublishTimeLimit();
-        if (StringUtils.isNotNull(publishTimeLimit) && !publishTimeLimit.equals(VideoSearchScreenPublishTime.NO_LIMIT.getCode())) {
-            long dayStartLong = DateUtils.getTodayPlusStartLocalLong(-Objects.requireNonNull(VideoSearchScreenPublishTime.findByCode(publishTimeLimit)).getLimit());
-            dto.setMinBehotTime(new Date(dayStartLong));
-        }
-        SearchRequest searchRequest = buildAppVideoSearchRequest(dto);
-        // 执行查询请求
-        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        // 处理搜索结果
-        return processAppVideoSearchResponse(searchResponse);
     }
 
-    /**
-     * 构建app视频搜索请求（仅搜索视频标题
-     */
-    private SearchRequest buildAppVideoSearchRequest(VideoSearchKeywordDTO videoSearchKeywordDTO) {
-        SearchRequest searchRequest = new SearchRequest(ESIndexConstants.INDEX_VIDEO);
+    private SearchRequest buildAppVideoSearchRequest(VideoSearchKeywordDTO dto) {
+        Date minBehotTime = processPublishTimeLimit(dto);
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        // 设置分页
-        searchSourceBuilder.from((videoSearchKeywordDTO.getPageNum() - 1) * videoSearchKeywordDTO.getPageSize());
-        searchSourceBuilder.size(videoSearchKeywordDTO.getPageSize());
-
-        // 构建查询条件
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-
-        // 构建多字段匹配查询
-        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(videoSearchKeywordDTO.getKeyword(), VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS);
-        boolQueryBuilder.must(multiMatchQueryBuilder);
-
-        // 构建范围过滤器
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(VideoSearchVO.PUBLISH_TIME)
-                .gte(videoSearchKeywordDTO.getMinBehotTime())
-                .lte(new Date().getTime());
-        boolQueryBuilder.filter(rangeQueryBuilder);
-
-        searchSourceBuilder.query(boolQueryBuilder);
-
-        // 设置高亮显示
-        HighlightBuilder highlightBuilder = new HighlightBuilder()
-                .boundaryScannerLocale(zh_CN)
-                .field(VideoSearchVO.VIDEO_TITLE)
-                .field(VideoSearchVO.TAGS)
-                .preTags(Highlight_preTags_RED)
-                .postTags(Highlight_postTags_RED);
-        searchSourceBuilder.highlighter(highlightBuilder);
-
-        // 设置排序
-        ScoreSortBuilder scoreSortField = SortBuilders.scoreSort().order(SortOrder.DESC);
-        FieldSortBuilder publishTimeSortField = SortBuilders.fieldSort(VideoSearchVO.PUBLISH_TIME).order(SortOrder.DESC).sortMode(SortMode.MAX);
-        searchSourceBuilder.sort(scoreSortField);
-        searchSourceBuilder.sort(publishTimeSortField);
-
-        searchRequest.source(searchSourceBuilder);
-
-        return searchRequest;
+        return SearchRequest.of(builder -> builder
+                .index(ESIndexConstants.INDEX_VIDEO)
+                .query(q -> q
+                        .bool(b -> b
+                                .must(m -> m
+                                        .multiMatch(mm -> mm
+                                                .query(dto.getKeyword())
+                                                .fields(VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS)
+                                        )
+                                )
+                                .filter(f -> f
+                                        .range(r -> r
+                                                .field(VideoSearchVO.PUBLISH_TIME)
+                                                .gte(JsonData.of(minBehotTime))
+                                                .lte(JsonData.of(new Date()))
+                                        )
+                                )
+                        )
+                )
+                .from((dto.getPageNum() - 1) * dto.getPageSize())
+                .size(dto.getPageSize())
+                .highlight(h -> h
+                        .fields(VideoSearchVO.VIDEO_TITLE, f -> f
+                                .preTags(Highlight_preTags_RED)
+                                .postTags(Highlight_postTags_RED)
+                        )
+                        .fields(VideoSearchVO.TAGS, f -> f
+                                .preTags(Highlight_preTags_RED)
+                                .postTags(Highlight_postTags_RED)
+                        )
+                )
+                .sort(s -> s
+                        .score(sc -> sc.order(SortOrder.Desc))
+                )
+                .sort(s -> s
+                        .field(f -> f
+                                .field(VideoSearchVO.PUBLISH_TIME)
+                                .order(SortOrder.Desc)
+                        )
+                ));
     }
 
-    private PageDataInfo processAppVideoSearchResponse(SearchResponse searchResponse) {
-        // 处理搜索结果
-        long totalValue = searchResponse.getHits().getTotalHits().value;
-        SearchHit[] hits = searchResponse.getHits().getHits();
-        List<VideoSearchVO> originVo = new ArrayList<>();
-        for (SearchHit hit : hits) {
-            // 处理每个搜索结果
-
-            // 获取高亮字段
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            HighlightField titleHighlightField = highlightFields.get(VideoSearchVO.VIDEO_TITLE);
-            HighlightField tagsHighlightField = highlightFields.get(VideoSearchVO.TAGS);
-            // 处理高亮显示的片段
-            String highlightedTitle = getHighlightedText(titleHighlightField);
-            String[] highlightedTags = getHighlightedTags(tagsHighlightField);
-            // 结果封装
-            Map<String, Object> sourceMap = hit.getSourceAsMap();
-            VideoSearchVO searchVO = JSON.parseObject(JSON.toJSONString(sourceMap), VideoSearchVO.class);
-            searchVO.setVideoTitle(highlightedTitle.isEmpty() ? searchVO.getVideoTitle() : highlightedTitle);
-            if (highlightedTags.length > 0) {
-                String[] tags = searchVO.getTags();
-                for (int i = 0; i < tags.length; i++) {
-                    String originalTag = tags[i];
-                    for (String highlightedTag : highlightedTags) {
-                        String replacedTag = highlightedTag.replace(Highlight_preTags_RED, "").replace(Highlight_postTags_RED, "");
-                        if (originalTag.equals(replacedTag)) {
-                            tags[i] = highlightedTag;
-                            break;
-                        }
-                    }
-                }
-                searchVO.setTags(tags);
-            }
-            originVo.add(searchVO);
-        }
-        if (originVo.isEmpty()) {
+    private PageDataInfo processAppVideoSearchResponse(SearchResponse<VideoSearchVO> response) {
+        long total = response.hits().total().value();
+        if (total == 0) {
             return PageDataInfo.emptyPage();
         }
-        List<AppVideoSearchVO> res = BeanCopyUtils.copyBeanList(originVo, AppVideoSearchVO.class);
-        // 封装用户，视频点赞量，喜欢量。。。
-        res.forEach(v -> {
-            // 作者
-            Member member = dubboMemberService.apiGetById(v.getUserId());
-            Author author = BeanCopyUtils.copyBean(member, Author.class);
-            v.setAuthor(author);
-            v.setCreateTime(DateUtils.date2LocalDateTime(v.getPublishTime()));
-            v.setPublishTime(null);
-            Integer cacheViewNum = redisService.getCacheMapValue("video:view:num", v.getVideoId());
-            v.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
-        });
-        return PageDataInfo.genPageData(res, totalValue);
+
+        List<AppVideoSearchVO> result = response.hits().hits().stream()
+                .map(hit -> {
+                    VideoSearchVO source = hit.source();
+                    AppVideoSearchVO vo = BeanCopyUtils.copyBean(source, AppVideoSearchVO.class);
+
+                    // 处理高亮
+                    applyAppHighlight(hit.highlight(), vo);
+
+                    // 设置作者信息
+                    Member member = dubboMemberService.apiGetById(source.getUserId());
+                    vo.setAuthor(BeanCopyUtils.copyBean(member, Author.class));
+                    vo.setCreateTime(DateUtils.date2LocalDateTime(source.getPublishTime()));
+                    vo.setPublishTime(null);
+
+                    // 设置观看数
+                    Integer cacheViewNum = redisService.getCacheMapValue("video:view:num", source.getVideoId());
+                    vo.setViewNum(StringUtils.isNull(cacheViewNum) ? 0L : cacheViewNum);
+
+                    return vo;
+                })
+                .collect(Collectors.toList());
+
+        return PageDataInfo.genPageData(result, total);
     }
 
+    private void applyAppHighlight(Map<String, List<String>> highlights, AppVideoSearchVO vo) {
+        if (highlights == null) return;
+
+        // 处理标题高亮
+        List<String> titleHighlights = highlights.get(VideoSearchVO.VIDEO_TITLE);
+        if (titleHighlights != null && !titleHighlights.isEmpty()) {
+            vo.setVideoTitle(String.join("", titleHighlights));
+        }
+
+        // 处理标签高亮
+        List<String> tagsHighlights = highlights.get(VideoSearchVO.TAGS);
+        if (tagsHighlights != null && !tagsHighlights.isEmpty()) {
+            String[] tags = vo.getTags();
+            for (int i = 0; i < tags.length; i++) {
+                String originalTag = tags[i];
+                for (String highlightedTag : tagsHighlights) {
+                    String replacedTag = highlightedTag.replace(Highlight_preTags_RED, "").replace(Highlight_postTags_RED, "");
+                    if (originalTag.equals(replacedTag)) {
+                        tags[i] = highlightedTag;
+                        break;
+                    }
+                }
+            }
+            vo.setTags(tags);
+        }
+    }
 }

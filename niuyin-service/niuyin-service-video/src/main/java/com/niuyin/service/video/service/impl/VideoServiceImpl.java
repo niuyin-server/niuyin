@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.niuyin.common.cache.annotations.RedissonLock;
+import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.exception.CustomException;
@@ -149,6 +150,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Resource
     private VideoRedisBatchCache videoRedisBatchCache;
+
+    @Resource
+    private SnowFlake snowFlake;
 
     /**
      * 解决异步线程无法访问主线程的ThreadLocal

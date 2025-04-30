@@ -22,3 +22,8 @@ spring:
           - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-elasticsearch-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
           - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+
+logging:
+  level:
+    org.springframework.data.elasticsearch: DEBUG
+    org.elasticsearch.client: DEBUG

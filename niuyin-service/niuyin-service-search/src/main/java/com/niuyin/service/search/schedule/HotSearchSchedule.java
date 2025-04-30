@@ -1,25 +1,23 @@
 package com.niuyin.service.search.schedule;
 
-import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dubbo.VideoBehaveData;
+import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.enums.IkAnalyzeTypeEnum;
 import com.niuyin.service.search.constant.VideoHotTitleCacheConstants;
 import com.niuyin.service.search.domain.VideoSearchHistory;
-import com.niuyin.service.search.domain.VideoSearchVO;
 import com.niuyin.service.search.service.EsIkAnalyzeService;
 import com.niuyin.service.search.service.VideoSearchHistoryService;
 import com.niuyin.service.search.service.VideoSearchService;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-
-import jakarta.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,7 +54,7 @@ public class HotSearchSchedule {
      */
 //    @RedissonLock(prefixKey = SEARCH_KEY)
     @SneakyThrows
-    @Scheduled(fixedRate = 1000 * 60 * 10)
+//    @Scheduled(fixedRate = 1000 * 60 * 10)
     public void computeHotSearch() {
         List<String> list = new ArrayList<>();
 //        List<Term> termList;
@@ -96,6 +94,10 @@ public class HotSearchSchedule {
                 videoSearchKeywordDTO.setPageNum(0);
                 videoSearchKeywordDTO.setPageSize(1);
                 List<VideoSearchVO> searchVOS = videoSearchService.searchAllVideoFromES(videoSearchKeywordDTO);
+                // 打印搜索结果
+                if (Objects.nonNull(searchVOS)) {
+                    searchVOS.forEach(System.out::println);
+                }
                 if (!CollectionUtils.isEmpty(searchVOS)) {
                     videoSearchVOS.addAll(searchVOS);
                 }

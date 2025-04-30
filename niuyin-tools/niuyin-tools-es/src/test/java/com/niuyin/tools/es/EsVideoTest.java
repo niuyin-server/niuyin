@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ public class EsVideoTest {
     private VideoTagRelationMapper videoTagRelationMapper;
     @Resource
     private VideoEsService videoEsService;
+    @Resource
+    private ElasticsearchOperations elasticsearchOperations;
 
     /**
      * 注意：数据量的导入，如果数据量过大，需要分页导入
@@ -72,7 +76,6 @@ public class EsVideoTest {
 //        restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
 //
 //    }
-
     @Test
     @DisplayName("所有视频同步到es new")
     public void initNew() {
@@ -100,5 +103,10 @@ public class EsVideoTest {
         });
     }
 
+    @Test
+    void testDeleteAllDoc() {
+        // 删除所有文档但保留索引
+        elasticsearchOperations.delete(Query.findAll(), VideoSearchVO.class);
+    }
 
 }
