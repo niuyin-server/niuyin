@@ -1,4 +1,4 @@
-package com.niuyin.service.ai.controller;
+package com.niuyin.service.ai.controller.chat;
 
 import cn.hutool.core.util.StrUtil;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
@@ -8,7 +8,6 @@ import com.niuyin.model.ai.domain.ChatConversationDO;
 import com.niuyin.model.ai.domain.ChatMessageDO;
 import com.niuyin.service.ai.service.IChatConversationService;
 import com.niuyin.service.ai.service.IChatMessageService;
-import jakarta.annotation.security.PermitAll;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +16,6 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.image.ImageModel;
-import org.springframework.ai.image.observation.ImageModelObservationContext;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 public class ChatbotController {
 
     private final ChatClient chatClient;
-    private final ImageModel imageModel;
     private final InMemoryChatMemory inMemoryChatMemory;
     private final IChatConversationService chatConversationService;
     private final IChatMessageService chatMessageService;
