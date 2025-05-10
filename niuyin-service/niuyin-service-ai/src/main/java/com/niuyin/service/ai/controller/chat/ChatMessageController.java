@@ -1,15 +1,12 @@
 package com.niuyin.service.ai.controller.chat;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.model.ai.domain.ChatMessageDO;
+import com.niuyin.model.ai.chat.domain.ChatMessageDO;
 import com.niuyin.service.ai.service.IChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 

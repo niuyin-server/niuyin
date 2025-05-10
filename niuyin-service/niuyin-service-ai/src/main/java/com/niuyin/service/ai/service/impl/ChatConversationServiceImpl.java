@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.model.ai.domain.ChatConversationDO;
+import com.niuyin.model.ai.chat.domain.ChatConversationDO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.service.ai.mapper.ChatConversationMapper;
 import com.niuyin.service.ai.service.IChatConversationService;

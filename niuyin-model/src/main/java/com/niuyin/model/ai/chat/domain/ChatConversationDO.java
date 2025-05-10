@@ -1,4 +1,4 @@
-package com.niuyin.model.ai.domain;
+package com.niuyin.model.ai.chat.domain;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;

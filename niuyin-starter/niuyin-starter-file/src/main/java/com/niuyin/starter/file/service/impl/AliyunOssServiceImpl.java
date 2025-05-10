@@ -261,22 +261,22 @@ public class AliyunOssServiceImpl implements AliyunOssService {
         ossClient.shutdown();
     }
 
-//    /**
-//     * 上传图片链接
-//     */
-//    private void putImageUrl(String url) {
-//        try {
-//            InputStream inputStream = new URL(url).openStream();
-//            String filePath = PathUtils.generateFilePath(Objects.requireNonNull(url));
-//            // 文件存储名称：服务名称/2023/11/11/uuid.jpg
-//            String ossFileName = "image/" + filePath;
-//            ossClient.putObject(BUCKET_NAME, ossFileName, inputStream);
-//            //关闭 OSSClient
-////            ossClient.shutdown();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        }
-//    }
+    /**
+     * 上传图片链接
+     */
+    public String putImageUrl(String url, String folder) {
+        try {
+            InputStream inputStream = new URL(url).openStream();
+            String filePath = PathUtils.generateFilePathForUrl(Objects.requireNonNull(url));
+            // 文件存储名称：服务名称/2023/11/11/uuid.jpg
+            String ossFileName = folder + "/" + filePath;
+            ossClient.putObject(BUCKET_NAME, ossFileName, inputStream);
+            //关闭 OSSClient
+//        ossClient.shutdown();
+            return "https://" + BUCKET_NAME + "." + END_POINT + "/" + ossFileName;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

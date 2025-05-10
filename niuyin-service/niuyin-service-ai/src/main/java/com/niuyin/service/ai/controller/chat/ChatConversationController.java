@@ -5,7 +5,7 @@ import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.domain.ChatConversationDO;
+import com.niuyin.model.ai.chat.domain.ChatConversationDO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.service.ai.service.IChatConversationService;
 import lombok.RequiredArgsConstructor;

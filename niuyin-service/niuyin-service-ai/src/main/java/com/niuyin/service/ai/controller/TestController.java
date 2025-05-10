@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 @RequiredArgsConstructor
-@CrossOrigin("*")
 @RestController
 public class TestController {
 

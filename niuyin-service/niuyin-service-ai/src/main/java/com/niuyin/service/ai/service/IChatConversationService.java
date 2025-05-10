@@ -2,12 +2,8 @@ package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.ai.domain.ChatConversationDO;
+import com.niuyin.model.ai.chat.domain.ChatConversationDO;
 import com.niuyin.model.common.dto.PageDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-
-import java.util.List;
 
 /**
  * AI 聊天对话表(AiChatConversation)表服务接口

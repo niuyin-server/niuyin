@@ -1,7 +1,7 @@
 package com.niuyin.service.ai.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.niuyin.model.ai.domain.ImageDO;
+import com.niuyin.model.ai.image.domain.ImageDO;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

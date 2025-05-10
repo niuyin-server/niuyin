@@ -1,4 +1,4 @@
-package com.niuyin.model.ai.domain;
+package com.niuyin.model.ai.image.domain;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
-import java.io.Serializable;
 
 /**
  * AI文生图表(AiImage)实体类
@@ -54,8 +53,9 @@ public class ImageDO extends BaseDO {
     private Integer height;
     /**
      * 绘画状态
+     * {@link com.niuyin.model.ai.image.enums.ImageStatusEnum.code}
      */
-    private Integer status;
+    private String status;
     /**
      * 完成时间
      */

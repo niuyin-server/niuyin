@@ -1,7 +1,7 @@
 package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.ai.domain.ChatMessageDO;
+import com.niuyin.model.ai.chat.domain.ChatMessageDO;
 
 import java.util.List;
 

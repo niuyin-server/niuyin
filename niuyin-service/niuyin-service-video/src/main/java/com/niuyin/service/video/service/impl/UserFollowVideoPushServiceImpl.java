@@ -116,12 +116,10 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
 
     @SneakyThrows
     public void init(Long userId, Long min, Long max, Collection<Long> followIds) {
-        String t1 = OUT_FOLLOW;
-        String t2 = IN_FOLLOW;
         // 查看关注人的发件箱
         List<Set<DefaultTypedTuple>> result = redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (Long followId : followIds) {
-                connection.zRevRangeByScoreWithScores((t1 + followId).getBytes(), min, max, 0, 20);
+                connection.zRevRangeByScoreWithScores((OUT_FOLLOW + followId).getBytes(), min, max, 0, 20);
             }
             return null;
         });
@@ -132,7 +130,7 @@ public class UserFollowVideoPushServiceImpl implements UserFollowVideoPushServic
                 if (!ObjectUtils.isEmpty(tuples)) {
                     for (DefaultTypedTuple tuple : tuples) {
                         String value = (String) tuple.getValue();
-                        byte[] key = (t2 + userId).getBytes();
+                        byte[] key = (IN_FOLLOW + userId).getBytes();
                         try {
                             connection.zAdd(key, tuple.getScore(), objectMapper.writeValueAsBytes(value));
                         } catch (JsonProcessingException e) {

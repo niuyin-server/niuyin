@@ -4,11 +4,10 @@ import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.model.ai.domain.ImageDO;
+import com.niuyin.model.ai.image.domain.ImageDO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.service.ai.service.IImageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +21,7 @@ import java.time.LocalDateTime;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/aiImage")
+@RequestMapping("/api/v1/image")
 public class ImageController {
 
     private final IImageService imageService;

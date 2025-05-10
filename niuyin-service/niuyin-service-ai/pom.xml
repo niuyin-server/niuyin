@@ -131,6 +131,12 @@
 <!--            <groupId>org.springframework.boot</groupId>-->
 <!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
 <!--        </dependency>-->
+        <!-- niuyin-存储starter-->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-starter-file</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

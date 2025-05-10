@@ -29,10 +29,19 @@ public interface AliyunOssService {
     /**
      * 分片上传视频文件
      *
-     * @param file 文件本体
+     * @param file   文件本体
      * @param folder oss路径前缀
      * @return url
      */
     String multipartUploadVideoFile(MultipartFile file, String folder);
+
+    /**
+     * 上传图片url
+     *
+     * @param url   图片url
+     * @param folder oss路径前缀
+     * @return url
+     */
+    String putImageUrl(String url,String folder);
 
 }

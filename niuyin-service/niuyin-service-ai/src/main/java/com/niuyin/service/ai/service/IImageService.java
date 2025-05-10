@@ -2,7 +2,8 @@ package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.ai.domain.ImageDO;
+import com.niuyin.model.ai.image.domain.ImageDO;
+import com.niuyin.model.ai.image.dto.ImageGenDTO;
 import com.niuyin.model.common.dto.PageDTO;
 import org.springframework.ai.image.Image;
 
@@ -17,7 +18,16 @@ public interface IImageService extends IService<ImageDO> {
     IPage<ImageDO> getList(PageDTO dto);
 
     /**
-     * 图片生成回调
+     * 保存图片生成任务
      */
-    boolean generateImageCall(Image image);
+    ImageDO saveImageTask(ImageGenDTO dto);
+
+    /**
+     * 图片生成回调
+     *
+     * @return url
+     */
+    ImageDO generateImageCall(boolean success, ImageDO imageNew, Image image, String errorMessage);
+
+    ImageDO generateImage(ImageGenDTO dto);
 }

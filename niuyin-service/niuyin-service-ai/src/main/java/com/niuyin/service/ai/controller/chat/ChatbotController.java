@@ -4,8 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.domain.ChatConversationDO;
-import com.niuyin.model.ai.domain.ChatMessageDO;
+import com.niuyin.model.ai.chat.domain.ChatConversationDO;
+import com.niuyin.model.ai.chat.domain.ChatMessageDO;
 import com.niuyin.service.ai.service.IChatConversationService;
 import com.niuyin.service.ai.service.IChatMessageService;
 import jakarta.validation.constraints.NotNull;
@@ -30,8 +30,8 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
-@CrossOrigin("*")
 @RestController
 public class ChatbotController {
 
