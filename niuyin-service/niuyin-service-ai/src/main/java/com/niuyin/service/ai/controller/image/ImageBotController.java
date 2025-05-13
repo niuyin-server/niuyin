@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImageBotController {
 
     private final IImageService imageService;
-    private final TongYiImagesClient imageService;
 
     /**
      * 文生图
