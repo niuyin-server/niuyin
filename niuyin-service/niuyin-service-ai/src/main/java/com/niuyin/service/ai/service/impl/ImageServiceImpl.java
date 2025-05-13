@@ -101,7 +101,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, ImageDO> implemen
         Image output = null;
         String errorMessage = null;
         try {
-            ImageOptions options = buildImageOptions(dto.getRadio());
+            ImageOptions options = buildImageOptions(dto);
             ImageResponse imageResponse = openAiImageModel.call(new ImagePrompt(dto.getMessage(), options));
             output = imageResponse.getResult().getOutput();
         } catch (Exception ex) {
@@ -115,10 +115,10 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, ImageDO> implemen
         return res;
     }
 
-    private static ImageOptions buildImageOptions(String radio) {
+    private static ImageOptions buildImageOptions(ImageGenDTO dto) {
         return OpenAiImageOptions.builder()
-                .withWidth(Objects.requireNonNull(ImageRadioEnum.getByCode(radio), "请选择正确的比例").getWidth())
-                .withHeight(Objects.requireNonNull(ImageRadioEnum.getByCode(radio), "请选择正确的比例").getHeight())
+                .withWidth(Objects.requireNonNull(ImageRadioEnum.getByCode(dto.getRadio()), "请选择正确的比例").getWidth())
+                .withHeight(Objects.requireNonNull(ImageRadioEnum.getByCode(dto.getRadio()), "请选择正确的比例").getHeight())
 //                    .withStyle(MapUtil.getStr(draw.getOptions(), "style")) // 风格
                 .withResponseFormat("b64_json")
                 .build();

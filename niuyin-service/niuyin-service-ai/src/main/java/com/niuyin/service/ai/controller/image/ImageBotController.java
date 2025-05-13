@@ -1,5 +1,6 @@
 package com.niuyin.service.ai.controller.image;
 
+import com.alibaba.cloud.ai.tongyi.image.TongYiImagesClient;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.model.ai.image.domain.ImageDO;
 import com.niuyin.model.ai.image.dto.ImageGenDTO;
@@ -7,7 +8,6 @@ import com.niuyin.service.ai.service.IImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImageBotController {
 
     private final IImageService imageService;
+    private final TongYiImagesClient imageService;
 
     /**
      * 文生图
@@ -36,6 +37,5 @@ public class ImageBotController {
     public R<ImageDO> generate(@Valid ImageGenDTO dto) {
         return R.ok(imageService.generateImage(dto));
     }
-
 
 }
