@@ -11,9 +11,11 @@
 
     <artifactId>niuyin-common</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>niuyin-common-core</module>
         <module>niuyin-common-cache</module>
+        <module>niuyin-common-ai</module>
     </modules>
 
 </project>

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * AiApplication
+ * https://cloud.tencent.com/developer/article/1707872
  *
  * @AUTHOR: roydon
  * @DATE: 2025/3/15

@@ -2,12 +2,14 @@ package com.niuyin.common.core.filter;
 
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.model.member.domain.Member;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 public class UserTokenInterceptor implements HandlerInterceptor {
 
     /**
