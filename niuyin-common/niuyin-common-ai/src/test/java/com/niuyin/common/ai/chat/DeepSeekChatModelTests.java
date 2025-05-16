@@ -1,6 +1,5 @@
 package com.niuyin.common.ai.chat;
 
-import com.niuyin.common.ai.model.baichuan.BaiChuanChatModel;
 import com.niuyin.common.ai.model.deepseek.DeepSeekChatModel;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,17 +17,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link BaiChuanChatModel} 集成测试
+ * {@link DeepSeekChatModel} 集成测试
+ *
+ * @author 芋道源码
  */
-public class BaiChuanChatModelTests {
+public class DeepSeekChatModelTests {
 
     private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
-                    .baseUrl(BaiChuanChatModel.BASE_URL)
-                    .apiKey("sk-bb72e0a07fdff22f354b11e53b343d60") // apiKey
+                    .baseUrl(DeepSeekChatModel.BASE_URL)
+                    .apiKey("sk-47dae8bc4dfc48f99bac223c93bef5b4") // apiKey
                     .build())
             .defaultOptions(OpenAiChatOptions.builder()
-                    .model("Baichuan4-Turbo") // 模型（https://platform.baichuan-ai.com/docs/api）
+                    .model("deepseek-chat") // 模型
                     .temperature(0.7)
                     .build())
             .build();
