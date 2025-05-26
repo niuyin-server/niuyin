@@ -168,7 +168,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
 
             return processSearchResponse(response);
         } catch (IOException e) {
-            log.error("视频搜索失败, keyword: {}, 错误: {}", dto.getKeyword(), e.getMessage(), e);
+            log.error("视频搜索失败, keyword: {}, 错误: {}", dto.getKeyword(), e.getMessage());
             return Collections.emptyList();
         }
     }

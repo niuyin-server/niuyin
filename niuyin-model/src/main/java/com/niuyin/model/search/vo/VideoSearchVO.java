@@ -24,7 +24,7 @@ public class VideoSearchVO {
     private String videoId;
     public static final String VIDEO_ID = "videoId";
     // 标题
-    @Field(analyzer = "ik_smart",searchAnalyzer = "ik_smart")
+//    @Field(analyzer = "ik_smart",searchAnalyzer = "ik_smart")
     private String videoTitle;
     public static final String VIDEO_TITLE = "videoTitle";
     // 文章发布时间
@@ -43,7 +43,7 @@ public class VideoSearchVO {
     private Long userId;
     public static final String USER_ID = "userId";
     // 标签
-    @Field(analyzer = "ik_smart")
+//    @Field(analyzer = "ik_smart")
     private String[] tags;
     public static final String TAGS = "tags";
 

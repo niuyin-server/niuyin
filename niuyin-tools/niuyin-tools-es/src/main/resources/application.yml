@@ -23,9 +23,9 @@ spring:
       password: n3f55MhYix6CPjKw
   elasticsearch:
     uris:
-      - http://127.0.0.1:9200
+      - http://127.0.0.1:9201
     username: elastic
-    password: kn0soofA1db0NacMOo0m
+    password: roydon#Elasticsearch
     connection-timeout: 5s
     socket-timeout: 60s
 

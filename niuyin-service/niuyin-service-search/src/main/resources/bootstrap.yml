@@ -27,3 +27,4 @@ logging:
   level:
     org.springframework.data.elasticsearch: DEBUG
     org.elasticsearch.client: DEBUG
+    co.elastic.clients: DEBUG
