@@ -1,4 +1,4 @@
-package com.niuyin.service.ai.controller.chat;
+package com.niuyin.service.ai.controller.web.chat;
 
 import com.niuyin.common.core.domain.R;
 import com.niuyin.model.ai.chat.domain.ChatMessageDO;

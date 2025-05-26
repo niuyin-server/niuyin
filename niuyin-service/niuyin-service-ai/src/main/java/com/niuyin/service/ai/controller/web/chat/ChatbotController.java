@@ -1,4 +1,4 @@
-package com.niuyin.service.ai.controller.chat;
+package com.niuyin.service.ai.controller.web.chat;
 
 import cn.hutool.core.util.StrUtil;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;

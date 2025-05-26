@@ -1,4 +1,4 @@
-package com.niuyin.service.ai.controller.chat;
+package com.niuyin.service.ai.controller.web.chat;
 
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;

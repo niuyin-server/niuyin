@@ -1,4 +1,4 @@
-package com.niuyin.service.ai.controller.image;
+package com.niuyin.service.ai.controller.web.image;
 
 import com.alibaba.cloud.ai.tongyi.image.TongYiImagesClient;
 import com.niuyin.common.core.domain.R;

@@ -1,4 +1,4 @@
-package com.niuyin.service.ai.controller.image;
+package com.niuyin.service.ai.controller.web.image;
 
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
