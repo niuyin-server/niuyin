@@ -11,7 +11,6 @@ import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.enums.TimeRange;
 import com.niuyin.model.search.vo.VideoSearchVO;
-import com.niuyin.model.video.enums.IkAnalyzeTypeEnum;
 import com.niuyin.service.search.service.VideoSearchService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.client.elc.QueryBuilders;
-import org.springframework.data.elasticsearch.core.SearchHits;
 
 import java.io.IOException;
 import java.time.*;

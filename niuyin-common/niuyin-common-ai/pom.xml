@@ -19,6 +19,7 @@
         <spring-ai.version>1.0.0-M6</spring-ai.version>
         <tinyflow.version>1.0.0-rc.3</tinyflow.version>
     </properties>
+
     <dependencies>
         <!-- Spring AI Model 模型接入 -->
         <dependency>

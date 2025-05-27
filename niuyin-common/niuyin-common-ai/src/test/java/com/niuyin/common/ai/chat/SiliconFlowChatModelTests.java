@@ -1,6 +1,7 @@
 package com.niuyin.common.ai.chat;
 
-import com.niuyin.common.ai.model.deepseek.DeepSeekChatModel;
+import com.niuyin.common.ai.model.siliconflow.SiliconFlowApiConstants;
+import com.niuyin.common.ai.model.siliconflow.SiliconFlowChatModel;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.Message;
@@ -17,22 +18,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link DeepSeekChatModel} 集成测试
+ * {@link SiliconFlowChatModel} 集成测试
  */
-public class DeepSeekChatModelTests {
+public class SiliconFlowChatModelTests {
 
     private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
-                    .baseUrl(DeepSeekChatModel.BASE_URL)
-                    .apiKey("sk-47dae8bc4dfc48f99bac223c93bef5b4") // apiKey
+                    .baseUrl(SiliconFlowApiConstants.DEFAULT_BASE_URL)
+                    .apiKey("sk-epsakfenqnyzoxhmbucsxlhkdqlcbnimslqoivkshalvdozz") // apiKey
                     .build())
             .defaultOptions(OpenAiChatOptions.builder()
-                    .model("deepseek-chat") // 模型
+                    .model(SiliconFlowApiConstants.MODEL_DEFAULT) // 模型
+//                    .model("deepseek-ai/DeepSeek-R1") // 模型（deepseek-ai/DeepSeek-R1）可用赠费
+//                    .model("Pro/deepseek-ai/DeepSeek-R1") // 模型（Pro/deepseek-ai/DeepSeek-R1）需要付费
                     .temperature(0.7)
                     .build())
             .build();
 
-    private final DeepSeekChatModel chatModel = new DeepSeekChatModel(openAiChatModel);
+    private final SiliconFlowChatModel chatModel = new SiliconFlowChatModel(openAiChatModel);
 
     @Test
     @Disabled

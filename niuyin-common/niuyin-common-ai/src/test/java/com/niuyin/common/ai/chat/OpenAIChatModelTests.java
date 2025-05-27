@@ -1,6 +1,5 @@
 package com.niuyin.common.ai.chat;
 
-import com.niuyin.common.ai.model.deepseek.DeepSeekChatModel;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.Message;
@@ -17,22 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link DeepSeekChatModel} 集成测试
+ * {@link OpenAiChatModel} 集成测试
  */
-public class DeepSeekChatModelTests {
+public class OpenAIChatModelTests {
 
-    private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
+    private final OpenAiChatModel chatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
-                    .baseUrl(DeepSeekChatModel.BASE_URL)
-                    .apiKey("sk-47dae8bc4dfc48f99bac223c93bef5b4") // apiKey
+                    .baseUrl("https://api.holdai.top")
+                    .apiKey("sk-aN6nWn3fILjrgLFT0fC4Aa60B72e4253826c77B29dC94f17") // apiKey
                     .build())
             .defaultOptions(OpenAiChatOptions.builder()
-                    .model("deepseek-chat") // 模型
+                    .model(OpenAiApi.ChatModel.GPT_4_O) // 模型
                     .temperature(0.7)
                     .build())
             .build();
-
-    private final DeepSeekChatModel chatModel = new DeepSeekChatModel(openAiChatModel);
 
     @Test
     @Disabled
@@ -46,6 +43,7 @@ public class DeepSeekChatModelTests {
         ChatResponse response = chatModel.call(new Prompt(messages));
         // 打印结果
         System.out.println(response);
+        System.out.println(response.getResult().getOutput());
     }
 
     @Test
@@ -59,7 +57,10 @@ public class DeepSeekChatModelTests {
         // 调用
         Flux<ChatResponse> flux = chatModel.stream(new Prompt(messages));
         // 打印结果
-        flux.doOnNext(System.out::println).then().block();
+        flux.doOnNext(response -> {
+//            System.out.println(response);
+            System.out.println(response.getResult().getOutput());
+        }).then().block();
     }
 
 }

@@ -1,7 +1,9 @@
 package com.niuyin.service.ai;
 
 import com.niuyin.common.cache.annotations.EnableCacheConfig;
+import com.niuyin.common.core.annotations.EnableUserTokenInterceptor;
 import com.niuyin.common.core.config.MybatisPlusConfig;
+import com.niuyin.common.core.filter.UserTokenInterceptor;
 import com.niuyin.common.core.swagger.Swagger2Configuration;
 import com.niuyin.feign.config.FeignConfig;
 import org.springframework.boot.CommandLineRunner;
@@ -22,7 +24,6 @@ import org.springframework.context.annotation.Import;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableCacheConfig
-@Import({MybatisPlusConfig.class})
 public class AiApplication implements CommandLineRunner {
 
     public static void main(String[] args) {

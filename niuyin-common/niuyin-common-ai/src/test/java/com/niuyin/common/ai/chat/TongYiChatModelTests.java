@@ -1,6 +1,8 @@
 package com.niuyin.common.ai.chat;
 
-import com.niuyin.common.ai.model.deepseek.DeepSeekChatModel;
+import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.Message;
@@ -8,31 +10,24 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link DeepSeekChatModel} 集成测试
+ * {@link DashScopeChatModel} 集成测试类
  */
-public class DeepSeekChatModelTests {
+public class TongYiChatModelTests {
 
-    private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
-            .openAiApi(OpenAiApi.builder()
-                    .baseUrl(DeepSeekChatModel.BASE_URL)
-                    .apiKey("sk-47dae8bc4dfc48f99bac223c93bef5b4") // apiKey
-                    .build())
-            .defaultOptions(OpenAiChatOptions.builder()
-                    .model("deepseek-chat") // 模型
-                    .temperature(0.7)
-                    .build())
-            .build();
-
-    private final DeepSeekChatModel chatModel = new DeepSeekChatModel(openAiChatModel);
+    private final DashScopeChatModel chatModel = new DashScopeChatModel(
+            new DashScopeApi("sk-7d903764249848cfa912733146da12d1"),
+            DashScopeChatOptions.builder()
+                    .withModel("qwen1.5-72b-chat") // 模型
+//                    .withModel("deepseek-r1") // 模型（deepseek-r1）
+//                    .withModel("deepseek-v3") // 模型（deepseek-v3）
+//                    .withModel("deepseek-r1-distill-qwen-1.5b") // 模型（deepseek-r1-distill-qwen-1.5b）
+                    .build());
 
     @Test
     @Disabled
@@ -46,6 +41,7 @@ public class DeepSeekChatModelTests {
         ChatResponse response = chatModel.call(new Prompt(messages));
         // 打印结果
         System.out.println(response);
+        System.out.println(response.getResult().getOutput());
     }
 
     @Test
@@ -59,7 +55,10 @@ public class DeepSeekChatModelTests {
         // 调用
         Flux<ChatResponse> flux = chatModel.stream(new Prompt(messages));
         // 打印结果
-        flux.doOnNext(System.out::println).then().block();
+        flux.doOnNext(response -> {
+//            System.out.println(response);
+            System.out.println(response.getResult().getOutput());
+        }).then().block();
     }
 
 }

@@ -38,6 +38,8 @@
         <spring.cloud.alibaba.version>2023.0.0.0-RC1</spring.cloud.alibaba.version> <!-- 2023.0.1.0 -->
         <!-- mysql -->
         <mysql.version>8.0.31</mysql.version>
+        <!-- druid -->
+        <druid.version>1.2.24</druid.version>
         <!-- mybatis-plus -->
         <mybatis.plus.version>3.5.2</mybatis.plus.version>
         <mybatis.plus357.version>3.5.5</mybatis.plus357.version>
@@ -257,6 +259,11 @@
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-3-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
             <!-- mybatis-plus -->
             <!--            <dependency>-->
             <!--                <groupId>com.baomidou</groupId>-->
@@ -346,22 +353,53 @@
                 <version>${transmittable-thread-local.version}</version>
             </dependency>
             <!-- swagger -->
-<!--            <dependency>-->
-<!--                <groupId>com.github.xiaoymin</groupId>-->
-<!--                <artifactId>knife4j-spring-boot-starter</artifactId>-->
-<!--                <version>${knife4j.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>io.springfox</groupId>-->
-<!--                <artifactId>springfox-swagger2</artifactId>-->
-<!--                <version>${swagger.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>io.springfox</groupId>-->
-<!--                <artifactId>springfox-swagger-ui</artifactId>-->
-<!--                <version>${swagger.version}</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>com.github.xiaoymin</groupId>-->
+            <!--                <artifactId>knife4j-spring-boot-starter</artifactId>-->
+            <!--                <version>${knife4j.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>io.springfox</groupId>-->
+            <!--                <artifactId>springfox-swagger2</artifactId>-->
+            <!--                <version>${swagger.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>io.springfox</groupId>-->
+            <!--                <artifactId>springfox-swagger-ui</artifactId>-->
+            <!--                <version>${swagger.version}</version>-->
+            <!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
+
+    <!-- 使用 huawei / aliyun 的 Maven 源，提升下载速度 -->
+    <repositories>
+        <repository>
+            <id>huaweicloud</id>
+            <name>huawei</name>
+            <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+        </repository>
+        <repository>
+            <id>aliyunmaven</id>
+            <name>aliyun</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
 </project>

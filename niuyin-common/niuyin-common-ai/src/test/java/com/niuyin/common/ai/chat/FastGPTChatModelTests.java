@@ -1,6 +1,5 @@
 package com.niuyin.common.ai.chat;
 
-import com.niuyin.common.ai.model.deepseek.DeepSeekChatModel;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.Message;
@@ -9,7 +8,6 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import reactor.core.publisher.Flux;
 
@@ -17,22 +15,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link DeepSeekChatModel} 集成测试
+ * 基于 {@link OpenAiChatModel} 集成 FastGPT 测试
  */
-public class DeepSeekChatModelTests {
+public class FastGPTChatModelTests {
 
-    private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
+    private final OpenAiChatModel chatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
-                    .baseUrl(DeepSeekChatModel.BASE_URL)
-                    .apiKey("sk-47dae8bc4dfc48f99bac223c93bef5b4") // apiKey
-                    .build())
-            .defaultOptions(OpenAiChatOptions.builder()
-                    .model("deepseek-chat") // 模型
-                    .temperature(0.7)
+                    .baseUrl("https://cloud.fastgpt.cn/api")
+                    .apiKey("fastgpt-aq") // apiKey
                     .build())
             .build();
-
-    private final DeepSeekChatModel chatModel = new DeepSeekChatModel(openAiChatModel);
 
     @Test
     @Disabled
@@ -46,6 +38,7 @@ public class DeepSeekChatModelTests {
         ChatResponse response = chatModel.call(new Prompt(messages));
         // 打印结果
         System.out.println(response);
+        System.out.println(response.getResult().getOutput());
     }
 
     @Test
@@ -59,7 +52,10 @@ public class DeepSeekChatModelTests {
         // 调用
         Flux<ChatResponse> flux = chatModel.stream(new Prompt(messages));
         // 打印结果
-        flux.doOnNext(System.out::println).then().block();
+        flux.doOnNext(response -> {
+//            System.out.println(response);
+            System.out.println(response.getResult().getOutput());
+        }).then().block();
     }
 
 }
