@@ -133,6 +133,13 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!--            ai -->
+            <dependency>
+                <groupId>com.niuyin</groupId>
+                <artifactId>niuyin-common-ai</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.niuyin</groupId>
                 <artifactId>niuyin-model</artifactId>

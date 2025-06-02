@@ -72,12 +72,12 @@
         </dependency>
 
         <!-- 向量存储：https://db-engines.com/en/ranking/vector+dbms -->
-        <dependency>
-            <!-- Qdrant：https://qdrant.tech/ -->
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-qdrant-store</artifactId>
-            <version>${spring-ai.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            &lt;!&ndash; Qdrant：https://qdrant.tech/ &ndash;&gt;-->
+<!--            <groupId>org.springframework.ai</groupId>-->
+<!--            <artifactId>spring-ai-qdrant-store</artifactId>-->
+<!--            <version>${spring-ai.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <!-- Redis：https://redis.io/docs/latest/develop/get-started/vector-database/ -->
@@ -91,12 +91,12 @@
             <artifactId>niuyin-common-cache</artifactId>
         </dependency>
 
-        <dependency>
-            <!-- Milvus：https://milvus.io/ -->
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-milvus-store</artifactId>
-            <version>${spring-ai.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            &lt;!&ndash; Milvus：https://milvus.io/ &ndash;&gt;-->
+<!--            <groupId>org.springframework.ai</groupId>-->
+<!--            <artifactId>spring-ai-milvus-store</artifactId>-->
+<!--            <version>${spring-ai.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <!-- Tika：负责内容的解析 -->

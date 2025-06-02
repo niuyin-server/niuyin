@@ -72,16 +72,20 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
         <!-- spring cloud alibaba dubbo -->
-        <!--        <dependency>-->
-        <!--            <groupId>com.alibaba.cloud</groupId>-->
-        <!--            <artifactId>spring-cloud-starter-dubbo</artifactId>-->
-        <!--        </dependency>-->
-        <!--        &lt;!&ndash;        dubbo api&ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.niuyin</groupId>-->
-        <!--            <artifactId>niuyin-dubbo</artifactId>-->
-        <!--            <version>1.0.0</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
+        </dependency>
+        <!--        dubbo api-->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-dubbo</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
@@ -128,10 +132,14 @@
             <groupId>com.niuyin</groupId>
             <artifactId>niuyin-common-cache</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.niuyin</groupId>-->
-<!--            <artifactId>niuyin-common-core</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.niuyin</groupId>
+            <artifactId>niuyin-common-ai</artifactId>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.niuyin</groupId>-->
+        <!--            <artifactId>niuyin-common-core</artifactId>-->
+        <!--        </dependency>-->
         <!--        <dependency>-->
         <!--            <groupId>org.springframework.boot</groupId>-->
         <!--            <artifactId>spring-boot-starter-webflux</artifactId>-->

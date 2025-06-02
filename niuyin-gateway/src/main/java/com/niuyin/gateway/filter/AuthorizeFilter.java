@@ -137,6 +137,8 @@ public class AuthorizeFilter implements GlobalFilter {
                 DataBuffer dataBuffer = response.bufferFactory().wrap(JSON.toJSONString(R.fail(401, "令牌失效，请重新登录")).getBytes());
                 return response.writeWith(Mono.just(dataBuffer));
             }
+            // todo 校验是否具有管理员权限
+
             //获取用户信息
             Object userId = claimsBody.get("id");
 

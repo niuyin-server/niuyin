@@ -27,4 +27,11 @@ public interface DubboMemberService {
      */
     List<Member> apiGetInIds(List<Long> userIds);
 
+    /**
+     * 根据用户名查询
+     *
+     * @param username 用户名
+     */
+    Member apiGetByUsername(String username);
+
 }

@@ -33,9 +33,6 @@ import com.niuyin.common.ai.model.suno.api.SunoApi;
 import com.niuyin.common.ai.model.xinghuo.XingHuoChatModel;
 import com.niuyin.common.core.utils.spring.SpringUtils;
 import io.micrometer.observation.ObservationRegistry;
-import io.milvus.client.MilvusServiceClient;
-import io.qdrant.client.QdrantClient;
-import io.qdrant.client.QdrantGrpcClient;
 import lombok.SneakyThrows;
 import org.springframework.ai.autoconfigure.azure.openai.AzureOpenAiAutoConfiguration;
 import org.springframework.ai.autoconfigure.azure.openai.AzureOpenAiChatProperties;
@@ -47,12 +44,8 @@ import org.springframework.ai.autoconfigure.ollama.OllamaAutoConfiguration;
 import org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration;
 import org.springframework.ai.autoconfigure.qianfan.QianFanAutoConfiguration;
 import org.springframework.ai.autoconfigure.stabilityai.StabilityAiImageAutoConfiguration;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientConnectionDetails;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.ai.autoconfigure.vectorstore.qdrant.QdrantVectorStoreAutoConfiguration;
-import org.springframework.ai.autoconfigure.vectorstore.qdrant.QdrantVectorStoreProperties;
 import org.springframework.ai.autoconfigure.vectorstore.redis.RedisVectorStoreAutoConfiguration;
 import org.springframework.ai.autoconfigure.vectorstore.redis.RedisVectorStoreProperties;
 import org.springframework.ai.autoconfigure.zhipuai.ZhiPuAiAutoConfiguration;
@@ -94,10 +87,8 @@ import org.springframework.ai.stabilityai.StabilityAiImageModel;
 import org.springframework.ai.stabilityai.api.StabilityAiApi;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
 import org.springframework.ai.vectorstore.observation.DefaultVectorStoreObservationConvention;
 import org.springframework.ai.vectorstore.observation.VectorStoreObservationConvention;
-import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.ai.zhipuai.*;
 import org.springframework.ai.zhipuai.api.ZhiPuAiApi;
@@ -234,7 +225,7 @@ public class AiModelFactoryImpl implements AiModelFactory {
             case OPENAI:
                 return buildOpenAiImageModel(apiKey, url);
             case SILICON_FLOW:
-                return buildSiliconFlowImageModel(apiKey,url);
+                return buildSiliconFlowImageModel(apiKey, url);
             case STABLE_DIFFUSION:
                 return buildStabilityAiImageModel(apiKey, url);
             default:
@@ -294,15 +285,15 @@ public class AiModelFactoryImpl implements AiModelFactory {
             if (type == SimpleVectorStore.class) {
                 return buildSimpleVectorStore(embeddingModel);
             }
-            if (type == QdrantVectorStore.class) {
-                return buildQdrantVectorStore(embeddingModel);
-            }
+//            if (type == QdrantVectorStore.class) {
+//                return buildQdrantVectorStore(embeddingModel);
+//            }
             if (type == RedisVectorStore.class) {
                 return buildRedisVectorStore(embeddingModel, metadataFields);
             }
-            if (type == MilvusVectorStore.class) {
-                return buildMilvusVectorStore(embeddingModel);
-            }
+//            if (type == MilvusVectorStore.class) {
+//                return buildMilvusVectorStore(embeddingModel);
+//            }
             throw new IllegalArgumentException(StrUtil.format("未知类型({})", type));
         });
     }
@@ -427,7 +418,7 @@ public class AiModelFactoryImpl implements AiModelFactory {
      * 可参考 {@link MoonshotAutoConfiguration} 的 moonshotChatModel 方法
      */
     private MoonshotChatModel buildMoonshotChatModel(String apiKey, String url) {
-        MoonshotApi moonshotApi = StrUtil.isEmpty(url)? new MoonshotApi(apiKey)
+        MoonshotApi moonshotApi = StrUtil.isEmpty(url) ? new MoonshotApi(apiKey)
                 : new MoonshotApi(url, apiKey);
         MoonshotChatOptions options = MoonshotChatOptions.builder().model(MoonshotApi.DEFAULT_CHAT_MODEL).build();
         return new MoonshotChatModel(moonshotApi, options, getFunctionCallbackResolver(), DEFAULT_RETRY_TEMPLATE);
@@ -463,6 +454,7 @@ public class AiModelFactoryImpl implements AiModelFactory {
     }
 
     // TODO @芋艿：手头暂时没密钥，使用建议再测试下
+
     /**
      * 可参考 {@link AzureOpenAiAutoConfiguration}
      */
@@ -539,7 +531,7 @@ public class AiModelFactoryImpl implements AiModelFactory {
      * 可参考 {@link MiniMaxAutoConfiguration} 的 miniMaxEmbeddingModel 方法
      */
     private EmbeddingModel buildMiniMaxEmbeddingModel(String apiKey, String url, String model) {
-        MiniMaxApi miniMaxApi = StrUtil.isEmpty(url)? new MiniMaxApi(apiKey)
+        MiniMaxApi miniMaxApi = StrUtil.isEmpty(url) ? new MiniMaxApi(apiKey)
                 : new MiniMaxApi(url, apiKey);
         MiniMaxEmbeddingOptions miniMaxEmbeddingOptions = MiniMaxEmbeddingOptions.builder().model(model).build();
         return new MiniMaxEmbeddingModel(miniMaxApi, MetadataMode.EMBED, miniMaxEmbeddingOptions);
@@ -575,6 +567,7 @@ public class AiModelFactoryImpl implements AiModelFactory {
     }
 
     // TODO @芋艿：手头暂时没密钥，使用建议再测试下
+
     /**
      * 可参考 {@link AzureOpenAiAutoConfiguration} 的 azureOpenAiEmbeddingModel 方法
      */
@@ -627,24 +620,24 @@ public class AiModelFactoryImpl implements AiModelFactory {
     /**
      * 参考 {@link QdrantVectorStoreAutoConfiguration} 的 vectorStore 方法
      */
-    @SneakyThrows
-    private QdrantVectorStore buildQdrantVectorStore(EmbeddingModel embeddingModel) {
-        QdrantVectorStoreAutoConfiguration configuration = new QdrantVectorStoreAutoConfiguration();
-        QdrantVectorStoreProperties properties = SpringUtil.getBean(QdrantVectorStoreProperties.class);
-        // 参考 QdrantVectorStoreAutoConfiguration 实现，创建 QdrantClient 对象
-        QdrantGrpcClient.Builder grpcClientBuilder = QdrantGrpcClient.newBuilder(
-                properties.getHost(), properties.getPort(), properties.isUseTls());
-        if (StrUtil.isNotEmpty(properties.getApiKey())) {
-            grpcClientBuilder.withApiKey(properties.getApiKey());
-        }
-        QdrantClient qdrantClient = new QdrantClient(grpcClientBuilder.build());
-        // 创建 QdrantVectorStore 对象
-        QdrantVectorStore vectorStore = configuration.vectorStore(embeddingModel, properties, qdrantClient,
-                getObservationRegistry(), getCustomObservationConvention(), getBatchingStrategy());
-        // 初始化索引
-        vectorStore.afterPropertiesSet();
-        return vectorStore;
-    }
+//    @SneakyThrows
+//    private QdrantVectorStore buildQdrantVectorStore(EmbeddingModel embeddingModel) {
+//        QdrantVectorStoreAutoConfiguration configuration = new QdrantVectorStoreAutoConfiguration();
+//        QdrantVectorStoreProperties properties = SpringUtil.getBean(QdrantVectorStoreProperties.class);
+//        // 参考 QdrantVectorStoreAutoConfiguration 实现，创建 QdrantClient 对象
+//        QdrantGrpcClient.Builder grpcClientBuilder = QdrantGrpcClient.newBuilder(
+//                properties.getHost(), properties.getPort(), properties.isUseTls());
+//        if (StrUtil.isNotEmpty(properties.getApiKey())) {
+//            grpcClientBuilder.withApiKey(properties.getApiKey());
+//        }
+//        QdrantClient qdrantClient = new QdrantClient(grpcClientBuilder.build());
+//        // 创建 QdrantVectorStore 对象
+//        QdrantVectorStore vectorStore = configuration.vectorStore(embeddingModel, properties, qdrantClient,
+//                getObservationRegistry(), getCustomObservationConvention(), getBatchingStrategy());
+//        // 初始化索引
+//        vectorStore.afterPropertiesSet();
+//        return vectorStore;
+//    }
 
     /**
      * 参考 {@link RedisVectorStoreAutoConfiguration} 的 vectorStore 方法
@@ -683,40 +676,53 @@ public class AiModelFactoryImpl implements AiModelFactory {
     /**
      * 参考 {@link MilvusVectorStoreAutoConfiguration} 的 vectorStore 方法
      */
-    @SneakyThrows
-    private MilvusVectorStore buildMilvusVectorStore(EmbeddingModel embeddingModel) {
-        MilvusVectorStoreAutoConfiguration configuration = new MilvusVectorStoreAutoConfiguration();
-        // 获取配置属性
-        MilvusVectorStoreProperties serverProperties = SpringUtil.getBean(MilvusVectorStoreProperties.class);
-        MilvusServiceClientProperties clientProperties = SpringUtil.getBean(MilvusServiceClientProperties.class);
-
-        // 创建 MilvusServiceClient 对象
-        MilvusServiceClient milvusClient = configuration.milvusClient(serverProperties, clientProperties,
-                new MilvusServiceClientConnectionDetails() {
-
-                    @Override
-                    public String getHost() {
-                        return clientProperties.getHost();
-                    }
-
-                    @Override
-                    public int getPort() {
-                        return clientProperties.getPort();
-                    }
-
-                }
-        );
-        // 创建 MilvusVectorStore 对象
-        MilvusVectorStore vectorStore = configuration.vectorStore(milvusClient, embeddingModel, serverProperties,
-                getBatchingStrategy(), getObservationRegistry(), getCustomObservationConvention());
-
-        // 初始化索引
-        vectorStore.afterPropertiesSet();
-        return vectorStore;
-    }
-
+//    @SneakyThrows
+//    private MilvusVectorStore buildMilvusVectorStore(EmbeddingModel embeddingModel) {
+//        MilvusVectorStoreAutoConfiguration configuration = new MilvusVectorStoreAutoConfiguration();
+//        // 获取配置属性
+//        MilvusVectorStoreProperties serverProperties = SpringUtil.getBean(MilvusVectorStoreProperties.class);
+//        MilvusServiceClientProperties clientProperties = SpringUtil.getBean(MilvusServiceClientProperties.class);
+//
+//        // 创建 MilvusServiceClient 对象
+//        MilvusServiceClient milvusClient = configuration.milvusClient(serverProperties, clientProperties,
+//                new MilvusServiceClientConnectionDetails() {
+//
+//                    @Override
+//                    public String getHost() {
+//                        return clientProperties.getHost();
+//                    }
+//
+//                    @Override
+//                    public int getPort() {
+//                        return clientProperties.getPort();
+//                    }
+//
+//                }
+//        );
+//        // 创建 MilvusVectorStore 对象
+//        MilvusVectorStore vectorStore = configuration.vectorStore(milvusClient, embeddingModel, serverProperties,
+//                getBatchingStrategy(), getObservationRegistry(), getCustomObservationConvention());
+//
+//        // 初始化索引
+//        vectorStore.afterPropertiesSet();
+//        return vectorStore;
+//    }
     private static ObjectProvider<ObservationRegistry> getObservationRegistry() {
         return new ObjectProvider<>() {
+            @Override
+            public ObservationRegistry getObject(Object... args) throws BeansException {
+                return null;
+            }
+
+            @Override
+            public ObservationRegistry getIfAvailable() throws BeansException {
+                return null;
+            }
+
+            @Override
+            public ObservationRegistry getIfUnique() throws BeansException {
+                return null;
+            }
 
             @Override
             public ObservationRegistry getObject() throws BeansException {
@@ -728,6 +734,21 @@ public class AiModelFactoryImpl implements AiModelFactory {
 
     private static ObjectProvider<VectorStoreObservationConvention> getCustomObservationConvention() {
         return new ObjectProvider<>() {
+            @Override
+            public VectorStoreObservationConvention getObject(Object... args) throws BeansException {
+                return null;
+            }
+
+            @Override
+            public VectorStoreObservationConvention getIfAvailable() throws BeansException {
+                return null;
+            }
+
+            @Override
+            public VectorStoreObservationConvention getIfUnique() throws BeansException {
+                return null;
+            }
+
             @Override
             public VectorStoreObservationConvention getObject() throws BeansException {
                 return new DefaultVectorStoreObservationConvention();

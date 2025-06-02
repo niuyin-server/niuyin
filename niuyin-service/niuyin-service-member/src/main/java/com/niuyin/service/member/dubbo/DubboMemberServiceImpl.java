@@ -1,5 +1,6 @@
 package com.niuyin.service.member.dubbo;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.member.domain.Member;
 import com.niuyin.service.member.service.IMemberService;
@@ -44,5 +45,15 @@ public class DubboMemberServiceImpl implements DubboMemberService {
     @Override
     public List<Member> apiGetInIds(List<Long> userIds) {
         return memberService.queryInIds(userIds);
+    }
+
+    /**
+     * 根据用户名查询
+     *
+     * @param username 用户名
+     */
+    @Override
+    public Member apiGetByUsername(String username) {
+        return memberService.getOne(Wrappers.<Member>lambdaQuery().eq(Member::getUserName, username));
     }
 }
