@@ -1,7 +1,7 @@
 package com.niuyin.service.ai.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.niuyin.model.ai.ApiKeyDO;
+import com.niuyin.model.ai.domain.model.ApiKeyDO;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

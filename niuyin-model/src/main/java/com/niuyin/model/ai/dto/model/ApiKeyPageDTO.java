@@ -1,4 +1,4 @@
-package com.niuyin.model.ai;
+package com.niuyin.model.ai.dto.model;
 
 import com.niuyin.model.common.dto.PageDTO;
 import lombok.Data;

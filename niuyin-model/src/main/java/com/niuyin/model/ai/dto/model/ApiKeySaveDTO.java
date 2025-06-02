@@ -1,4 +1,4 @@
-package com.niuyin.model.ai;
+package com.niuyin.model.ai.dto.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

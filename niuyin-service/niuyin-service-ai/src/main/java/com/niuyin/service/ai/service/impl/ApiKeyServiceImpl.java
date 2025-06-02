@@ -7,10 +7,11 @@ import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.ApiKeyDO;
-import com.niuyin.model.ai.ApiKeyPageDTO;
-import com.niuyin.model.ai.ApiKeySaveDTO;
-import com.niuyin.model.ai.ApiKeyStateDTO;
+import com.niuyin.model.ai.domain.model.ApiKeyDO;
+import com.niuyin.model.ai.dto.model.ApiKeyPageDTO;
+import com.niuyin.model.ai.dto.model.ApiKeySaveDTO;
+import com.niuyin.model.ai.dto.model.ApiKeyStateDTO;
+import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.service.ai.mapper.ApiKeyMapper;
 import com.niuyin.service.ai.service.IApiKeyService;
 import jakarta.annotation.Resource;
@@ -67,5 +68,14 @@ public class ApiKeyServiceImpl extends ServiceImpl<ApiKeyMapper, ApiKeyDO> imple
     public void updateApiKeyState(ApiKeyStateDTO dto) {
         ApiKeyDO apiKey = BeanCopyUtils.copyBean(dto, ApiKeyDO.class);
         apiKeyMapper.updateById(apiKey);
+    }
+
+    @Override
+    public ApiKeyDO validateApiKey(Long id) {
+        ApiKeyDO apiKey = getApiKey(id);
+        if (StateFlagEnum.isDisable(apiKey.getStateFlag())) {
+            throw new RuntimeException("密钥已被禁用");
+        }
+        return apiKey;
     }
 }

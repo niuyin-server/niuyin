@@ -1,13 +1,12 @@
-package com.niuyin.model.ai;
+package com.niuyin.model.ai.dto.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-@Schema(description = "管理后台 - AI API 密钥状态修改 Request VO")
+@Schema(description = "管理后台 - AI 模型状态修改 Request VO")
 @Data
-public class ApiKeyStateDTO {
+public class AiModelStateDTO {
 
     @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "23538")
     @NotNull(message = "编号不能为空")

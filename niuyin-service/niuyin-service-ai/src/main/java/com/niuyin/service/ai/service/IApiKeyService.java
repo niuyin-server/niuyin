@@ -2,10 +2,10 @@ package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.model.ai.ApiKeyDO;
-import com.niuyin.model.ai.ApiKeyPageDTO;
-import com.niuyin.model.ai.ApiKeySaveDTO;
-import com.niuyin.model.ai.ApiKeyStateDTO;
+import com.niuyin.model.ai.domain.model.ApiKeyDO;
+import com.niuyin.model.ai.dto.model.ApiKeyPageDTO;
+import com.niuyin.model.ai.dto.model.ApiKeySaveDTO;
+import com.niuyin.model.ai.dto.model.ApiKeyStateDTO;
 
 /**
  * AI API 密钥表(AiApiKey)表服务接口
@@ -26,4 +26,6 @@ public interface IApiKeyService extends IService<ApiKeyDO> {
     PageDataInfo<ApiKeyDO> getApiKeyPage(ApiKeyPageDTO pageDTO);
 
     void updateApiKeyState(ApiKeyStateDTO dto);
+
+    ApiKeyDO validateApiKey(Long id);
 }

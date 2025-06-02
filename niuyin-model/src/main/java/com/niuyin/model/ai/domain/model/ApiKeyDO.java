@@ -1,4 +1,4 @@
-package com.niuyin.model.ai;
+package com.niuyin.model.ai.domain.model;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -6,8 +6,6 @@ import com.niuyin.model.common.BaseDO;
 import lombok.Data;
 
 import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * AI API 密钥表(AiApiKey)实体类

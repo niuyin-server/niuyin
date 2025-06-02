@@ -11,28 +11,28 @@ import java.util.Arrays;
  */
 @Getter
 @RequiredArgsConstructor
-public enum AiModelTypeEnum implements ArrayValuable<Integer> {
+public enum AiModelTypeEnum implements ArrayValuable<String> {
 
-    CHAT(1, "对话"),
-    IMAGE(2, "绘图"),
-    VOICE(3, "语音"),
-    VIDEO(4, "视频"),
-    EMBEDDING(5, "向量"),
-    RERANK(6, "重排序");
+    CHAT("1", "对话"),
+    IMAGE("2", "绘图"),
+    VOICE("3", "语音"),
+    VIDEO("4", "视频"),
+    EMBEDDING("5", "向量"),
+    RERANK("6", "重排序");
 
     /**
      * 类型
      */
-    private final Integer type;
+    private final String type;
     /**
      * 类型名
      */
     private final String name;
 
-    public static final Integer[] ARRAYS = Arrays.stream(values()).map(AiModelTypeEnum::getType).toArray(Integer[]::new);
+    public static final String[] ARRAYS = Arrays.stream(values()).map(AiModelTypeEnum::getType).toArray(String[]::new);
 
     @Override
-    public Integer[] array() {
+    public String[] array() {
         return ARRAYS;
     }
 

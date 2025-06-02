@@ -3,10 +3,11 @@ package com.niuyin.service.ai.controller.admin;
 import com.niuyin.common.ai.enums.AiPlatformEnum;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.model.ai.ApiKeyDO;
-import com.niuyin.model.ai.ApiKeyPageDTO;
-import com.niuyin.model.ai.ApiKeySaveDTO;
-import com.niuyin.model.ai.ApiKeyStateDTO;
+import com.niuyin.model.ai.domain.model.ApiKeyDO;
+import com.niuyin.model.ai.dto.model.ApiKeyPageDTO;
+import com.niuyin.model.ai.dto.model.ApiKeySaveDTO;
+import com.niuyin.model.ai.dto.model.ApiKeyStateDTO;
+import com.niuyin.model.ai.vo.model.ApiKeySimpleVO;
 import com.niuyin.model.common.vo.DictVO;
 import com.niuyin.service.ai.service.IApiKeyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static com.niuyin.common.core.utils.CollectionUtils.convertList;
 
 /**
  * AI API 密钥表(AiApiKey)表控制层
@@ -45,6 +48,7 @@ public class AdminApiKeyController {
         apiKeyService.updateApiKey(dto);
         return R.ok(true);
     }
+
     @PutMapping("/updateState")
     @Operation(summary = "更新 API 密钥状态")
     public R<Boolean> updateApiKey(@Valid @RequestBody ApiKeyStateDTO dto) {
@@ -82,11 +86,11 @@ public class AdminApiKeyController {
         return R.ok(res);
     }
 
-//    @GetMapping("/simple-list")
-//    @Operation(summary = "获得 API 密钥分页列表")
-//    public R<List<AiModelRespVO>> getApiKeySimpleList() {
-//        List<AiApiKeyDO> list = apiKeyService.getApiKeyList();
-//        return R.ok(convertList(list, key -> new AiModelRespVO().setId(key.getId()).setName(key.getName())));
-//    }
+    @GetMapping("/simple-list")
+    @Operation(summary = "获得 API 密钥分页列表")
+    public R<List<ApiKeySimpleVO>> getApiKeySimpleList() {
+        List<ApiKeyDO> list = apiKeyService.list();
+        return R.ok(convertList(list, key -> new ApiKeySimpleVO().setId(key.getId()).setName(key.getName()).setPlatform(key.getPlatform())));
+    }
 }
 

@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * {@link ZhiPuAiChatModel} 的集成测试
  */
-public class ZhiPuAiChatModelTests {
+public class ZhiPuChatModelTests {
 
     private final ZhiPuAiChatModel chatModel = new ZhiPuAiChatModel(
             new ZhiPuAiApi("32f84543e54eee31f8d56b2bd6020573.3vh9idLJZ2ZhxDEs"), // 密钥
