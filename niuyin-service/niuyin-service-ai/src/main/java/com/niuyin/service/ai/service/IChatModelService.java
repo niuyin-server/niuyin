@@ -11,6 +11,8 @@ import org.springframework.ai.image.ImageModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 /**
  * AI 聊天模型表(AiChatModel)表服务接口
  *
@@ -37,4 +39,6 @@ public interface IChatModelService extends IService<ChatModelDO> {
     ChatModel getChatModel(Long id);
 
     ImageModel getImageModel(Long id);
+
+    List<ChatModelDO> getModelListByStateAndTypeAndPlatform(String state, String type, String platform);
 }

@@ -7,7 +7,8 @@ import com.niuyin.model.ai.domain.model.ChatModelDO;
 import com.niuyin.model.ai.dto.model.AiModelPageDTO;
 import com.niuyin.model.ai.dto.model.AiModelSaveDTO;
 import com.niuyin.model.ai.dto.model.AiModelStateDTO;
-import com.niuyin.model.ai.dto.model.ApiKeyStateDTO;
+import com.niuyin.model.ai.vo.model.ChatModelSimpleVO;
+import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.model.common.vo.DictVO;
 import com.niuyin.service.ai.service.IChatModelService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static com.niuyin.common.core.utils.CollectionUtils.convertList;
 
 
 /**
@@ -85,18 +88,21 @@ public class AdminChatModelController {
         return R.ok(res);
     }
 
-//    @GetMapping("/simple-list")
-//    @Operation(summary = "获得模型列表")
-//    @Parameter(name = "type", description = "类型", required = true, example = "1")
-//    @Parameter(name = "platform", description = "平台", example = "midjourney")
-//    public CommonResult<List<AiModelRespVO>> getModelSimpleList(
-//            @RequestParam("type") Integer type,
-//            @RequestParam(value = "platform", required = false) String platform) {
-//        List<AiModelDO> list = chatModelService.getModelListByStatusAndType(
-//                CommonStatusEnum.ENABLE.getStatus(), type, platform);
-//        return success(convertList(list, model -> new AiModelRespVO().setId(model.getId())
-//                .setName(model.getName()).setModel(model.getModel()).setPlatform(model.getPlatform())));
-//    }
+    @GetMapping("/simple-list")
+    @Operation(summary = "获得模型列表")
+    @Parameter(name = "type", description = "类型", example = "1")
+    @Parameter(name = "platform", description = "平台", example = "midjourney")
+    public R<List<ChatModelSimpleVO>> getModelSimpleList(ModelSimpleListDTO dto) {
+        List<ChatModelDO> list = chatModelService.getModelListByStateAndTypeAndPlatform(StateFlagEnum.ENABLE.getCode(), dto.type, dto.platform);
+        return R.ok(convertList(list, model -> new ChatModelSimpleVO().setId(model.getId())
+                .setName(model.getName())
+                .setModel(model.getModel())
+                .setPlatform(model.getPlatform())
+                .setType(model.getType())));
+    }
+
+    public record ModelSimpleListDTO(String type, String platform) {
+    }
 
 
 }

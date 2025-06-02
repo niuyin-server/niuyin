@@ -23,6 +23,9 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
+
 /**
  * AI 聊天模型表(AiChatModel)表服务实现类
  *
@@ -122,4 +125,12 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         return modelFactory.getOrCreateImageModel(platform, apiKey.getApiKey(), apiKey.getUrl());
     }
 
+    @Override
+    public List<ChatModelDO> getModelListByStateAndTypeAndPlatform(String state, String type, String platform) {
+        LambdaQueryWrapper<ChatModelDO> qw = new LambdaQueryWrapper<>();
+        qw.eq(StringUtils.isNotBlank(state), ChatModelDO::getStateFlag, state)
+                .eq(StringUtils.isNotBlank(type), ChatModelDO::getType, type)
+                .eq(StringUtils.isNotBlank(platform), ChatModelDO::getPlatform, platform);
+        return this.list(qw);
+    }
 }

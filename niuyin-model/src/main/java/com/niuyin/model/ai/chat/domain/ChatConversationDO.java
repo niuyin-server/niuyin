@@ -34,6 +34,10 @@ public class ChatConversationDO extends BaseDO {
      */
     private Long userId;
     /**
+     * 角色编号
+     */
+    private Long roleId;
+    /**
      * 对话标题
      */
     private String title;
