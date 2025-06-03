@@ -20,10 +20,14 @@ import com.niuyin.service.ai.service.IApiKeyService;
 import com.niuyin.service.ai.service.IChatModelService;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -107,6 +111,15 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         chatModelMapper.updateById(modelDO);
     }
 
+    @Override
+    public List<ChatModelDO> getModelListByStateAndTypeAndPlatform(String state, String type, String platform) {
+        LambdaQueryWrapper<ChatModelDO> qw = new LambdaQueryWrapper<>();
+        qw.eq(StringUtils.isNotBlank(state), ChatModelDO::getStateFlag, state)
+                .eq(StringUtils.isNotBlank(type), ChatModelDO::getType, type)
+                .eq(StringUtils.isNotBlank(platform), ChatModelDO::getPlatform, platform);
+        return this.list(qw);
+    }
+
     // ========== 与 Spring AI 集成 ==========
 
     @Override
@@ -125,12 +138,27 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         return modelFactory.getOrCreateImageModel(platform, apiKey.getApiKey(), apiKey.getUrl());
     }
 
+    /**
+     * 获得 VectorStore 对象
+     *
+     * @param id             编号
+     * @param metadataFields 元数据的定义
+     * @return VectorStore 对象
+     */
     @Override
-    public List<ChatModelDO> getModelListByStateAndTypeAndPlatform(String state, String type, String platform) {
-        LambdaQueryWrapper<ChatModelDO> qw = new LambdaQueryWrapper<>();
-        qw.eq(StringUtils.isNotBlank(state), ChatModelDO::getStateFlag, state)
-                .eq(StringUtils.isNotBlank(type), ChatModelDO::getType, type)
-                .eq(StringUtils.isNotBlank(platform), ChatModelDO::getPlatform, platform);
-        return this.list(qw);
+    public VectorStore getOrCreateVectorStore(Long id, Map<String, Class<?>> metadataFields) {
+        // 获取模型 + 密钥
+        ChatModelDO model = validateModel(id);
+        ApiKeyDO apiKey = apiKeyService.validateApiKey(model.getKeyId());
+        AiPlatformEnum platform = AiPlatformEnum.validatePlatform(apiKey.getPlatform());
+
+        // 创建或获取 EmbeddingModel 对象
+        EmbeddingModel embeddingModel = modelFactory.getOrCreateEmbeddingModel(platform, apiKey.getApiKey(), apiKey.getUrl(), model.getModel());
+
+        // 创建或获取 VectorStore 对象
+        return modelFactory.getOrCreateVectorStore(SimpleVectorStore.class, embeddingModel, metadataFields);
+//         return modelFactory.getOrCreateVectorStore(QdrantVectorStore.class, embeddingModel, metadataFields);
+//         return modelFactory.getOrCreateVectorStore(RedisVectorStore.class, embeddingModel, metadataFields);
+//         return modelFactory.getOrCreateVectorStore(MilvusVectorStore.class, embeddingModel, metadataFields);
     }
 }

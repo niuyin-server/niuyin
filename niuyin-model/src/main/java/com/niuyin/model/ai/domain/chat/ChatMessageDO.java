@@ -1,14 +1,18 @@
-package com.niuyin.model.ai.chat.domain;
+package com.niuyin.model.ai.domain.chat;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.niuyin.model.ai.domain.knowledge.KnowledgeSegmentDO;
+import com.niuyin.model.ai.domain.model.ChatModelDO;
+import com.niuyin.model.ai.domain.model.ModelRoleDO;
 import com.niuyin.model.common.BaseDO;
+import com.niuyin.model.common.handler.LongListTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * AI 聊天消息表(ai_chat_message)实体类
@@ -51,5 +55,32 @@ public class ChatMessageDO extends BaseDO {
      * 是否携带上下文[0否1是]
      */
     private String useContext;
+
+    /**
+     * 角色编号
+     *
+     * 关联 {@link ModelRoleDO#getId()} 字段
+     */
+    private Long roleId;
+
+    /**
+     * 模型标志
+     *
+     * 冗余 {@link ChatModelDO#getModel()}
+     */
+    private String model;
+    /**
+     * 模型编号
+     *
+     * 关联 {@link ChatModelDO#getId()} 字段
+     */
+    private Long modelId;
+    /**
+     * 知识库段落编号数组
+     *
+     * 关联 {@link KnowledgeSegmentDO#getId()} 字段
+     */
+    @TableField(typeHandler = LongListTypeHandler.class)
+    private List<Long> segmentIds;
 
 }

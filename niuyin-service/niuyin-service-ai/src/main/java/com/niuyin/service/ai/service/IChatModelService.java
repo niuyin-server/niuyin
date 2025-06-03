@@ -8,10 +8,12 @@ import com.niuyin.model.ai.dto.model.AiModelSaveDTO;
 import com.niuyin.model.ai.dto.model.AiModelStateDTO;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * AI 聊天模型表(AiChatModel)表服务接口
@@ -41,4 +43,13 @@ public interface IChatModelService extends IService<ChatModelDO> {
     ImageModel getImageModel(Long id);
 
     List<ChatModelDO> getModelListByStateAndTypeAndPlatform(String state, String type, String platform);
+
+    /**
+     * 获得 VectorStore 对象
+     *
+     * @param id 编号
+     * @param metadataFields 元数据的定义
+     * @return VectorStore 对象
+     */
+    VectorStore getOrCreateVectorStore(Long id, Map<String, Class<?>> metadataFields);
 }

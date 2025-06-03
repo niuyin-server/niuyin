@@ -1,10 +1,8 @@
-package com.niuyin.model.ai.chat.domain;
+package com.niuyin.model.ai.domain.chat;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.niuyin.model.common.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,6 +31,10 @@ public class ChatConversationDO extends BaseDO {
      * 用户编号
      */
     private Long userId;
+    /**
+     * 模型编号
+     */
+    private Long modelId;
     /**
      * 角色编号
      */

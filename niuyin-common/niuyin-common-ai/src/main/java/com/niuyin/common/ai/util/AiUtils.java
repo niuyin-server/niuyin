@@ -15,6 +15,7 @@ import org.springframework.ai.qianfan.QianFanChatOptions;
 import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -60,6 +61,44 @@ public class AiUtils {
             case OLLAMA:
                 return OllamaOptions.builder().model(model).temperature(temperature).numPredict(maxTokens)
                         .toolNames(toolNames).build();
+            default:
+                throw new IllegalArgumentException(StrUtil.format("未知平台({})", platform));
+        }
+    }
+
+    public static ChatOptions buildChatOptions(AiPlatformEnum platform, String model, Double temperature, Integer maxTokens, Set<String> toolNames, Map<String, Object> toolContext) {
+        toolNames = ObjUtil.defaultIfNull(toolNames, Collections.emptySet());
+        // noinspection EnhancedSwitchMigration
+        switch (platform) {
+            case TONG_YI:
+                return DashScopeChatOptions.builder().withModel(model).withTemperature(temperature).withMaxToken(maxTokens)
+                        .withFunctions(toolNames).withToolContext(toolContext).build();
+            case YI_YAN:
+                return QianFanChatOptions.builder().model(model).temperature(temperature).maxTokens(maxTokens).build();
+            case ZHI_PU:
+                return ZhiPuAiChatOptions.builder().model(model).temperature(temperature).maxTokens(maxTokens)
+                        .functions(toolNames).toolContext(toolContext).build();
+            case MINI_MAX:
+                return MiniMaxChatOptions.builder().model(model).temperature(temperature).maxTokens(maxTokens)
+                        .functions(toolNames).toolContext(toolContext).build();
+            case MOONSHOT:
+                return MoonshotChatOptions.builder().model(model).temperature(temperature).maxTokens(maxTokens)
+                        .functions(toolNames).toolContext(toolContext).build();
+            case OPENAI:
+            case DEEP_SEEK: // 复用 OpenAI 客户端
+            case DOU_BAO: // 复用 OpenAI 客户端
+            case HUN_YUAN: // 复用 OpenAI 客户端
+            case XING_HUO: // 复用 OpenAI 客户端
+            case SILICON_FLOW: // 复用 OpenAI 客户端
+            case BAI_CHUAN: // 复用 OpenAI 客户端
+                return OpenAiChatOptions.builder().model(model).temperature(temperature).maxTokens(maxTokens)
+                        .toolNames(toolNames).toolContext(toolContext).build();
+            case AZURE_OPENAI:
+                return AzureOpenAiChatOptions.builder().deploymentName(model).temperature(temperature).maxTokens(maxTokens)
+                        .toolNames(toolNames).toolContext(toolContext).build();
+            case OLLAMA:
+                return OllamaOptions.builder().model(model).temperature(temperature).numPredict(maxTokens)
+                        .toolNames(toolNames).toolContext(toolContext).build();
             default:
                 throw new IllegalArgumentException(StrUtil.format("未知平台({})", platform));
         }

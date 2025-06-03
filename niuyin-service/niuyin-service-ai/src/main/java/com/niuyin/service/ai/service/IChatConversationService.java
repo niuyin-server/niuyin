@@ -2,7 +2,7 @@ package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.model.ai.chat.domain.ChatConversationDO;
+import com.niuyin.model.ai.domain.chat.ChatConversationDO;
 import com.niuyin.model.common.dto.PageDTO;
 
 /**
@@ -14,4 +14,6 @@ import com.niuyin.model.common.dto.PageDTO;
 public interface IChatConversationService extends IService<ChatConversationDO> {
 
     IPage<ChatConversationDO> getList(PageDTO dto);
+
+    ChatConversationDO validateChatConversationExists(Long id);
 }

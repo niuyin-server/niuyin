@@ -5,7 +5,7 @@ import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
-import com.niuyin.model.ai.chat.domain.ChatConversationDO;
+import com.niuyin.model.ai.domain.chat.ChatConversationDO;
 import com.niuyin.model.ai.domain.model.ModelRoleDO;
 import com.niuyin.model.ai.dto.model.web.ChatConversationSaveDTO;
 import com.niuyin.model.common.dto.PageDTO;

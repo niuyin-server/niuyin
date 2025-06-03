@@ -1,11 +1,15 @@
 package com.niuyin.model.ai.domain.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.niuyin.model.ai.domain.knowledge.KnowledgeDO;
 import com.niuyin.model.common.BaseDO;
+import com.niuyin.model.common.handler.LongListTypeHandler;
 import lombok.Data;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * AI 聊天角色表(ModelRole)实体类
@@ -63,6 +67,20 @@ public class ModelRoleDO extends BaseDO {
      * 角色排序
      */
     private Integer sort;
+    /**
+     * 引用的知识库编号列表
+     * <p>
+     * 关联 {@link KnowledgeDO#getId()} 字段
+     */
+    @TableField(typeHandler = LongListTypeHandler.class)
+    private List<Long> knowledgeIds;
+    /**
+     * 引用的工具编号列表
+     * <p>
+     * 关联 {@link ToolDO#getId()} 字段
+     */
+    @TableField(typeHandler = LongListTypeHandler.class)
+    private List<Long> toolIds;
 
 
 }

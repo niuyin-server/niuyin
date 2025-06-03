@@ -1,7 +1,7 @@
 package com.niuyin.service.ai.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.niuyin.model.ai.chat.domain.ChatConversationDO;
+import com.niuyin.model.ai.domain.chat.ChatConversationDO;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

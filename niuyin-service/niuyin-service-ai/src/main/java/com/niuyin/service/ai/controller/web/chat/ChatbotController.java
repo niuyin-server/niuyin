@@ -1,32 +1,25 @@
 package com.niuyin.service.ai.controller.web.chat;
 
-import cn.hutool.core.util.StrUtil;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
 import com.niuyin.common.core.compont.SnowFlake;
-import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.chat.domain.ChatConversationDO;
-import com.niuyin.model.ai.chat.domain.ChatMessageDO;
+import com.niuyin.common.core.domain.R;
+import com.niuyin.model.ai.vo.chat.ChatMessageVO;
 import com.niuyin.service.ai.service.IChatConversationService;
 import com.niuyin.service.ai.service.IChatMessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -35,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class ChatbotController {
 
-//    private final ChatClient chatClient;
+    //    private final ChatClient chatClient;
     private final InMemoryChatMemory inMemoryChatMemory;
     private final IChatConversationService chatConversationService;
     private final IChatMessageService chatMessageService;
@@ -95,9 +88,16 @@ public class ChatbotController {
 //                .onErrorResume(e -> Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build()));
 //    }
 
-    record ChatRequest(@NotNull(message = "请选择对话") Long conversationId,
-                       Long userId,
-                       @NotNull(message = "请输入内容") String message) {
+    public record ChatRequest(@NotNull(message = "请选择对话") Long conversationId, Long userId,
+                              @NotNull(message = "请输入内容") String message,
+                              @Schema(description = "是否携带上下文", example = "true") Boolean useContext) {
+    }
+
+    @Operation(summary = "发送消息（流式）", description = "流式返回，响应较快")
+    @RateLimiter(count = 10, time = 1, timeUnit = TimeUnit.HOURS, message = "请求达到上限，可以过一个时辰再来试试哦o_0")
+    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<R<ChatMessageVO>> sendChatMessageStream(@Valid @RequestBody ChatRequest dto) {
+        return chatMessageService.sendChatMessageStream(dto, dto.userId());
     }
 
 }
