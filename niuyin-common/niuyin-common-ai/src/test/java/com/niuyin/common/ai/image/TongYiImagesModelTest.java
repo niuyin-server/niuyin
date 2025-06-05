@@ -14,7 +14,7 @@ import org.springframework.ai.image.ImageResponse;
  */
 public class TongYiImagesModelTest {
 
-    private final DashScopeImageModel imageModel = new DashScopeImageModel(new DashScopeImageApi("sk-6879fb6daefa445d890bb9edf8dbab7c"));
+    private final DashScopeImageModel imageModel = new DashScopeImageModel(new DashScopeImageApi(""));
 
     @Test
     @Disabled

@@ -24,7 +24,7 @@ import java.util.List;
 public class YiYanChatModelTests {
 
     private final QianFanChatModel chatModel = new QianFanChatModel(
-            new QianFanApi("qS8k8dYr2nXunagK4SSU8Xjj", "pHGbx51ql2f0hOyabQvSZezahVC3hh3e"), // 密钥
+            new QianFanApi("", ""), // 密钥
             QianFanChatOptions.builder()
                     .model(QianFanApi.ChatModel.ERNIE_4_0_8K_Preview.getValue())
                     .build()

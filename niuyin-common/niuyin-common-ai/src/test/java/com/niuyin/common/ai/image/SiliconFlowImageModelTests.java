@@ -14,7 +14,7 @@ import org.springframework.ai.image.ImageResponse;
 public class SiliconFlowImageModelTests {
 
     private final SiliconFlowImageModel imageModel = new SiliconFlowImageModel(
-            new SiliconFlowImageApi("sk-epsakfenqnyzoxhmbucsxlhkdqlcbnimslqoivkshalvdozz") // 密钥
+            new SiliconFlowImageApi("") // 密钥
     );
 
     @Test

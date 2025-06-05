@@ -24,7 +24,7 @@ public class HunYuanChatModelTests {
     private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
                     .baseUrl(HunYuanChatModel.BASE_URL)
-                    .apiKey("sk-kfx3kzOKCBdiXbCdAKVNCpvRDyYFrLrVql2uGqVidn6QAdSp") // apiKey
+                    .apiKey("") // apiKey
                     .build())
             .defaultOptions(OpenAiChatOptions.builder()
                     .model(HunYuanChatModel.MODEL_DEFAULT) // 模型

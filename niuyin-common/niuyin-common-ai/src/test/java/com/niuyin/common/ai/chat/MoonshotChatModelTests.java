@@ -21,7 +21,7 @@ import java.util.List;
 public class MoonshotChatModelTests {
 
     private final MoonshotChatModel chatModel = new MoonshotChatModel(
-            new MoonshotApi("sk-aHYYV1SARscItye5QQRRNbXij4fy65Ee7pNZlC9gsSQnUKXA"), // 密钥
+            new MoonshotApi(""), // 密钥
             MoonshotChatOptions.builder()
                     .model("moonshot-v1-8k") // 模型
                     .build());

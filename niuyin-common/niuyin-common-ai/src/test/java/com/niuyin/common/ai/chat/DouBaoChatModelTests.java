@@ -27,7 +27,7 @@ public class DouBaoChatModelTests {
     private final OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
                     .baseUrl(DouBaoChatModel.BASE_URL)
-                    .apiKey("b7e962aa-fb6f-4916-a999-c4ce99c97527") // apiKey
+                    .apiKey("") // apiKey
                     .build())
             .defaultOptions(OpenAiChatOptions.builder()
                     .model("doubao-1-5-lite-32k-250115") // 模型（doubao）

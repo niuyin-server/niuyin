@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.concurrent.TimeUnit;
@@ -26,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("v1/chat")
 public class ChatbotController {
 
     //    private final ChatClient chatClient;
@@ -88,14 +86,15 @@ public class ChatbotController {
 //                .onErrorResume(e -> Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build()));
 //    }
 
-    public record ChatRequest(@NotNull(message = "请选择对话") Long conversationId, Long userId,
+    public record ChatRequest(@NotNull(message = "请选择对话") Long conversationId,
+                              Long userId,
                               @NotNull(message = "请输入内容") String message,
                               @Schema(description = "是否携带上下文", example = "true") Boolean useContext) {
     }
 
     @Operation(summary = "发送消息（流式）", description = "流式返回，响应较快")
-    @RateLimiter(count = 10, time = 1, timeUnit = TimeUnit.HOURS, message = "请求达到上限，可以过一个时辰再来试试哦o_0")
-    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RateLimiter(count = 10, time = 2, timeUnit = TimeUnit.HOURS, message = "请求达到上限，可以过一个时辰再来试试哦o_0")
+    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<R<ChatMessageVO>> sendChatMessageStream(@Valid @RequestBody ChatRequest dto) {
         return chatMessageService.sendChatMessageStream(dto, dto.userId());
     }

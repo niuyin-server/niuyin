@@ -89,7 +89,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         if (ObjUtil.notEqual(conversation.getUserId(), userId)) {
             throw new RuntimeException("对话不存在");
         }
-        List<ChatMessageDO> historyMessages = this.selectListByConversation(conversation.getId());
+        List<ChatMessageDO> historyMessages = this.selectListByConversation(conversation.getId(), conversation.getMaxContexts());
         // 1.2 校验模型
         ChatModelDO model = chatModelService.validateModel(conversation.getModelId());
         StreamingChatModel chatModel = chatModelService.getChatModel(model.getId());
@@ -125,8 +125,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             contentBuffer.append(newContent);
             return R.ok(new ChatMessageVO()
                     .setSend(BeanUtils.toBean(userMessage, ChatMessageVO.Message.class))
-                    .setReceive(BeanUtils.toBean(assistantMessage, ChatMessageVO.Message.class)
-                            .setContent(newContent).setSegments(segments)));
+                    .setReceive(BeanUtils.toBean(assistantMessage, ChatMessageVO.Message.class).setContent(newContent).setSegments(segments)));
         }).doOnComplete(() -> {
             chatMessageMapper.updateById(new ChatMessageDO().setId(assistantMessage.getId()).setContent(contentBuffer.toString()));
         }).doOnError(throwable -> {
@@ -138,10 +137,12 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     /**
      * 获得指定对话的消息列表
      */
-    List<ChatMessageDO> selectListByConversation(Long conversationId) {
+    List<ChatMessageDO> selectListByConversation(Long conversationId, Integer maxContexts) {
         LambdaQueryWrapper<ChatMessageDO> qw = new LambdaQueryWrapper<>();
         qw.eq(ChatMessageDO::getConversationId, conversationId);
-        qw.orderByAsc(ChatMessageDO::getId);
+        qw.orderByDesc(ChatMessageDO::getId);
+        // 筛选条数
+        qw.last("limit " + maxContexts);
         return this.list(qw);
     }
 

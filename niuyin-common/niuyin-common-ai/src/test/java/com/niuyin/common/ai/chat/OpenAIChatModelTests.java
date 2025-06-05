@@ -23,7 +23,7 @@ public class OpenAIChatModelTests {
     private final OpenAiChatModel chatModel = OpenAiChatModel.builder()
             .openAiApi(OpenAiApi.builder()
                     .baseUrl("https://api.holdai.top")
-                    .apiKey("sk-aN6nWn3fILjrgLFT0fC4Aa60B72e4253826c77B29dC94f17") // apiKey
+                    .apiKey("") // apiKey
                     .build())
             .defaultOptions(OpenAiChatOptions.builder()
                     .model(OpenAiApi.ChatModel.GPT_4_O) // 模型
