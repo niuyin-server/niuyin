@@ -31,7 +31,7 @@ public class ChatMessageVO {
 
         @Schema(description = "知识库段落编号数组", example = "[1,2,3]")
         private List<Long> segmentIds;
-//
+
         @Schema(description = "知识库段落数组")
         private List<ChatMessageRespVO.KnowledgeSegment> segments;
 

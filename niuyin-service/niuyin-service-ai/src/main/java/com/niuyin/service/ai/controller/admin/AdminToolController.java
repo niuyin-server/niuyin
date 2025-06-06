@@ -90,9 +90,7 @@ public class AdminToolController {
     @Operation(summary = "获得工具列表")
     public R<List<ToolSimpleVO>> getToolSimpleList() {
         List<ToolDO> list = toolService.getToolListByState(StateFlagEnum.ENABLE.getCode());
-        return R.ok(convertList(list, tool -> new ToolSimpleVO()
-                .setId(tool.getId())
-                .setName(tool.getName())));
+        return R.ok(convertList(list, tool -> new ToolSimpleVO().setId(tool.getId()).setName(tool.getName())));
     }
 
 }

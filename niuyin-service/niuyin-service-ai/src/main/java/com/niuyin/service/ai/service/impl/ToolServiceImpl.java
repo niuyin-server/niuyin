@@ -61,7 +61,7 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolDO> implements 
         try {
             SpringUtil.getBean(name);
         } catch (NoSuchBeanDefinitionException e) {
-            throw new RuntimeException("名称已存在");
+            throw new RuntimeException("工具不存在");
         }
     }
 
@@ -79,7 +79,8 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolDO> implements 
     public PageDataInfo<ToolDO> getToolPage(ToolPageDTO pageDTO) {
         LambdaQueryWrapper<ToolDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ToolDO::getName, pageDTO.getName())
-                .eq(ToolDO::getStateFlag, StateFlagEnum.ENABLE.getCode());
+                .like(StringUtils.isNotBlank(pageDTO.getDescription()), ToolDO::getDescription, pageDTO.getDescription())
+                .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ToolDO::getStateFlag, pageDTO.getStateFlag());
         Page<ToolDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
         return PageDataInfo.page(page);
     }
