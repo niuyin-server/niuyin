@@ -11,7 +11,8 @@ public class JwtUtil {
     // TOKEN的有效期一天（S）
     private static final Long TOKEN_TIME_OUT = 24 * 60 * 60 * 1000L;;
     // 加密KEY
-    private static final String TOKEN_ENCRY_KEY = "MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY";
+    private static final String TOKEN_ENCRY_KEY = "roydoncheeseblastwebMDk4ZjZiY2Q0NjIxZDM3M2NhZGUW0ZTgzMjYyN2I0ZjY";
+
     // 最小刷新间隔(S)
     private static final int REFRESH_TIME = 300;
 
@@ -92,7 +93,7 @@ public class JwtUtil {
      */
     public static SecretKey generalKey() {
         byte[] encodedKey = Base64.getEncoder().encode(TOKEN_ENCRY_KEY.getBytes());
-        SecretKey key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
+        SecretKey key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "HmacSHA256");
         return key;
     }
 
