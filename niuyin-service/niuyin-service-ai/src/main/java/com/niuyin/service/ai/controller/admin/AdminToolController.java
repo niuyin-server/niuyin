@@ -10,7 +10,9 @@ import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.service.ai.service.IToolService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +43,24 @@ public class AdminToolController {
     public R<Boolean> updateTool(@Valid @RequestBody AiToolSaveDTO dto) {
         toolService.updateTool(dto);
         return R.ok(true);
+    }
+
+    @PutMapping("/updateState")
+    @Operation(summary = "更新工具状态")
+    public R<Boolean> updateToolState(@Valid @RequestBody ToolStateDTO dto) {
+        toolService.updateToolState(dto);
+        return R.ok(true);
+    }
+
+    public record ToolStateDTO(
+            @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "23538")
+            @NotNull(message = "编号不能为空")
+            Long id,
+
+            @Schema(description = "状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+            @NotNull(message = "状态不能为空")
+            String stateFlag
+    ) {
     }
 
     @DeleteMapping("/delete")

@@ -67,7 +67,7 @@ services:
     container_name: niuyin-gateway
     build:
       context: ./niuyin/gateway
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "9090:9090"
     depends_on:
@@ -78,7 +78,7 @@ services:
     container_name: niuyin-service-video
     build:
       context: ./niuyin/service/video
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     ports:
       - "9201:9201"
     depends_on:

@@ -23,7 +23,7 @@ public class GlobalExceptionCatch {
     @ExceptionHandler(Throwable.class)
     public R<?> exception(Throwable e) {
         log.error("Catch exception:{}", e.getMessage());
-        return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), e.getMessage());
+        return R.fail(HttpCodeEnum.HAS_ERROR.getCode(), "未知错误");
     }
 
     /**

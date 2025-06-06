@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.bean.BeanUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
+import com.niuyin.model.ai.domain.model.ModelRoleDO;
 import com.niuyin.model.ai.domain.model.ToolDO;
 import com.niuyin.model.ai.dto.model.AiToolSaveDTO;
 import com.niuyin.model.ai.dto.model.ToolPageDTO;
 import com.niuyin.model.common.enums.StateFlagEnum;
+import com.niuyin.service.ai.controller.admin.AdminToolController;
 import com.niuyin.service.ai.mapper.ToolMapper;
 import com.niuyin.service.ai.service.IToolService;
 import lombok.RequiredArgsConstructor;
@@ -84,5 +87,11 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolDO> implements 
     @Override
     public List<ToolDO> getToolListByState(String state) {
         return toolMapper.selectList(new LambdaQueryWrapper<ToolDO>().eq(ToolDO::getStateFlag, state));
+    }
+
+    @Override
+    public void updateToolState(AdminToolController.ToolStateDTO dto) {
+        ToolDO toolDO = BeanCopyUtils.copyBean(dto, ToolDO.class);
+        toolMapper.updateById(toolDO);
     }
 }
