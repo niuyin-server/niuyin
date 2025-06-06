@@ -40,31 +40,36 @@ public class PageDataInfo<T> implements Serializable {
     private long total;
 
     /**
+     * 是否还有更多数据，作为下拉加载更多使用
+     */
+    private Boolean hasMore;
+
+    /**
      * 返回分页数据
+     *
+     * @param page 分页对象
      */
     public static <T> PageDataInfo<T> page(IPage<T> page) {
         if (CollUtil.isEmpty(page.getRecords())) {
             return emptyPage();
         }
-        return new PageDataInfo<>(R.SUCCESS, "OK", page.getRecords(), page.getTotal());
+        // 是否还有更多数据
+        Boolean hasMore = page.getCurrent() < page.getPages();
+        return new PageDataInfo<>(R.SUCCESS, "OK", page.getRecords(), page.getTotal(), hasMore);
     }
 
     /**
      * 返回分页数据
-     *
-     * @param rows
-     * @param total
-     * @return
      */
     public static <T> PageDataInfo<T> genPageData(List<T> rows, long total) {
-        return new PageDataInfo<>(R.SUCCESS, "OK", rows, total);
+        return new PageDataInfo<>(R.SUCCESS, "OK", rows, total, true);
     }
 
     /**
      * 返回空数据
      */
     public static <T> PageDataInfo<T> emptyPage() {
-        return new PageDataInfo<>(R.SUCCESS, "OK", null, 0);
+        return new PageDataInfo<>(R.SUCCESS, "OK", null, 0, false);
     }
 
 }

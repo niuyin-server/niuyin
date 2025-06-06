@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.niuyin.common.ai.enums.AiPlatformEnum;
+import com.niuyin.common.core.context.UserContext;
 import org.springframework.ai.azure.openai.AzureOpenAiChatOptions;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -15,6 +16,7 @@ import org.springframework.ai.qianfan.QianFanChatOptions;
 import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,6 +24,8 @@ import java.util.Set;
  * Spring AI 工具类
  */
 public class AiUtils {
+
+    public static final String TOOL_CONTEXT_LOGIN_USER = "LOGIN_USER";
 
     public static ChatOptions buildChatOptions(AiPlatformEnum platform, String model, Double temperature, Integer maxTokens) {
         return buildChatOptions(platform, model, temperature, maxTokens, null);
@@ -120,4 +124,10 @@ public class AiUtils {
         throw new IllegalArgumentException(StrUtil.format("未知消息类型({})", type));
     }
 
+    public static Map<String, Object> buildCommonToolContext() {
+        Map<String, Object> context = new HashMap<>();
+        // todo @roydon 提供登录用户上下文到tool
+//        context.put(TOOL_CONTEXT_LOGIN_USER, UserContext.getUser());
+        return context;
+    }
 }

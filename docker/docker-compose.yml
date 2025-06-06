@@ -1,8 +1,8 @@
 version : '1.0.0'
 services:
   niuyin-nacos:
-    container_name: niuyin-nacos
-    image: nacos/nacos-server
+    container_name: niuyin-nacos-standalone
+    image: nacos/nacos-server:2.3.2
     build:
       context: ./nacos
     environment:

@@ -17,6 +17,7 @@ import com.niuyin.model.ai.domain.chat.ChatMessageDO;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDocumentDO;
 import com.niuyin.model.ai.domain.model.ChatModelDO;
 import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ToolDO;
 import com.niuyin.model.ai.vo.chat.ChatMessageRespVO;
 import com.niuyin.model.ai.vo.chat.ChatMessageVO;
 import com.niuyin.service.ai.controller.web.chat.ChatbotController;
@@ -66,6 +67,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     private final IModelRoleService modelRoleService;
     private final IKnowledgeSegmentService knowledgeSegmentService;
     private final IKnowledgeDocumentService knowledgeDocumentService;
+    private final IToolService toolService;
 
     /**
      * 获得指定对话的消息列表
@@ -89,7 +91,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         if (ObjUtil.notEqual(conversation.getUserId(), userId)) {
             throw new RuntimeException("对话不存在");
         }
-        List<ChatMessageDO> historyMessages = this.selectListByConversation(conversation.getId(), conversation.getMaxContexts());
+        List<ChatMessageDO> contextMessages = this.selectListByConversation(conversation.getId(), conversation.getMaxContexts());
         // 1.2 校验模型
         ChatModelDO model = chatModelService.validateModel(conversation.getModelId());
         StreamingChatModel chatModel = chatModelService.getChatModel(model.getId());
@@ -104,7 +106,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         ChatMessageDO assistantMessage = createChatMessage(conversation.getId(), userMessage.getId(), model, userId, conversation.getRoleId(), MessageType.ASSISTANT, "", dto.useContext(), knowledgeSegments);
 
         // 4.2 构建 Prompt，并进行调用
-        Prompt prompt = buildPrompt(conversation, historyMessages, knowledgeSegments, model, dto);
+        Prompt prompt = buildPrompt(conversation, contextMessages, knowledgeSegments, model, dto);
         Flux<ChatResponse> streamResponse = chatModel.stream(prompt);
 
         // 4.3 流式返回
@@ -141,8 +143,8 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         LambdaQueryWrapper<ChatMessageDO> qw = new LambdaQueryWrapper<>();
         qw.eq(ChatMessageDO::getConversationId, conversationId);
         qw.orderByDesc(ChatMessageDO::getId);
-        // 筛选条数
-        qw.last("limit " + maxContexts);
+        // 根据对话设置的上下文的最大 Message 数量筛选条数
+        qw.last("limit " + maxContexts * 2);
         return this.list(qw);
     }
 
@@ -159,7 +161,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             return Collections.emptyList();
         }
 
-        // 2. 遍历找回
+        // 2. 遍历召回
         List<KnowledgeSegmentSearchRespBO> knowledgeSegments = new ArrayList<>();
         for (Long knowledgeId : role.getKnowledgeIds()) {
             knowledgeSegments.addAll(knowledgeSegmentService.searchKnowledgeSegment(new KnowledgeSegmentSearchReqBO().setKnowledgeId(knowledgeId).setContent(content)));
@@ -186,7 +188,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     /**
      * 构建 Prompt
      */
-    private Prompt buildPrompt(ChatConversationDO conversation, List<ChatMessageDO> messages,
+    private Prompt buildPrompt(ChatConversationDO conversation, List<ChatMessageDO> contextMessages,
                                List<KnowledgeSegmentSearchRespBO> knowledgeSegments,
                                ChatModelDO model, ChatbotController.ChatRequest dto) {
         List<Message> chatMessages = new ArrayList<>();
@@ -195,8 +197,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             chatMessages.add(new SystemMessage(conversation.getSystemMessage()));
         }
 
-        // 1.2 历史 history message 历史消息
-        List<ChatMessageDO> contextMessages = filterContextMessages(messages, conversation, dto);
+        // 1.2 context message 历史消息
         contextMessages.forEach(message -> chatMessages.add(AiUtils.buildMessage(message.getMessageType(), message.getContent())));
 
         // 1.3 当前 user message 新发送消息
@@ -216,55 +217,15 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         if (conversation.getRoleId() != null) {
             ModelRoleDO chatRole = modelRoleService.getModelRole(conversation.getRoleId());
             if (chatRole != null && CollUtil.isNotEmpty(chatRole.getToolIds())) {
+                toolNames = convertSet(toolService.getToolList(chatRole.getToolIds()), ToolDO::getName);
                 // todo @roydon 工具集合
-//                toolNames = convertSet(toolService.getToolList(chatRole.getToolIds()), AiToolDO::getName);
-//                toolContext = AiUtils.buildCommonToolContext();
+                toolContext = AiUtils.buildCommonToolContext();
             }
         }
         // 2.2 构建 ChatOptions 对象
         AiPlatformEnum platform = AiPlatformEnum.validatePlatform(model.getPlatform());
         ChatOptions chatOptions = AiUtils.buildChatOptions(platform, model.getModel(), conversation.getTemperature(), conversation.getMaxTokens(), toolNames, toolContext);
         return new Prompt(chatMessages, chatOptions);
-    }
-
-    /**
-     * 从历史消息中，获得倒序的 n 组消息作为消息上下文
-     * <p>
-     * n 组：指的是 user + assistant 形成一组
-     *
-     * @param messages     消息列表
-     * @param conversation 对话
-     * @param dto          发送请求
-     * @return 消息上下文
-     */
-    private List<ChatMessageDO> filterContextMessages(List<ChatMessageDO> messages,
-                                                      ChatConversationDO conversation,
-                                                      ChatbotController.ChatRequest dto) {
-        if (conversation.getMaxContexts() == null || ObjUtil.notEqual(dto.useContext(), Boolean.TRUE)) {
-            return Collections.emptyList();
-        }
-        List<ChatMessageDO> contextMessages = new ArrayList<>(conversation.getMaxContexts() * 2);
-        for (int i = messages.size() - 1; i >= 0; i--) {
-            ChatMessageDO assistantMessage = CollUtil.get(messages, i);
-            if (assistantMessage == null || assistantMessage.getReplyId() == null) {
-                continue;
-            }
-            ChatMessageDO userMessage = CollUtil.get(messages, i - 1);
-            if (userMessage == null
-                    || ObjUtil.notEqual(assistantMessage.getReplyId(), userMessage.getId())
-                    || StrUtil.isEmpty(assistantMessage.getContent())) {
-                continue;
-            }
-            // 由于后续要 reverse 反转，所以先添加 assistantMessage
-            contextMessages.add(assistantMessage);
-            contextMessages.add(userMessage);
-            // 超过最大上下文，结束
-            if (contextMessages.size() >= conversation.getMaxContexts() * 2) {
-                break;
-            }
-        }
-        Collections.reverse(contextMessages);
-        return contextMessages;
     }
 
 

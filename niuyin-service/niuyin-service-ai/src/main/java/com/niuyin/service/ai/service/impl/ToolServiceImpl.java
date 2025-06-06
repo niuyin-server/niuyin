@@ -94,4 +94,9 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolDO> implements 
         ToolDO toolDO = BeanCopyUtils.copyBean(dto, ToolDO.class);
         toolMapper.updateById(toolDO);
     }
+
+    @Override
+    public List<ToolDO> getToolList(List<Long> toolIds) {
+        return toolMapper.selectBatchIds(toolIds);
+    }
 }

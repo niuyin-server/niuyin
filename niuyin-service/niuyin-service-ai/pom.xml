@@ -130,10 +130,6 @@
         <!--        </dependency>-->
         <dependency>
             <groupId>com.niuyin</groupId>
-            <artifactId>niuyin-common-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.niuyin</groupId>
             <artifactId>niuyin-common-ai</artifactId>
         </dependency>
         <!--        <dependency>-->

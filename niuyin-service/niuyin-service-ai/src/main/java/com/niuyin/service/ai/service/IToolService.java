@@ -7,6 +7,7 @@ import com.niuyin.model.ai.dto.model.AiToolSaveDTO;
 import com.niuyin.model.ai.dto.model.ToolPageDTO;
 import com.niuyin.service.ai.controller.admin.AdminToolController;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,4 +31,6 @@ public interface IToolService extends IService<ToolDO> {
     List<ToolDO> getToolListByState(String state);
 
     void updateToolState(AdminToolController.ToolStateDTO dto);
+
+    List<ToolDO> getToolList(List<Long> toolIds);
 }
