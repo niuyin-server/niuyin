@@ -6,6 +6,7 @@ import com.niuyin.model.ai.domain.model.ChatModelDO;
 import com.niuyin.model.ai.dto.model.AiModelPageDTO;
 import com.niuyin.model.ai.dto.model.AiModelSaveDTO;
 import com.niuyin.model.ai.dto.model.AiModelStateDTO;
+import com.niuyin.model.ai.vo.model.ModelVO;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -52,4 +53,6 @@ public interface IChatModelService extends IService<ChatModelDO> {
      * @return VectorStore 对象
      */
     VectorStore getOrCreateVectorStore(Long id, Map<String, Class<?>> metadataFields);
+
+    List<ModelVO> getModelList(String type, String platform);
 }

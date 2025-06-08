@@ -129,10 +129,15 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                     .setSend(BeanUtils.toBean(userMessage, ChatMessageVO.Message.class))
                     .setReceive(BeanUtils.toBean(assistantMessage, ChatMessageVO.Message.class).setContent(newContent).setSegments(segments)));
         }).doOnComplete(() -> {
+            // 更新assistant的内容
             chatMessageMapper.updateById(new ChatMessageDO().setId(assistantMessage.getId()).setContent(contentBuffer.toString()));
+            // 更新对话的最后一次回复时间与最新回复内容
+            chatConversationService.updateById((ChatConversationDO) new ChatConversationDO().setId(conversation.getId()).setLastMessage(contentBuffer.substring(0, Math.min(contentBuffer.length(), 64))).setUpdateTime(LocalDateTime.now()));
         }).doOnError(throwable -> {
             log.error("[sendChatMessageStream][userId({}) dto({}) 发生异常]", userId, dto, throwable);
             chatMessageMapper.updateById(new ChatMessageDO().setId(assistantMessage.getId()).setContent(throwable.getMessage()));
+            // 更新对话的最后一次回复时间与最新回复内容
+            chatConversationService.updateById((ChatConversationDO) new ChatConversationDO().setId(conversation.getId()).setLastMessage(throwable.getMessage()).setUpdateTime(LocalDateTime.now()));
         }).onErrorResume(error -> Flux.just(R.fail("对话生成异常")));
     }
 

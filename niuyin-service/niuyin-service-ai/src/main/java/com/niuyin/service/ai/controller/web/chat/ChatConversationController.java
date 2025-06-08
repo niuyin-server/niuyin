@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/chat/conversation")
+@RequestMapping("v1/chat/conversation")
 public class ChatConversationController {
 
     private final IChatConversationService chatConversationService;
@@ -66,6 +66,7 @@ public class ChatConversationController {
 //            chatConversationDO.setTemperature(0.75);
 //            chatConversationDO.setMaxTokens(4096);
 //            chatConversationDO.setMaxContexts(20);
+            // 填充默认第一条ai回复预设消息
         }
 //        chatConversationDO.setTitle(StringUtils.isEmpty(chatConversationDO.getTitle()) ? "新对话" : chatConversationDO.getTitle());
 

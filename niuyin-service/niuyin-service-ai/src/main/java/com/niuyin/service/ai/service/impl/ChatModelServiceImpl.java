@@ -1,5 +1,6 @@
 package com.niuyin.service.ai.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -7,6 +8,7 @@ import com.niuyin.common.ai.enums.AiPlatformEnum;
 import com.niuyin.common.ai.factory.AiModelFactory;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.utils.CollectionUtils;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.ai.domain.model.ApiKeyDO;
@@ -14,6 +16,7 @@ import com.niuyin.model.ai.domain.model.ChatModelDO;
 import com.niuyin.model.ai.dto.model.AiModelPageDTO;
 import com.niuyin.model.ai.dto.model.AiModelSaveDTO;
 import com.niuyin.model.ai.dto.model.AiModelStateDTO;
+import com.niuyin.model.ai.vo.model.ModelVO;
 import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.service.ai.mapper.ChatModelMapper;
 import com.niuyin.service.ai.service.IApiKeyService;
@@ -161,4 +164,25 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
 //         return modelFactory.getOrCreateVectorStore(RedisVectorStore.class, embeddingModel, metadataFields);
 //         return modelFactory.getOrCreateVectorStore(MilvusVectorStore.class, embeddingModel, metadataFields);
     }
+
+    @Override
+    public List<ModelVO> getModelList(String type, String platform) {
+        LambdaQueryWrapper<ChatModelDO> qw = new LambdaQueryWrapper<>();
+        qw.eq(ChatModelDO::getStateFlag, StateFlagEnum.ENABLE.getCode())
+                .eq(StringUtils.isNotBlank(type), ChatModelDO::getType, type)
+                .eq(StringUtils.isNotBlank(platform), ChatModelDO::getPlatform, platform)
+                .orderByAsc(ChatModelDO::getSort);
+        List<ChatModelDO> list = this.list(qw);
+        if (CollUtil.isEmpty(list)) {
+            return null;
+        }
+        List<ModelVO> modelVOS = BeanCopyUtils.copyBeanList(list, ModelVO.class);
+        modelVOS.forEach(item -> {
+            AiPlatformEnum byPlatform = AiPlatformEnum.getByPlatform(item.getPlatform());
+            assert byPlatform != null;
+            item.setIcon(byPlatform.getIcon());
+        });
+        return modelVOS;
+    }
+
 }
