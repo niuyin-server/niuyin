@@ -23,11 +23,11 @@ public class R<T> implements Serializable {
     private T data;
 
     public static <T> R<T> ok() {
-        return restResult(null, SUCCESS, "操作成功");
+        return restResult(null, SUCCESS, "ok");
     }
 
     public static <T> R<T> ok(T data) {
-        return restResult(data, SUCCESS, "操作成功");
+        return restResult(data, SUCCESS, "ok");
     }
 
     public static <T> R<T> ok(T data, String msg) {
