@@ -52,6 +52,10 @@ public class ModelRoleDO extends BaseDO {
      */
     private String description;
     /**
+     * 对话开场白
+     */
+    private String chatPrologue;
+    /**
      * 角色上下文
      */
     private String systemMessage;

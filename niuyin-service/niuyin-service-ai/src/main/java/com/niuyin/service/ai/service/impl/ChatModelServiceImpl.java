@@ -83,6 +83,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         LambdaQueryWrapper<ChatModelDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ChatModelDO::getName, pageDTO.getName())
                 .like(StringUtils.isNotBlank(pageDTO.getModel()), ChatModelDO::getModel, pageDTO.getModel())
+                .eq(StringUtils.isNotBlank(pageDTO.getKeyId()), ChatModelDO::getKeyId, pageDTO.getKeyId())
                 .eq(StringUtils.isNotBlank(pageDTO.getPlatform()), ChatModelDO::getPlatform, pageDTO.getPlatform())
                 .eq(StringUtils.isNotBlank(pageDTO.getType()), ChatModelDO::getType, pageDTO.getType())
                 .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ChatModelDO::getStateFlag, pageDTO.getStateFlag())

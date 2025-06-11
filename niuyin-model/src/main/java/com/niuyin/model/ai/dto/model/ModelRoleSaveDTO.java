@@ -12,6 +12,8 @@ import lombok.Data;
  **/
 @Data
 public class ModelRoleSaveDTO {
+
+    private Long id;
     /**
      * 模型编号
      */
@@ -34,6 +36,10 @@ public class ModelRoleSaveDTO {
      * 角色描述
      */
     private String description;
+    /**
+     * 对话开场白
+     */
+    private String chatPrologue;
     /**
      * 角色上下文
      */

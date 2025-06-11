@@ -18,7 +18,7 @@ import com.niuyin.service.ai.service.IChatModelService;
 import com.niuyin.service.ai.service.IKnowledgeDocumentService;
 import com.niuyin.service.ai.service.IKnowledgeSegmentService;
 import com.niuyin.service.ai.service.IKnowledgeService;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.tokenizer.TokenCountEstimator;
 import org.springframework.ai.transformer.splitter.TextSplitter;
@@ -26,6 +26,7 @@ import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,6 @@ import static com.niuyin.common.core.utils.CollectionUtils.convertList;
  * @author roydon
  * @since 2025-06-03 22:03:58
  */
-@RequiredArgsConstructor
 @Service
 public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMapper, KnowledgeSegmentDO> implements IKnowledgeSegmentService {
 
@@ -55,11 +55,17 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
             VECTOR_STORE_METADATA_DOCUMENT_ID, String.class,
             VECTOR_STORE_METADATA_SEGMENT_ID, String.class);
 
-    private final KnowledgeSegmentMapper knowledgeSegmentMapper;
-    private final IKnowledgeService knowledgeService;
-    private final IChatModelService chatModelService;
-    private final IKnowledgeDocumentService knowledgeDocumentService;
-    private final TokenCountEstimator tokenCountEstimator;
+    @Resource
+    private KnowledgeSegmentMapper knowledgeSegmentMapper;
+    @Resource
+    private IKnowledgeService knowledgeService;
+    @Resource
+    private IChatModelService chatModelService;
+    @Resource
+    @Lazy
+    private IKnowledgeDocumentService knowledgeDocumentService;
+    @Resource
+    private TokenCountEstimator tokenCountEstimator;
 
     /**
      * 搜索知识库分段
@@ -170,5 +176,32 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
 
         // 2. 更新向量 ID
         this.updateById(new KnowledgeSegmentDO().setId(segmentDO.getId()).setVectorId(segment.getId()));
+    }
+
+    /**
+     * 根据 URL 内容，切片创建多个段落
+     *
+     * @param url              URL 地址
+     * @param segmentMaxTokens 段落最大 Token 数
+     * @return 切片后的段落列表
+     */
+    @Override
+    public List<KnowledgeSegmentDO> splitContent(String url, Integer segmentMaxTokens) {
+        // 1. 读取 URL 内容
+        String content = knowledgeDocumentService.readUrl(url);
+
+        // 2. 文档切片
+        List<Document> documentSegments = splitContentByToken(content, segmentMaxTokens);
+
+        // 3. 转换为段落对象
+        return convertList(documentSegments, segment -> {
+            if (StrUtil.isEmpty(segment.getText())) {
+                return null;
+            }
+            return new KnowledgeSegmentDO()
+                    .setContent(segment.getText())
+                    .setContentLength(segment.getText().length())
+                    .setTokens(tokenCountEstimator.estimate(segment.getText()));
+        });
     }
 }

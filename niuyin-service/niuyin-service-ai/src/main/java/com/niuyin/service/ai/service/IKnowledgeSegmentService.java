@@ -39,4 +39,13 @@ public interface IKnowledgeSegmentService extends IService<KnowledgeSegmentDO> {
     default void createKnowledgeSegmentBySplitContentAsync(Long documentId, String content) {
         createKnowledgeSegmentBySplitContent(documentId, content);
     }
+
+    /**
+     * 根据 URL 内容，切片创建多个段落
+     *
+     * @param url              URL 地址
+     * @param segmentMaxTokens 段落最大 Token 数
+     * @return 切片后的段落列表
+     */
+    List<KnowledgeSegmentDO> splitContent(String url, Integer segmentMaxTokens);
 }

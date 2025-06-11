@@ -19,6 +19,7 @@ public class AiModelPageDTO extends PageDTO {
      * 模型标识
      */
     private String model;
+    private String keyId;
     /**
      * 模型平台
      * 枚举 {@link AiPlatformEnum}
