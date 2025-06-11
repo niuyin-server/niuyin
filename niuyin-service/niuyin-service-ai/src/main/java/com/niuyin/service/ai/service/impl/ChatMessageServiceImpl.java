@@ -106,7 +106,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         ChatMessageDO assistantMessage = createChatMessage(conversation.getId(), userMessage.getId(), model, userId, conversation.getRoleId(), MessageType.ASSISTANT, "", dto.useContext(), knowledgeSegments);
 
         // 4.2 构建 Prompt，并进行调用
-        Prompt prompt = buildPrompt(conversation, contextMessages, knowledgeSegments, model, dto);
+        Prompt prompt = buildPrompt(userId, conversation, contextMessages, knowledgeSegments, model, dto);
         Flux<ChatResponse> streamResponse = chatModel.stream(prompt);
 
         // 4.3 流式返回
@@ -193,7 +193,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     /**
      * 构建 Prompt
      */
-    private Prompt buildPrompt(ChatConversationDO conversation, List<ChatMessageDO> contextMessages,
+    private Prompt buildPrompt(Long userId, ChatConversationDO conversation, List<ChatMessageDO> contextMessages,
                                List<KnowledgeSegmentSearchRespBO> knowledgeSegments,
                                ChatModelDO model, ChatbotController.ChatRequest dto) {
         List<Message> chatMessages = new ArrayList<>();
@@ -224,7 +224,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             if (chatRole != null && CollUtil.isNotEmpty(chatRole.getToolIds())) {
                 toolNames = convertSet(toolService.getToolList(chatRole.getToolIds()), ToolDO::getName);
                 // todo @roydon 工具集合
-                toolContext = AiUtils.buildCommonToolContext();
+                toolContext = AiUtils.buildCommonToolContext(userId);
             }
         }
         // 2.2 构建 ChatOptions 对象

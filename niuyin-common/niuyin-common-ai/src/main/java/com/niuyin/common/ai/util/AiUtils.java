@@ -124,10 +124,10 @@ public class AiUtils {
         throw new IllegalArgumentException(StrUtil.format("未知消息类型({})", type));
     }
 
-    public static Map<String, Object> buildCommonToolContext() {
+    public static Map<String, Object> buildCommonToolContext(Long userId) {
         Map<String, Object> context = new HashMap<>();
         // todo @roydon 提供登录用户上下文到tool
-//        context.put(TOOL_CONTEXT_LOGIN_USER, UserContext.getUser());
+        context.put(TOOL_CONTEXT_LOGIN_USER, userId);
         return context;
     }
 }

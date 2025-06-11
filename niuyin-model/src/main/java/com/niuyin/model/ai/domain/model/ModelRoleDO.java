@@ -18,7 +18,7 @@ import java.util.List;
  * @since 2025-06-02 15:30:42
  */
 @Data
-@TableName("ai_model_role")
+@TableName(value = "ai_model_role",autoResultMap = true)
 public class ModelRoleDO extends BaseDO {
     @Serial
     private static final long serialVersionUID = 197421509258722922L;

@@ -75,12 +75,12 @@ public class ChatConversationController {
             }
             chatConversationDO.setTitle(modelRole.getName());
             chatConversationDO.setSystemMessage(modelRole.getSystemMessage());
-            chatConversationDO.setSystemMessage(modelRole.getSystemMessage());
-            // todo 获取角色关联的模型，填充参数
+            // 获取角色关联的模型，填充参数
             ChatModelDO modelDO = chatModelService.getById(modelRole.getModelId());
             if (Objects.isNull(modelDO)) {
                 throw new RuntimeException("模型不存在");
             }
+            chatConversationDO.setModelId(modelDO.getId());
             chatConversationDO.setTemperature(modelDO.getTemperature().doubleValue());
             chatConversationDO.setMaxTokens(modelDO.getMaxTokens());
             chatConversationDO.setMaxContexts(modelDO.getMaxContexts());

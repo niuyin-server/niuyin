@@ -1,8 +1,11 @@
 package com.niuyin.model.ai.dto.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * ModelRoleSaveDTO
@@ -57,5 +60,11 @@ public class ModelRoleSaveDTO {
      * 角色排序
      */
     private Integer sort;
+
+    @Schema(description = "引用的知识库编号列表", example = "1,2,3")
+    private List<Long> knowledgeIds;
+
+    @Schema(description = "引用的工具编号列表", example = "1,2,3")
+    private List<Long> toolIds;
 
 }

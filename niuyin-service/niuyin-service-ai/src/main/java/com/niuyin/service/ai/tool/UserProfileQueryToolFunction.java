@@ -62,11 +62,11 @@ public class UserProfileQueryToolFunction implements BiFunction<UserProfileQuery
 
     @Override
     public Response apply(Request request, ToolContext toolContext) {
-        Member loginUser = (Member) toolContext.getContext().get(AiUtils.TOOL_CONTEXT_LOGIN_USER);
-        if (loginUser == null) {
+        Long loginUserId = (Long) toolContext.getContext().get(AiUtils.TOOL_CONTEXT_LOGIN_USER);
+        if (loginUserId == null) {
             return null;
         }
-        Member member = dubboMemberService.apiGetById(loginUser.getUserId());
+        Member member = dubboMemberService.apiGetById(loginUserId);
         return BeanUtils.toBean(member, Response.class);
 
     }

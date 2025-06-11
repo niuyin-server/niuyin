@@ -24,7 +24,7 @@ import static cn.hutool.core.date.DatePattern.NORM_DATETIME_PATTERN;
 @Component("weather_query")
 public class WeatherQueryToolFunction implements Function<WeatherQueryToolFunction.Request, WeatherQueryToolFunction.Response> {
 
-    private static final String[] WEATHER_CONDITIONS = { "晴朗", "多云", "阴天", "小雨", "大雨", "雷雨", "小雪", "大雪" };
+    private static final String[] WEATHER_CONDITIONS = {"晴朗", "多云", "阴天", "小雨", "大雨", "雷雨", "小雪", "大雪"};
 
     @Data
     @JsonClassDescription("查询指定城市的天气信息")
