@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.niuyin.model.ai.bo.KnowledgeSegmentSearchReqBO;
 import com.niuyin.model.ai.bo.KnowledgeSegmentSearchRespBO;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeSegmentDO;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 
@@ -19,4 +20,23 @@ public interface IKnowledgeSegmentService extends IService<KnowledgeSegmentDO> {
      * 搜索知识库分段
      */
     List<KnowledgeSegmentSearchRespBO> searchKnowledgeSegment(KnowledgeSegmentSearchReqBO bo);
+
+    /**
+     * 基于 content 内容，切片创建多个段落
+     *
+     * @param documentId 知识库文档编号
+     * @param content    文档内容
+     */
+    void createKnowledgeSegmentBySplitContent(Long documentId, String content);
+
+    /**
+     * 【异步】基于 content 内容，切片创建多个段落
+     *
+     * @param documentId 知识库文档编号
+     * @param content    文档内容
+     */
+    @Async
+    default void createKnowledgeSegmentBySplitContentAsync(Long documentId, String content) {
+        createKnowledgeSegmentBySplitContent(documentId, content);
+    }
 }

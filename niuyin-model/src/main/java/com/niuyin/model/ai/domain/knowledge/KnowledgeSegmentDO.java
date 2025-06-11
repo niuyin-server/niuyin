@@ -20,6 +20,12 @@ import java.io.Serializable;
 public class KnowledgeSegmentDO extends BaseDO {
     @Serial
     private static final long serialVersionUID = -80429395507510721L;
+
+    /**
+     * 向量库的编号 - 空值
+     */
+    public static final String VECTOR_ID_EMPTY = "";
+
     /**
      * 编号
      */

@@ -3,24 +3,33 @@ package com.niuyin.service.ai.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.utils.bean.BeanUtils;
 import com.niuyin.model.ai.bo.KnowledgeSegmentSearchReqBO;
 import com.niuyin.model.ai.bo.KnowledgeSegmentSearchRespBO;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDO;
+import com.niuyin.model.ai.domain.knowledge.KnowledgeDocumentDO;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeSegmentDO;
+import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.service.ai.mapper.KnowledgeSegmentMapper;
 import com.niuyin.service.ai.service.IChatModelService;
+import com.niuyin.service.ai.service.IKnowledgeDocumentService;
 import com.niuyin.service.ai.service.IKnowledgeSegmentService;
 import com.niuyin.service.ai.service.IKnowledgeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.tokenizer.TokenCountEstimator;
+import org.springframework.ai.transformer.splitter.TextSplitter;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,6 +58,8 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
     private final KnowledgeSegmentMapper knowledgeSegmentMapper;
     private final IKnowledgeService knowledgeService;
     private final IChatModelService chatModelService;
+    private final IKnowledgeDocumentService knowledgeDocumentService;
+    private final TokenCountEstimator tokenCountEstimator;
 
     /**
      * 搜索知识库分段
@@ -96,4 +107,68 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
         return chatModelService.getOrCreateVectorStore(knowledge.getEmbeddingModelId(), VECTOR_STORE_METADATA_TYPES);
     }
 
+    /**
+     * 基于 content 内容，切片创建多个段落
+     *
+     * @param documentId 知识库文档编号
+     * @param content    文档内容
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void createKnowledgeSegmentBySplitContent(Long documentId, String content) {
+        // 1. 校验
+        KnowledgeDocumentDO documentDO = knowledgeDocumentService.validateKnowledgeDocumentExists(documentId);
+        KnowledgeDO knowledgeDO = knowledgeService.validateKnowledgeExists(documentDO.getKnowledgeId());
+        VectorStore vectorStore = getVectorStoreById(knowledgeDO);
+
+        // 2. 文档切片
+        List<Document> documentSegments = splitContentByToken(content, documentDO.getSegmentMaxTokens());
+
+        // 3.1 存储切片
+        List<KnowledgeSegmentDO> segmentDOs = convertList(documentSegments, segment -> {
+            if (StrUtil.isEmpty(segment.getText())) {
+                return null;
+            }
+            return new KnowledgeSegmentDO().setKnowledgeId(documentDO.getKnowledgeId())
+                    .setDocumentId(documentId)
+                    .setContent(segment.getText()).setContentLength(segment.getText().length())
+                    .setVectorId(KnowledgeSegmentDO.VECTOR_ID_EMPTY)
+                    .setTokens(tokenCountEstimator.estimate(segment.getText()))
+                    .setStateFlag(StateFlagEnum.ENABLE.getCode());
+        });
+        this.saveBatch(segmentDOs);
+        // 3.2 切片向量化
+        for (int i = 0; i < documentSegments.size(); i++) {
+            Document segment = documentSegments.get(i);
+            KnowledgeSegmentDO segmentDO = segmentDOs.get(i);
+            writeVectorStore(vectorStore, segmentDO, segment);
+        }
+    }
+
+    private static List<Document> splitContentByToken(String content, Integer segmentMaxTokens) {
+        TextSplitter textSplitter = buildTokenTextSplitter(segmentMaxTokens);
+        return textSplitter.apply(Collections.singletonList(new Document(content)));
+    }
+
+    private static TextSplitter buildTokenTextSplitter(Integer segmentMaxTokens) {
+        return TokenTextSplitter.builder()
+                .withChunkSize(segmentMaxTokens)
+                .withMinChunkSizeChars(Integer.MAX_VALUE) // 忽略字符的截断
+                .withMinChunkLengthToEmbed(1) // 允许的最小有效分段长度
+                .withMaxNumChunks(Integer.MAX_VALUE)
+                .withKeepSeparator(true) // 保留分隔符
+                .build();
+    }
+
+    private void writeVectorStore(VectorStore vectorStore, KnowledgeSegmentDO segmentDO, Document segment) {
+        // 1. 向量存储
+        // 为什么要 toString 呢？因为部分 VectorStore 实现，不支持 Long 类型，例如说 QdrantVectorStore
+        segment.getMetadata().put(VECTOR_STORE_METADATA_KNOWLEDGE_ID, segmentDO.getKnowledgeId().toString());
+        segment.getMetadata().put(VECTOR_STORE_METADATA_DOCUMENT_ID, segmentDO.getDocumentId().toString());
+        segment.getMetadata().put(VECTOR_STORE_METADATA_SEGMENT_ID, segmentDO.getId().toString());
+        vectorStore.add(List.of(segment));
+
+        // 2. 更新向量 ID
+        this.updateById(new KnowledgeSegmentDO().setId(segmentDO.getId()).setVectorId(segment.getId()));
+    }
 }
