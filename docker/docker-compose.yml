@@ -35,7 +35,7 @@ services:
         ]
     environment:
       MYSQL_DATABASE: 'niuyin_short_video_dev'
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: roydon#Mysql
   niuyin-redis:
     container_name: niuyin-redis
     image: redis

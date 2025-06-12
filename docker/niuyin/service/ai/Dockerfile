@@ -11,6 +11,6 @@ RUN mkdir -p /home/niuyin
 # 指定路径
 WORKDIR /home/niuyin
 # 复制jar文件到路径
-COPY ./jar/niuyin-service-video.jar /home/niuyin/niuyin-service-video.jar
+COPY ./jar/niuyin-service-ai.jar /home/niuyin/niuyin-service-ai.jar
 # 启动网关服务
-ENTRYPOINT ["java","-jar","niuyin-service-video.jar"]
+ENTRYPOINT ["java","-jar","niuyin-service-ai.jar"]

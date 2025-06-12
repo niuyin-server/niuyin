@@ -1,8 +1,9 @@
 # 基础镜像
-FROM  openjdk:8-jre
+FROM  openjdk:17-jre
 # author
 MAINTAINER roydon
-
+# 时区配置
+ENV TZ=Asia/Shanghai
 # 挂载目录
 VOLUME /home/niuyin
 # 创建目录
