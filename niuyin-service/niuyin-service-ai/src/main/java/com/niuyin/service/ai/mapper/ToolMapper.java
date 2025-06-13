@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * AI 工具表(Tool)表数据库访问层
  *
- * @author makejava
+ * @author roydon
  * @since 2025-06-05 16:02:46
  */
 @Mapper

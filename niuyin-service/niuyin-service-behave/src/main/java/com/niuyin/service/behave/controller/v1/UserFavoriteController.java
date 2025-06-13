@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
 import com.niuyin.model.common.dto.PageDTO;
@@ -46,9 +46,9 @@ public class UserFavoriteController {
      * 我的收藏夹集合分页查询
      */
     @PostMapping("/page")
-    public PageDataInfo userFavoritePage(@RequestBody PageDTO pageDTO) {
+    public PageData userFavoritePage(@RequestBody PageDTO pageDTO) {
         IPage<UserFavorite> userFavoriteIPage = userFavoriteService.queryCollectionPage(pageDTO);
-        return PageDataInfo.genPageData(userFavoriteIPage.getRecords(), userFavoriteIPage.getTotal());
+        return PageData.genPageData(userFavoriteIPage.getRecords(), userFavoriteIPage.getTotal());
     }
 
     /**
@@ -63,7 +63,7 @@ public class UserFavoriteController {
      * 我的收藏夹集合详情分页查询
      */
     @PostMapping("/infoPage")
-    public PageDataInfo userCollectionInfoPage(@RequestBody PageDTO pageDTO) {
+    public PageData userCollectionInfoPage(@RequestBody PageDTO pageDTO) {
         return userFavoriteService.queryMyCollectionInfoPage(pageDTO);
     }
 

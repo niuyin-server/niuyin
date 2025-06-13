@@ -3,7 +3,7 @@ package com.niuyin.service.social.controller.v1;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.vo.UserFollowsFansVo;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
@@ -50,7 +50,7 @@ public class UserFollowController {
      * 分页查询我的关注列表
      */
     @PostMapping("/page")
-    public PageDataInfo followPage(@RequestBody PageDTO pageDTO) {
+    public PageData followPage(@RequestBody PageDTO pageDTO) {
         return userFollowService.getFollowPage(pageDTO);
     }
 
@@ -95,7 +95,7 @@ public class UserFollowController {
      * @return
      */
     @PostMapping("/fans-page")
-    public PageDataInfo getUserFansPage(@RequestBody PageDTO pageDTO) {
+    public PageData getUserFansPage(@RequestBody PageDTO pageDTO) {
         return userFollowService.queryUserFansPage(pageDTO);
     }
 

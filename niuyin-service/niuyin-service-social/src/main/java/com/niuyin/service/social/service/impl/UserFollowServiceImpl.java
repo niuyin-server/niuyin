@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
@@ -184,7 +184,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
      * @return
      */
     @Override
-    public PageDataInfo getFollowPage(PageDTO pageDTO) {
+    public PageData getFollowPage(PageDTO pageDTO) {
         if (StringUtils.isNull(pageDTO)) {
             LambdaQueryWrapper<UserFollow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(UserFollow::getUserId, UserContext.getUserId());
@@ -195,7 +195,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                         Member user = dubboMemberService.apiGetById(l.getUserFollowId());
                         res.add(user);
                     })).toArray(CompletableFuture[]::new)).join();
-            return PageDataInfo.genPageData(res, res.size());
+            return PageData.genPageData(res, res.size());
         }
         IPage<UserFollow> userFollowIPage = this.followPage(pageDTO);
         List<Member> userList = new ArrayList<>();
@@ -203,7 +203,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             Member user = dubboMemberService.apiGetById(uf.getUserFollowId());
             userList.add(user);
         });
-        return PageDataInfo.genPageData(userList, userFollowIPage.getTotal());
+        return PageData.genPageData(userList, userFollowIPage.getTotal());
     }
 
     /**
@@ -213,7 +213,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
      * @return
      */
     @Override
-    public PageDataInfo queryUserFansPage(PageDTO pageDTO) {
+    public PageData queryUserFansPage(PageDTO pageDTO) {
         Long userId = UserContext.getUserId();
         // 查询粉丝ids
         LambdaQueryWrapper<UserFollow> queryWrapper = new LambdaQueryWrapper<>();
@@ -221,11 +221,11 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         Page<UserFollow> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
         List<UserFollow> records = page.getRecords();
         if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<Long> fansUserIds = records.stream().map(UserFollow::getUserId).collect(Collectors.toList());
         List<Member> memberList = dubboMemberService.apiGetInIds(fansUserIds);
-        return PageDataInfo.genPageData(memberList, page.getTotal());
+        return PageData.genPageData(memberList, page.getTotal());
     }
 
     @Override
@@ -271,15 +271,15 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
      * @return
      */
     @Override
-    public PageDataInfo<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO) {
-        PageDataInfo<String> socialDynamics = socialDynamicsService.getSocialDynamics(pageDTO);
+    public PageData<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO) {
+        PageData<String> socialDynamics = socialDynamicsService.getSocialDynamics(pageDTO);
         // 封装视频vo
         List<String> videoIds = socialDynamics.getRows();
         if (videoIds.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<VideoVO> videoVOList = dubboVideoService.apiGetVideoVOListByVideoIds(UserContext.getUserId(), videoIds);
-        return PageDataInfo.genPageData(videoVOList, socialDynamics.getTotal());
+        return PageData.genPageData(videoVOList, socialDynamics.getTotal());
     }
 
     /**
@@ -316,14 +316,14 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
      * @param pageDTO
      */
     @Override
-    public PageDataInfo<FollowUser> appGetFollowPage(PageDTO pageDTO) {
+    public PageData<FollowUser> appGetFollowPage(PageDTO pageDTO) {
         IPage<UserFollow> userFollowIPage = this.followPage(pageDTO);
         List<FollowUser> followUserList = new ArrayList<>();
         userFollowIPage.getRecords().forEach(uf -> {
             Member user = dubboMemberService.apiGetById(uf.getUserFollowId());
             followUserList.add(BeanCopyUtils.copyBean(user, FollowUser.class));
         });
-        return PageDataInfo.genPageData(followUserList, userFollowIPage.getTotal());
+        return PageData.genPageData(followUserList, userFollowIPage.getTotal());
     }
 
     @Override
@@ -341,7 +341,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
      * @return
      */
     @Override
-    public PageDataInfo<Fans> appGetFansPage(PageDTO pageDTO) {
+    public PageData<Fans> appGetFansPage(PageDTO pageDTO) {
         IPage<UserFollow> userFollowIPage = this.fansPage(pageDTO);
         List<Fans> fansList = new ArrayList<>();
         userFollowIPage.getRecords().forEach(uf -> {
@@ -350,6 +350,6 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             fans.setWeatherFollow(weatherFollow(UserContext.getUserId(), uf.getUserId()));
             fansList.add(fans);
         });
-        return PageDataInfo.genPageData(fansList, userFollowIPage.getTotal());
+        return PageData.genPageData(fansList, userFollowIPage.getTotal());
     }
 }

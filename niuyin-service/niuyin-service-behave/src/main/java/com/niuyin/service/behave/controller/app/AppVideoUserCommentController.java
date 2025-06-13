@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.controller.app;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
@@ -31,7 +31,7 @@ public class AppVideoUserCommentController {
      * 获取视频父评论
      */
     @PostMapping("/parent")
-    public PageDataInfo queryCommentParentPage(@Validated @RequestBody VideoUserCommentPageDTO pageDTO) {
+    public PageData queryCommentParentPage(@Validated @RequestBody VideoUserCommentPageDTO pageDTO) {
         return videoUserCommentService.getCommentParentPage(pageDTO);
     }
 
@@ -47,7 +47,7 @@ public class AppVideoUserCommentController {
      * 分页评论回复
      */
     @PostMapping("/replyPage")
-    public PageDataInfo queryCommentReplyPage(@Validated @RequestBody VideoCommentReplayPageDTO pageDTO) {
+    public PageData queryCommentReplyPage(@Validated @RequestBody VideoCommentReplayPageDTO pageDTO) {
         return videoUserCommentService.getCommentReplyPage(pageDTO);
     }
 

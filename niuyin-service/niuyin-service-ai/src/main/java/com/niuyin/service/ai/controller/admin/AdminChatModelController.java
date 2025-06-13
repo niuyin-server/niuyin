@@ -2,7 +2,7 @@ package com.niuyin.service.ai.controller.admin;
 
 import com.niuyin.common.ai.enums.AiModelTypeEnum;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.model.ChatModelDO;
 import com.niuyin.model.ai.dto.model.AiModelPageDTO;
 import com.niuyin.model.ai.dto.model.AiModelSaveDTO;
@@ -76,8 +76,8 @@ public class AdminChatModelController {
 
     @GetMapping("/page")
     @Operation(summary = "获得模型分页")
-    public R<PageDataInfo<ChatModelDO>> getModelPage(@Valid AiModelPageDTO pageDTO) {
-        PageDataInfo<ChatModelDO> pageResult = chatModelService.getModelPage(pageDTO);
+    public R<PageData<ChatModelDO>> getModelPage(@Valid AiModelPageDTO pageDTO) {
+        PageData<ChatModelDO> pageResult = chatModelService.getModelPage(pageDTO);
         return R.ok(pageResult);
     }
 

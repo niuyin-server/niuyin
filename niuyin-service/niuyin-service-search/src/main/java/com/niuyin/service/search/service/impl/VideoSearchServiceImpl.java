@@ -10,7 +10,7 @@ import co.elastic.clients.json.JsonData;
 import com.alibaba.fastjson.JSON;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -380,9 +380,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
      * APP端视频搜索
      */
     @Override
-    public PageDataInfo searchVideoFromESForApp(VideoSearchKeywordDTO dto) {
+    public PageData searchVideoFromESForApp(VideoSearchKeywordDTO dto) {
         if (StringUtils.isEmpty(dto.getKeyword())) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
 
         // 保存搜索记录
@@ -394,7 +394,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
             return processAppVideoSearchResponse(response);
         } catch (IOException e) {
             log.error("APP视频搜索失败, keyword: {}, 错误: {}", dto.getKeyword(), e.getMessage(), e);
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
     }
 
@@ -450,10 +450,10 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                 ));
     }
 
-    private PageDataInfo processAppVideoSearchResponse(SearchResponse<VideoSearchVO> response) {
+    private PageData processAppVideoSearchResponse(SearchResponse<VideoSearchVO> response) {
         long total = response.hits().total().value();
         if (total == 0) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
 
         List<AppVideoSearchVO> result = response.hits().hits().stream()
@@ -478,7 +478,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                 })
                 .collect(Collectors.toList());
 
-        return PageDataInfo.genPageData(result, total);
+        return PageData.genPageData(result, total);
     }
 
     private void applyAppHighlight(Map<String, List<String>> highlights, AppVideoSearchVO vo) {

@@ -3,7 +3,7 @@ package com.niuyin.service.social.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.date.DateUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
@@ -113,21 +113,21 @@ public class SocialDynamicsServiceImpl implements SocialDynamicsService {
      * 从redis分页用户收件箱
      */
     @Override
-    public PageDataInfo<String> getSocialDynamics(PageDTO pageDTO) {
+    public PageData<String> getSocialDynamics(PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
         Set<DefaultTypedTuple<String>> cacheZSetRange = redisService.getCacheZSetRangeWithScores(IN_FOLLOW + UserContext.getUserId(), startIndex, endIndex, true);
         List<String> collect = cacheZSetRange.stream().map(DefaultTypedTuple::getValue).collect(Collectors.toList());
         Long cacheZSetZCard = redisService.getCacheZSetZCard(IN_FOLLOW + UserContext.getUserId());
-        return PageDataInfo.genPageData(collect, cacheZSetZCard);
+        return PageData.genPageData(collect, cacheZSetZCard);
     }
 
     /**
      * 获取社交动态用户
      */
     @Override
-    public PageDataInfo<DynamicUser> getSocialDynamicsUser() {
+    public PageData<DynamicUser> getSocialDynamicsUser() {
         Set<DynamicUser> cacheZSetRange = redisService.getCacheZSetReverseRange(SOCIAL_DYNAMICS + UserContext.getUserId(), 0, -1);
-        return PageDataInfo.genPageData(new ArrayList<>(cacheZSetRange), cacheZSetRange.size());
+        return PageData.genPageData(new ArrayList<>(cacheZSetRange), cacheZSetRange.size());
     }
 }

@@ -1,6 +1,6 @@
 package com.niuyin.service.social;
 
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.video.vo.VideoVO;
 import com.niuyin.service.social.service.IUserFollowService;
@@ -25,7 +25,7 @@ public class UserFollowServiceTest {
 
     @Test
     public void test() {
-        PageDataInfo<VideoVO> socialDynamicVideoPage = userFollowService.getSocialDynamicVideoPage(new PageDTO());
+        PageData<VideoVO> socialDynamicVideoPage = userFollowService.getSocialDynamicVideoPage(new PageDTO());
         socialDynamicVideoPage.toString();
     }
 }

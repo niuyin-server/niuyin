@@ -1,7 +1,7 @@
 package com.niuyin.service.notice.controller.app;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.notice.dto.NoticePageDTO;
 import com.niuyin.service.notice.service.INoticeService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class AppNoticeController {
      * @return
      */
     @PostMapping("/behavePage")
-    public PageDataInfo behaveNoticePage(@RequestBody NoticePageDTO pageDTO) {
+    public PageData behaveNoticePage(@RequestBody NoticePageDTO pageDTO) {
         return noticeService.getBehaveNoticePage(pageDTO);
     }
 

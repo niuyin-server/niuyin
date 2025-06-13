@@ -1,14 +1,11 @@
 package com.niuyin.service.ai.controller.web.knowledge;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.model.ai.domain.chat.ChatConversationDO;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDO;
-import com.niuyin.model.ai.dto.model.web.ChatConversationSaveDTO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.service.ai.service.IKnowledgeService;
 import jakarta.annotation.Resource;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,7 +25,7 @@ public class KnowledgeController {
      * 新增知识库
      */
     @GetMapping("/list")
-    public R<PageDataInfo<KnowledgeDO>> list(PageDTO pageDTO) {
+    public R<PageData<KnowledgeDO>> list(PageDTO pageDTO) {
         return R.ok(knowledgeService.knowledgeList(pageDTO));
     }
 

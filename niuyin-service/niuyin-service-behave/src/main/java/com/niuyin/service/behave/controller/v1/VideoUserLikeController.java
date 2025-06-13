@@ -3,7 +3,7 @@ package com.niuyin.service.behave.controller.v1;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.feign.video.RemoteVideoService;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.video.dto.VideoPageDto;
@@ -40,7 +40,7 @@ public class VideoUserLikeController {
      * todo 使用sql 用户点赞分页查询
      */
     @PostMapping("/mylikepage")
-    public PageDataInfo myLikePage(@RequestBody VideoPageDto pageDto) {
+    public PageData myLikePage(@RequestBody VideoPageDto pageDto) {
         return videoUserLikeService.queryMyLikeVideoPage(pageDto);
     }
 
@@ -83,7 +83,7 @@ public class VideoUserLikeController {
      * @return
      */
     @PostMapping("/personLikePage")
-    public PageDataInfo personLikePage(@RequestBody VideoPageDto pageDto) {
+    public PageData personLikePage(@RequestBody VideoPageDto pageDto) {
         return videoUserLikeService.queryPersonLikePage(pageDto);
     }
 

@@ -1,7 +1,7 @@
 package com.niuyin.service.video.controller.app;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.model.video.vo.app.VideoInfoVO;
@@ -48,7 +48,7 @@ public class AppVideoController {
      */
     @PostMapping("/hotVideo")
     @Cacheable(value = "hotVideos", key = "'hotVideos'+ #pageDTO.pageNum + '_' + #pageDTO.pageSize")
-    public PageDataInfo<?> hotVideosForApp(@RequestBody PageDTO pageDTO) {
+    public PageData<?> hotVideosForApp(@RequestBody PageDTO pageDTO) {
         return videoService.getHotVideos(pageDTO);
     }
 
@@ -56,7 +56,7 @@ public class AppVideoController {
      * 分页查询我的视频
      */
     @PostMapping("/myPage")
-    public PageDataInfo<?> myPageForApp(@RequestBody VideoPageDto pageDto) {
+    public PageData<?> myPageForApp(@RequestBody VideoPageDto pageDto) {
         return videoService.queryMyVideoPageForApp(pageDto);
     }
 
@@ -64,7 +64,7 @@ public class AppVideoController {
      * 分页查询用户视频
      */
     @PostMapping("/userPage")
-    public PageDataInfo<?> userPage(@RequestBody VideoPageDto pageDto) {
+    public PageData<?> userPage(@RequestBody VideoPageDto pageDto) {
         return videoService.queryUserVideoPage(pageDto);
     }
 

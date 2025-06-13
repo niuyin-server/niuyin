@@ -2,7 +2,7 @@ package com.niuyin.service.social.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.domain.UserFollow;
 import com.niuyin.model.social.vo.Fans;
@@ -47,7 +47,7 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo getFollowPage(PageDTO pageDTO);
+    PageData getFollowPage(PageDTO pageDTO);
 
     /**
      * 分页用户粉丝
@@ -55,7 +55,7 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo queryUserFansPage(PageDTO pageDTO);
+    PageData queryUserFansPage(PageDTO pageDTO);
 
     List<UserFollow> getFollowList(Long userId);
 
@@ -75,7 +75,7 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO);
+    PageData<VideoVO> getSocialDynamicVideoPage(PageDTO pageDTO);
 
     /**
      * 是否关注用户
@@ -93,7 +93,7 @@ public interface IUserFollowService extends IService<UserFollow> {
     /**
      * 分页我的关注列表
      */
-    PageDataInfo<FollowUser> appGetFollowPage(PageDTO pageDTO);
+    PageData<FollowUser> appGetFollowPage(PageDTO pageDTO);
 
     IPage<UserFollow> fansPage(PageDTO pageDTO);
 
@@ -103,5 +103,5 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo<Fans> appGetFansPage(PageDTO pageDTO);
+    PageData<Fans> appGetFansPage(PageDTO pageDTO);
 }

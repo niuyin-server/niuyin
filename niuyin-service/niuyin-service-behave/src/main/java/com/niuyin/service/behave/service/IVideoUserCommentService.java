@@ -2,7 +2,7 @@ package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.VideoUserComment;
 import com.niuyin.model.behave.dto.VideoCommentReplayPageDTO;
 import com.niuyin.model.behave.dto.VideoUserCommentPageDTO;
@@ -64,7 +64,7 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @return
      * @throws InterruptedException
      */
-    PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO);
+    PageData getCommentPageTree(VideoUserCommentPageDTO pageDTO);
 
     /**
      * 删除视频所有评论
@@ -80,7 +80,7 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO);
+    PageData getCommentParentPage(VideoUserCommentPageDTO pageDTO);
 
     /**
      * 评论视频
@@ -93,7 +93,7 @@ public interface IVideoUserCommentService extends IService<VideoUserComment> {
     /**
      * 视频评论回复分页
      */
-    PageDataInfo getCommentReplyPage(VideoCommentReplayPageDTO pageDTO);
+    PageData getCommentReplyPage(VideoCommentReplayPageDTO pageDTO);
 
     /**
      * 获取用户评论视频记录

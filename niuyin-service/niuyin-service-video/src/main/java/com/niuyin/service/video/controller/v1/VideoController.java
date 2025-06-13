@@ -4,7 +4,7 @@ import com.niuyin.common.cache.annotations.DoubleCache;
 import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.core.utils.file.PathUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -132,7 +132,7 @@ public class VideoController {
      */
     @PostMapping("/hot")
     @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
-    public PageDataInfo hotVideos(@RequestBody PageDTO pageDTO) {
+    public PageData hotVideos(@RequestBody PageDTO pageDTO) {
         return videoService.getHotVideos(pageDTO);
     }
 
@@ -187,7 +187,7 @@ public class VideoController {
      * 分页查询我的视频
      */
     @PostMapping("/mypage")
-    public PageDataInfo myPage(@RequestBody VideoPageDto pageDto) {
+    public PageData myPage(@RequestBody VideoPageDto pageDto) {
         return videoService.queryMyVideoPage(pageDto);
     }
 
@@ -195,7 +195,7 @@ public class VideoController {
      * 分页查询用户视频
      */
     @PostMapping("/userpage")
-    public PageDataInfo userPage(@RequestBody VideoPageDto pageDto) {
+    public PageData userPage(@RequestBody VideoPageDto pageDto) {
         return videoService.queryUserVideoPage(pageDto);
     }
 

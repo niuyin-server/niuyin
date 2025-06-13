@@ -5,10 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDO;
 import com.niuyin.model.common.dto.PageDTO;
-import com.niuyin.model.common.enums.TrueOrFalseEnum;
 import com.niuyin.service.ai.mapper.KnowledgeMapper;
 import com.niuyin.service.ai.service.IKnowledgeService;
 import lombok.RequiredArgsConstructor;
@@ -63,10 +62,10 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeMapper, Knowledge
      *
      */
     @Override
-    public PageDataInfo<KnowledgeDO> knowledgeList(PageDTO pageDTO) {
+    public PageData<KnowledgeDO> knowledgeList(PageDTO pageDTO) {
         Wrappers.<KnowledgeDO>lambdaQuery()
                 .eq(KnowledgeDO::getUserId, UserContext.getUserId());
         Page<KnowledgeDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()));
-        return PageDataInfo.page(page);
+        return PageData.page(page);
     }
 }

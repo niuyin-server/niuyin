@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.VideoUserLike;
 import com.niuyin.model.video.dto.VideoPageDto;
 
@@ -23,9 +23,9 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @param pageDto
      * @return
      */
-    PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto);
+    PageData queryMyLikeVideoPage(VideoPageDto pageDto);
 
-    PageDataInfo queryMyLikeVideoPageForApp(VideoPageDto pageDto);
+    PageData queryMyLikeVideoPageForApp(VideoPageDto pageDto);
 
     /**
      * 查询用户的点赞列表
@@ -33,7 +33,7 @@ public interface IVideoUserLikeService extends IService<VideoUserLike> {
      * @param pageDto
      * @return
      */
-    PageDataInfo queryPersonLikePage(VideoPageDto pageDto);
+    PageData queryPersonLikePage(VideoPageDto pageDto);
 
     /**
      * 删除所有用户对此视频的点赞 ！！！

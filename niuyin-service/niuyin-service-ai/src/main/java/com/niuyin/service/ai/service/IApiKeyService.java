@@ -1,7 +1,7 @@
 package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.model.ApiKeyDO;
 import com.niuyin.model.ai.dto.model.ApiKeyPageDTO;
 import com.niuyin.model.ai.dto.model.ApiKeySaveDTO;
@@ -23,7 +23,7 @@ public interface IApiKeyService extends IService<ApiKeyDO> {
 
     ApiKeyDO getApiKey(Long id);
 
-    PageDataInfo<ApiKeyDO> getApiKeyPage(ApiKeyPageDTO pageDTO);
+    PageData<ApiKeyDO> getApiKeyPage(ApiKeyPageDTO pageDTO);
 
     void updateApiKeyState(ApiKeyStateDTO dto);
 

@@ -1,6 +1,6 @@
 package com.niuyin.service.social.service;
 
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.cache.DynamicUser;
 
@@ -21,10 +21,10 @@ public interface SocialDynamicsService {
     /**
      * 获取社交动态列表
      */
-    PageDataInfo<String> getSocialDynamics(PageDTO pageDTO);
+    PageData<String> getSocialDynamics(PageDTO pageDTO);
 
     /**
      * 获取社交动态用户
      */
-    PageDataInfo<DynamicUser> getSocialDynamicsUser();
+    PageData<DynamicUser> getSocialDynamicsUser();
 }

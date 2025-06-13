@@ -1,7 +1,7 @@
 package com.niuyin.service.creator.service.impl;
 
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.common.enums.HttpCodeEnum;
@@ -48,14 +48,14 @@ public class CreatorServiceImpl implements CreatorService {
      * @return
      */
     @Override
-    public PageDataInfo queryVideoPage(VideoPageDTO videoPageDTO) {
+    public PageData queryVideoPage(VideoPageDTO videoPageDTO) {
         videoPageDTO.setUserId(UserContext.getUserId());
         videoPageDTO.setPageNum((videoPageDTO.getPageNum() - 1) * videoPageDTO.getPageSize());
         List<Video> videoList = videoMapper.selectVideoPage(videoPageDTO);
         if (videoList.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
-        return PageDataInfo.genPageData(videoList, videoMapper.selectVideoPageCount(videoPageDTO));
+        return PageData.genPageData(videoList, videoMapper.selectVideoPageCount(videoPageDTO));
     }
 
     /**
@@ -65,14 +65,14 @@ public class CreatorServiceImpl implements CreatorService {
      * @return
      */
     @Override
-    public PageDataInfo queryVideoCompilationPage(videoCompilationPageDTO videoCompilationPageDTO) {
+    public PageData queryVideoCompilationPage(videoCompilationPageDTO videoCompilationPageDTO) {
         videoCompilationPageDTO.setUserId(UserContext.getUserId());
         videoCompilationPageDTO.setPageNum((videoCompilationPageDTO.getPageNum() - 1) * videoCompilationPageDTO.getPageSize());
         List<UserVideoCompilation> compilationList = videoMapper.selectVideoCompilationPage(videoCompilationPageDTO);
         if (compilationList.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
-        return PageDataInfo.genPageData(compilationList, videoMapper.selectVideoCompilationPageCount(videoCompilationPageDTO));
+        return PageData.genPageData(compilationList, videoMapper.selectVideoCompilationPageCount(videoCompilationPageDTO));
     }
 
     /**

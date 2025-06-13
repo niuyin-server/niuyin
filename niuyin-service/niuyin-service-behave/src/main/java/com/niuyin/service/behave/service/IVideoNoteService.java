@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.VideoNote;
 import com.niuyin.model.behave.dto.VideoNotePageDTO;
 import com.niuyin.model.behave.vo.VideoNoteVO;
@@ -19,6 +19,6 @@ public interface IVideoNoteService extends IService<VideoNote> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo<VideoNoteVO> queryVideoNotePage(VideoNotePageDTO pageDTO);
+    PageData<VideoNoteVO> queryVideoNotePage(VideoNotePageDTO pageDTO);
 
 }

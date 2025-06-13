@@ -3,7 +3,7 @@ package com.niuyin.service.behave.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
 import com.niuyin.model.behave.domain.VideoNote;
@@ -44,7 +44,7 @@ public class VideoNoteServiceImpl extends ServiceImpl<VideoNoteMapper, VideoNote
      * @return
      */
     @Override
-    public PageDataInfo<VideoNoteVO> queryVideoNotePage(VideoNotePageDTO pageDTO) {
+    public PageData<VideoNoteVO> queryVideoNotePage(VideoNotePageDTO pageDTO) {
         LambdaQueryWrapper<VideoNote> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(VideoNote::getDelFlag, VideoNoteDelFlagEnum.NORMAL.getCode())
                 .eq(VideoNote::getVideoId, pageDTO.getVideoId())
@@ -52,7 +52,7 @@ public class VideoNoteServiceImpl extends ServiceImpl<VideoNoteMapper, VideoNote
         Page<VideoNote> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
         List<VideoNote> records = page.getRecords();
         if (CollectionUtils.isEmpty(records)) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<VideoNoteVO> voList = BeanCopyUtils.copyBeanList(records, VideoNoteVO.class);
         voList.forEach(v -> {
@@ -63,7 +63,7 @@ public class VideoNoteServiceImpl extends ServiceImpl<VideoNoteMapper, VideoNote
                 v.setAuthor(author);
             }
         });
-        return PageDataInfo.genPageData(voList, page.getTotal());
+        return PageData.genPageData(voList, page.getTotal());
     }
 
 }

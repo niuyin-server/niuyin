@@ -1,11 +1,9 @@
 package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDO;
 import com.niuyin.model.common.dto.PageDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * AI 知识库表(Knowledge)表服务接口
@@ -27,5 +25,5 @@ public interface IKnowledgeService extends IService<KnowledgeDO> {
     /**
      * 获取知识库分页列表
      */
-    PageDataInfo<KnowledgeDO> knowledgeList(PageDTO pageDTO);
+    PageData<KnowledgeDO> knowledgeList(PageDTO pageDTO);
 }

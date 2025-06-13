@@ -4,10 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.compont.SnowFlake;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.domain.model.ChatModelDO;
 import com.niuyin.model.ai.domain.model.ModelRoleDO;
 import com.niuyin.model.ai.dto.model.ModelRolePageDTO;
 import com.niuyin.model.ai.dto.model.ModelRoleSaveDTO;
@@ -62,7 +61,7 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
     }
 
     @Override
-    public PageDataInfo<ModelRoleDO> getModelRolePage(ModelRolePageDTO pageDTO) {
+    public PageData<ModelRoleDO> getModelRolePage(ModelRolePageDTO pageDTO) {
         LambdaQueryWrapper<ModelRoleDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ModelRoleDO::getName, pageDTO.getName())
                 .like(StringUtils.isNotBlank(pageDTO.getCategory()), ModelRoleDO::getCategory, pageDTO.getCategory())
@@ -70,7 +69,7 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
                 .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ModelRoleDO::getStateFlag, pageDTO.getStateFlag())
                 .orderByAsc(ModelRoleDO::getSort);
         Page<ModelRoleDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
-        return PageDataInfo.page(page);
+        return PageData.page(page);
     }
 
     @Override
@@ -80,7 +79,7 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
     }
 
     @Override
-    public PageDataInfo<ModelRoleDO> getModelRolePageForWeb(WebModelRolePageDTO pageDTO) {
+    public PageData<ModelRoleDO> getModelRolePageForWeb(WebModelRolePageDTO pageDTO) {
         LambdaQueryWrapper<ModelRoleDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ModelRoleDO::getName, pageDTO.getName())
                 .like(StringUtils.isNotBlank(pageDTO.getCategory()), ModelRoleDO::getCategory, pageDTO.getCategory())
@@ -88,6 +87,6 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
                 .eq(ModelRoleDO::getStateFlag, StateFlagEnum.ENABLE.getCode())
                 .orderByAsc(ModelRoleDO::getSort);
         Page<ModelRoleDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
-        return PageDataInfo.page(page);
+        return PageData.page(page);
     }
 }

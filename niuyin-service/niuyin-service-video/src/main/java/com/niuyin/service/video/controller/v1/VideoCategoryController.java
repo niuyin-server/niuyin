@@ -2,7 +2,7 @@ package com.niuyin.service.video.controller.v1;
 
 import com.niuyin.common.core.annotations.MappingCostTime;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
 import com.niuyin.model.video.vo.VideoCategoryVo;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
@@ -32,7 +32,7 @@ public class VideoCategoryController {
     }
 
     @PostMapping("/page")
-    public PageDataInfo<?> categoryVideoPage(@RequestBody VideoCategoryPageDTO pageDTO) {
+    public PageData<?> categoryVideoPage(@RequestBody VideoCategoryPageDTO pageDTO) {
         return videoCategoryService.selectVideoByCategory(pageDTO);
     }
 

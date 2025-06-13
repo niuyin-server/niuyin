@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.compont.SnowFlake;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.ai.domain.model.ApiKeyDO;
@@ -55,13 +55,13 @@ public class ApiKeyServiceImpl extends ServiceImpl<ApiKeyMapper, ApiKeyDO> imple
     }
 
     @Override
-    public PageDataInfo<ApiKeyDO> getApiKeyPage(ApiKeyPageDTO pageDTO) {
+    public PageData<ApiKeyDO> getApiKeyPage(ApiKeyPageDTO pageDTO) {
         LambdaQueryWrapper<ApiKeyDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ApiKeyDO::getName, pageDTO.getName())
                 .eq(StringUtils.isNotBlank(pageDTO.getPlatform()), ApiKeyDO::getPlatform, pageDTO.getPlatform())
                 .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ApiKeyDO::getStateFlag, pageDTO.getStateFlag());
         Page<ApiKeyDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
-        return PageDataInfo.page(page);
+        return PageData.page(page);
     }
 
     @Override

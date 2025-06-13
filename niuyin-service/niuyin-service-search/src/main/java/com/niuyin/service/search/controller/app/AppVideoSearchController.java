@@ -1,7 +1,7 @@
 package com.niuyin.service.search.controller.app;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.service.search.service.VideoSearchService;
@@ -29,7 +29,7 @@ public class AppVideoSearchController {
      * 分页搜索视频
      */
     @PostMapping()
-    public PageDataInfo<?> searchVideoForApp(@RequestBody VideoSearchKeywordDTO dto) {
+    public PageData<?> searchVideoForApp(@RequestBody VideoSearchKeywordDTO dto) {
         return videoSearchService.searchVideoFromESForApp(dto);
     }
 

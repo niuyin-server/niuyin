@@ -3,7 +3,7 @@ package com.niuyin.service.ai.controller.web.chat;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.model.ai.domain.chat.ChatConversationDO;
 import com.niuyin.model.ai.domain.chat.ChatMessageDO;
@@ -46,8 +46,8 @@ public class ChatConversationController {
      * 分页查询
      */
     @PostMapping("/list")
-    public PageDataInfo<ChatConversationDO> list(@Validated @RequestBody PageDTO dto) {
-        return PageDataInfo.page(chatConversationService.getList(dto));
+    public PageData<ChatConversationDO> list(@Validated @RequestBody PageDTO dto) {
+        return PageData.page(chatConversationService.getList(dto));
     }
 
     /**

@@ -2,7 +2,7 @@ package com.niuyin.service.notice.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.notice.domain.Notice;
 import com.niuyin.model.notice.dto.NoticePageDTO;
 
@@ -33,7 +33,7 @@ public interface INoticeService extends IService<Notice> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo getBehaveNoticePage(NoticePageDTO pageDTO);
+    PageData getBehaveNoticePage(NoticePageDTO pageDTO);
 
     /**
      * 新增消息

@@ -5,15 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.compont.SnowFlake;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.bean.BeanUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
 import com.niuyin.model.ai.domain.model.ToolDO;
 import com.niuyin.model.ai.dto.model.AiToolSaveDTO;
 import com.niuyin.model.ai.dto.model.ToolPageDTO;
-import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.service.ai.controller.admin.AdminToolController;
 import com.niuyin.service.ai.mapper.ToolMapper;
 import com.niuyin.service.ai.service.IToolService;
@@ -26,7 +24,7 @@ import java.util.List;
 /**
  * AI 工具表(Tool)表服务实现类
  *
- * @author makejava
+ * @author roydon
  * @since 2025-06-05 16:02:48
  */
 @RequiredArgsConstructor
@@ -76,13 +74,13 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolDO> implements 
     }
 
     @Override
-    public PageDataInfo<ToolDO> getToolPage(ToolPageDTO pageDTO) {
+    public PageData<ToolDO> getToolPage(ToolPageDTO pageDTO) {
         LambdaQueryWrapper<ToolDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ToolDO::getName, pageDTO.getName())
                 .like(StringUtils.isNotBlank(pageDTO.getDescription()), ToolDO::getDescription, pageDTO.getDescription())
                 .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ToolDO::getStateFlag, pageDTO.getStateFlag());
         Page<ToolDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
-        return PageDataInfo.page(page);
+        return PageData.page(page);
     }
 
     @Override

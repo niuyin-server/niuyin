@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.audit.SensitiveWordUtil;
@@ -54,7 +54,6 @@ import lombok.val;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -72,7 +71,6 @@ import static com.niuyin.model.common.enums.HttpCodeEnum.SENSITIVEWORD_ERROR;
 import static com.niuyin.model.video.mq.VideoDelayedQueueConstant.*;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.DIRECT_KEY_INFO;
 import static com.niuyin.model.video.mq.VideoDirectExchangeConstant.EXCHANGE_VIDEO_DIRECT;
-import static com.niuyin.service.video.config.AsyncConfig.VIDEO_EXECUTOR;
 import static com.niuyin.service.video.constants.HotVideoConstants.VIDEO_BEFORE_DAT30;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_CATEGORY_VIDEOS_CACHE_KEY_PREFIX;
 import static com.niuyin.service.video.constants.InterestPushConstant.VIDEO_TAG_VIDEOS_CACHE_KEY_PREFIX;
@@ -352,13 +350,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     @Override
-    public PageDataInfo queryMyVideoPage(VideoPageDto pageDto) {
+    public PageData queryMyVideoPage(VideoPageDto pageDto) {
         pageDto.setUserId(UserContext.getUserId());
         return getUserVideoPage(pageDto);
     }
 
     @Override
-    public PageDataInfo queryMyVideoPageForApp(VideoPageDto pageDto) {
+    public PageData queryMyVideoPageForApp(VideoPageDto pageDto) {
         pageDto.setUserId(UserContext.getUserId());
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, pageDto.getUserId());
@@ -368,14 +366,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         IPage<Video> videoIPage = this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
         List<Video> records = videoIPage.getRecords();
         if (StringUtils.isNull(records) || records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<MyVideoVO> myVideoVOList = BeanCopyUtils.copyBeanList(records, MyVideoVO.class);
         // 设置点赞量
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(myVideoVOList.stream()
                 .map(this::packageMyVideoVOAsync).toArray(CompletableFuture[]::new));
         allFutures.join();
-        return PageDataInfo.genPageData(myVideoVOList, videoIPage.getTotal());
+        return PageData.genPageData(myVideoVOList, videoIPage.getTotal());
     }
 
     public CompletableFuture<Void> packageMyVideoVOAsync(MyVideoVO vo) {
@@ -388,14 +386,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     @Override
-    public PageDataInfo queryUserVideoPage(VideoPageDto pageDto) {
+    public PageData queryUserVideoPage(VideoPageDto pageDto) {
         if (StringUtils.isNull(pageDto.getUserId())) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         return getUserVideoPage(pageDto);
     }
 
-    public PageDataInfo getUserVideoPage(VideoPageDto pageDto) {
+    public PageData getUserVideoPage(VideoPageDto pageDto) {
         LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Video::getUserId, pageDto.getUserId());
         queryWrapper.eq(Video::getDelFlag, DelFlagEnum.EXIST.getCode());
@@ -404,13 +402,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         IPage<Video> videoIPage = this.page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()), queryWrapper);
         List<Video> records = videoIPage.getRecords();
         if (StringUtils.isNull(records) || records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(records, VideoVO.class);
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(videoVOList.stream()
                 .map(this::packageUserVideoVOAsync).toArray(CompletableFuture[]::new));
         allFutures.join();
-        return PageDataInfo.genPageData(videoVOList, videoIPage.getTotal());
+        return PageData.genPageData(videoVOList, videoIPage.getTotal());
     }
 
     public CompletableFuture<Void> packageUserVideoVOAsync(VideoVO videoVO) {
@@ -833,7 +831,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return
      */
     @Override
-    public PageDataInfo getHotVideos(PageDTO pageDTO) {
+    public PageData getHotVideos(PageDTO pageDTO) {
         int startIndex = (pageDTO.getPageNum() - 1) * pageDTO.getPageSize();
         int endIndex = startIndex + pageDTO.getPageSize() - 1;
         Set<Object> videoIds = redisService.getCacheZSetRange(VideoCacheConstants.VIDEO_HOT, startIndex, endIndex);
@@ -876,7 +874,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
 
-        return PageDataInfo.genPageData(videoVOList, hotCount);
+        return PageData.genPageData(videoVOList, hotCount);
 
     }
 

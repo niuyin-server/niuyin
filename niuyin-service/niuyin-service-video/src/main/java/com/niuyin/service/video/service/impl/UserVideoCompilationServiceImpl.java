@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.video.domain.UserVideoCompilation;
@@ -56,7 +56,7 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
      * @return
      */
     @Override
-    public PageDataInfo videoCompilationMyPage(UserVideoCompilationPageDTO pageDTO) {
+    public PageData videoCompilationMyPage(UserVideoCompilationPageDTO pageDTO) {
         LambdaQueryWrapper<UserVideoCompilation> uvcQW = new LambdaQueryWrapper<>();
         uvcQW.eq(UserVideoCompilation::getUserId, UserContext.getUserId());
         uvcQW.like(StringUtils.isNotEmpty(pageDTO.getTitle()), UserVideoCompilation::getTitle, pageDTO.getTitle());
@@ -64,12 +64,12 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
         IPage<UserVideoCompilation> userVideoCompilationIPage = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), uvcQW);
         List<UserVideoCompilation> records = userVideoCompilationIPage.getRecords();
         if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<UserVideoCompilationVO> userVideoCompilationVOList = BeanCopyUtils.copyBeanList(records, UserVideoCompilationVO.class);
         // 封装VO
         packageUserVideoCompilationVOProcessor.processUserVideoCompilationVOList(userVideoCompilationVOList);
-        return PageDataInfo.genPageData(userVideoCompilationVOList, userVideoCompilationIPage.getTotal());
+        return PageData.genPageData(userVideoCompilationVOList, userVideoCompilationIPage.getTotal());
     }
 
     /**
@@ -79,10 +79,10 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
      * @return
      */
     @Override
-    public PageDataInfo videoCompilationUserPage(UserVideoCompilationPageDTO pageDTO) {
+    public PageData videoCompilationUserPage(UserVideoCompilationPageDTO pageDTO) {
         Long userId = pageDTO.getUserId();
         if (StringUtils.isNull(userId)) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         LambdaQueryWrapper<UserVideoCompilation> uvcQW = new LambdaQueryWrapper<>();
         uvcQW.eq(UserVideoCompilation::getUserId, userId);
@@ -91,12 +91,12 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
         IPage<UserVideoCompilation> userVideoCompilationIPage = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), uvcQW);
         List<UserVideoCompilation> records = userVideoCompilationIPage.getRecords();
         if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<UserVideoCompilationVO> userVideoCompilationVOList = BeanCopyUtils.copyBeanList(records, UserVideoCompilationVO.class);
         // 封装VO
         packageUserVideoCompilationVOProcessor.processUserVideoCompilationVOList(userVideoCompilationVOList);
-        return PageDataInfo.genPageData(userVideoCompilationVOList, userVideoCompilationIPage.getTotal());
+        return PageData.genPageData(userVideoCompilationVOList, userVideoCompilationIPage.getTotal());
     }
 
     /**
@@ -169,9 +169,9 @@ public class UserVideoCompilationServiceImpl extends ServiceImpl<UserVideoCompil
      * @param pageDTO
      */
     @Override
-    public PageDataInfo compilationVideoPage(CompilationVideoPageDTO pageDTO) {
+    public PageData compilationVideoPage(CompilationVideoPageDTO pageDTO) {
         List<CompilationVideoVO> vo = userVideoCompilationRelationService.compilationVideoPageList(pageDTO);
-        return PageDataInfo.genPageData(vo, userVideoCompilationRelationService.compilationVideoPageCount(pageDTO.getCompilationId()));
+        return PageData.genPageData(vo, userVideoCompilationRelationService.compilationVideoPageCount(pageDTO.getCompilationId()));
     }
 
     /**

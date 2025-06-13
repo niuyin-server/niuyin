@@ -1,7 +1,7 @@
 package com.niuyin.service.video.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.domain.UserVideoCompilation;
 import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.dto.UpdateUserVideoCompilationDTO;
@@ -22,7 +22,7 @@ public interface IUserVideoCompilationService extends IService<UserVideoCompilat
      * @param pageDTO
      * @return
      */
-    PageDataInfo videoCompilationMyPage(UserVideoCompilationPageDTO pageDTO);
+    PageData videoCompilationMyPage(UserVideoCompilationPageDTO pageDTO);
 
     /**
      * 分页查询用户合集
@@ -30,7 +30,7 @@ public interface IUserVideoCompilationService extends IService<UserVideoCompilat
      * @param pageDTO
      * @return
      */
-    PageDataInfo videoCompilationUserPage(UserVideoCompilationPageDTO pageDTO);
+    PageData videoCompilationUserPage(UserVideoCompilationPageDTO pageDTO);
 
     /**
      * 合集播放量
@@ -60,7 +60,7 @@ public interface IUserVideoCompilationService extends IService<UserVideoCompilat
     /**
      * 合集视频分页
      */
-    PageDataInfo compilationVideoPage(CompilationVideoPageDTO pageDTO);
+    PageData compilationVideoPage(CompilationVideoPageDTO pageDTO);
 
     /**
      * 根据视频id获取合集信息

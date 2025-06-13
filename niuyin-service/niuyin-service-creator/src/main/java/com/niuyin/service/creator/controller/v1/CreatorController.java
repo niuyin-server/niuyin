@@ -1,7 +1,7 @@
 package com.niuyin.service.creator.controller.v1;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
 import com.niuyin.model.creator.vo.DashboardAmountVO;
@@ -28,7 +28,7 @@ public class CreatorController {
      * 视频分页
      */
     @PostMapping("/videoPage")
-    public PageDataInfo videoPage(@RequestBody VideoPageDTO videoPageDTO) {
+    public PageData videoPage(@RequestBody VideoPageDTO videoPageDTO) {
         return creatorService.queryVideoPage(videoPageDTO);
     }
 
@@ -36,7 +36,7 @@ public class CreatorController {
      * 视频合集分页
      */
     @PostMapping("/videoCompilationPage")
-    public PageDataInfo videoCompilationPage(@RequestBody videoCompilationPageDTO videoCompilationPageDTO) {
+    public PageData videoCompilationPage(@RequestBody videoCompilationPageDTO videoCompilationPageDTO) {
         return creatorService.queryVideoCompilationPage(videoCompilationPageDTO);
     }
 

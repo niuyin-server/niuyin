@@ -1,7 +1,7 @@
 package com.niuyin.service.ai.controller.admin;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.model.ToolDO;
 import com.niuyin.model.ai.dto.model.AiToolSaveDTO;
 import com.niuyin.model.ai.dto.model.ToolPageDTO;
@@ -23,7 +23,7 @@ import static com.niuyin.common.core.utils.CollectionUtils.convertList;
 /**
  * AI 工具表(Tool)表控制层
  *
- * @author makejava
+ * @author roydon
  * @since 2025-06-05 16:02:46
  */
 @RequiredArgsConstructor
@@ -81,8 +81,8 @@ public class AdminToolController {
 
     @GetMapping("/page")
     @Operation(summary = "获得工具分页")
-    public R<PageDataInfo<ToolDO>> getToolPage(@Valid ToolPageDTO pageDTO) {
-        PageDataInfo<ToolDO> pageResult = toolService.getToolPage(pageDTO);
+    public R<PageData<ToolDO>> getToolPage(@Valid ToolPageDTO pageDTO) {
+        PageData<ToolDO> pageResult = toolService.getToolPage(pageDTO);
         return R.ok(pageResult);
     }
 

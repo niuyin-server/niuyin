@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.model.behave.domain.UserFavorite;
 import com.niuyin.model.behave.vo.UserFavoriteInfoVO;
@@ -78,19 +78,19 @@ public class UserFavoriteServiceImpl extends ServiceImpl<UserFavoriteMapper, Use
      * @return
      */
     @Override
-    public PageDataInfo queryMyCollectionInfoPage(PageDTO pageDTO) {
+    public PageData queryMyCollectionInfoPage(PageDTO pageDTO) {
         LambdaQueryWrapper<UserFavorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserFavorite::getUserId, UserContext.getUserId());
         queryWrapper.orderByDesc(UserFavorite::getCreateTime);
         IPage<UserFavorite> userFavoriteIPage = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), queryWrapper);
         List<UserFavorite> records = userFavoriteIPage.getRecords();
         if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         List<UserFavoriteInfoVO> collectionInfoList = BeanCopyUtils.copyBeanList(records, UserFavoriteInfoVO.class);
         // 封装VO
         packageCollectionInfoPageProcessor.processUserFavoriteInfoList(collectionInfoList);
-        return PageDataInfo.genPageData(collectionInfoList, userFavoriteIPage.getTotal());
+        return PageData.genPageData(collectionInfoList, userFavoriteIPage.getTotal());
     }
 
     /**

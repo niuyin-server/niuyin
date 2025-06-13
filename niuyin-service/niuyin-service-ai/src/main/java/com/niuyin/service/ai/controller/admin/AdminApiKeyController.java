@@ -2,7 +2,7 @@ package com.niuyin.service.ai.controller.admin;
 
 import com.niuyin.common.ai.enums.AiPlatformEnum;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.model.ApiKeyDO;
 import com.niuyin.model.ai.dto.model.ApiKeyPageDTO;
 import com.niuyin.model.ai.dto.model.ApiKeySaveDTO;
@@ -74,8 +74,8 @@ public class AdminApiKeyController {
 
     @GetMapping("/page")
     @Operation(summary = "获得 API 密钥分页")
-    public R<PageDataInfo<ApiKeyDO>> getApiKeyPage(@Valid ApiKeyPageDTO pageDTO) {
-        PageDataInfo<ApiKeyDO> pageResult = apiKeyService.getApiKeyPage(pageDTO);
+    public R<PageData<ApiKeyDO>> getApiKeyPage(@Valid ApiKeyPageDTO pageDTO) {
+        PageData<ApiKeyDO> pageResult = apiKeyService.getApiKeyPage(pageDTO);
         return R.ok(pageResult);
     }
 

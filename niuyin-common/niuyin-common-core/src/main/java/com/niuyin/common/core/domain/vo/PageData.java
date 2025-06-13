@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,7 +17,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageDataInfo<T> implements Serializable {
+public class PageData<T> implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -49,27 +51,27 @@ public class PageDataInfo<T> implements Serializable {
      *
      * @param page 分页对象
      */
-    public static <T> PageDataInfo<T> page(IPage<T> page) {
+    public static <T> PageData<T> page(IPage<T> page) {
         if (CollUtil.isEmpty(page.getRecords())) {
             return emptyPage();
         }
         // 是否还有更多数据
         Boolean hasMore = page.getCurrent() < page.getPages();
-        return new PageDataInfo<>(R.SUCCESS, "OK", page.getRecords(), page.getTotal(), hasMore);
+        return new PageData<>(R.SUCCESS, "OK", page.getRecords(), page.getTotal(), hasMore);
     }
 
     /**
      * 返回分页数据
      */
-    public static <T> PageDataInfo<T> genPageData(List<T> rows, long total) {
-        return new PageDataInfo<>(R.SUCCESS, "OK", rows, total, true);
+    public static <T> PageData<T> genPageData(List<T> rows, long total) {
+        return new PageData<>(R.SUCCESS, "OK", rows, total, true);
     }
 
     /**
      * 返回空数据
      */
-    public static <T> PageDataInfo<T> emptyPage() {
-        return new PageDataInfo<>(R.SUCCESS, "OK", null, 0, false);
+    public static <T> PageData<T> emptyPage() {
+        return new PageData<>(R.SUCCESS, "OK", null, 0, false);
     }
 
 }

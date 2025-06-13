@@ -1,7 +1,7 @@
 package com.niuyin.service.video.controller.app;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.dto.CategoryVideoPageDTO;
 import com.niuyin.model.video.vo.app.AppVideoCategoryVo;
 import com.niuyin.service.video.service.IVideoCategoryService;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -45,7 +44,7 @@ public class AppVideoCategoryController {
      * 分页分类视频
      */
     @PostMapping("/videoPage")
-    public PageDataInfo<?> getVideoByCategoryId(@Validated @RequestBody CategoryVideoPageDTO pageDTO) {
+    public PageData<?> getVideoByCategoryId(@Validated @RequestBody CategoryVideoPageDTO pageDTO) {
         return videoCategoryService.getVideoPageByCategoryId(pageDTO);
     }
 

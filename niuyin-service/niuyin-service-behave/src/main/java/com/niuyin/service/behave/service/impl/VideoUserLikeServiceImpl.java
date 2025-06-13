@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -167,13 +167,13 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @return
      */
     @Override
-    public PageDataInfo queryMyLikeVideoPage(VideoPageDto pageDto) {
+    public PageData queryMyLikeVideoPage(VideoPageDto pageDto) {
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
         List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
         List<VideoVO> videoVOList = BeanCopyUtils.copyBeanList(records, VideoVO.class);
         CompletableFuture.allOf(videoVOList.stream().map(this::packageVideoVOAsync).toArray(CompletableFuture[]::new)).join();
-        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+        return PageData.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
     @Async
@@ -195,13 +195,13 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
     }
 
     @Override
-    public PageDataInfo queryMyLikeVideoPageForApp(VideoPageDto pageDto) {
+    public PageData queryMyLikeVideoPageForApp(VideoPageDto pageDto) {
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         pageDto.setUserId(UserContext.getUserId());
         List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
         List<MyLikeVideoVO> videoVOList = BeanCopyUtils.copyBeanList(records, MyLikeVideoVO.class);
         CompletableFuture.allOf(videoVOList.stream().map(this::packageMyLikeVideoPageAsync).toArray(CompletableFuture[]::new)).join();
-        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+        return PageData.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
 
@@ -237,11 +237,11 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
      * @return
      */
     @Override
-    public PageDataInfo queryPersonLikePage(VideoPageDto pageDto) {
+    public PageData queryPersonLikePage(VideoPageDto pageDto) {
         //判断该用户的点赞列表是否对外展示
         MemberInfo memberInfo = videoUserLikeMapper.selectPersonLikeShowStatus(pageDto.getUserId());
         if (memberInfo.getLikeShowStatus().equals(ShowStatusEnum.HIDE.getCode())) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         pageDto.setPageNum((pageDto.getPageNum() - 1) * pageDto.getPageSize());
         List<Video> records = videoUserLikeMapper.selectPersonLikePage(pageDto);
@@ -263,7 +263,7 @@ public class VideoUserLikeServiceImpl extends ServiceImpl<VideoUserLikeMapper, V
                     videoVOList.add(videoVO);
                 })).collect(Collectors.toList());
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        return PageDataInfo.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
+        return PageData.genPageData(videoVOList, videoUserLikeMapper.selectPersonLikeCount(pageDto));
     }
 
     /**

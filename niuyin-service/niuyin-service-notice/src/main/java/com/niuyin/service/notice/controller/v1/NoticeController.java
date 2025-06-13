@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -51,11 +51,11 @@ public class NoticeController {
      * @return
      */
     @PostMapping("/page")
-    public PageDataInfo userNoticePage(@RequestBody NoticePageDTO pageDTO) {
+    public PageData userNoticePage(@RequestBody NoticePageDTO pageDTO) {
         IPage<Notice> noticeIPage = noticeService.queryUserNoticePage(pageDTO);
         List<Notice> records = noticeIPage.getRecords();
         if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
 //        List<NoticeVO> voList = new ArrayList<>(10);
 //        //封装vo
@@ -128,7 +128,7 @@ public class NoticeController {
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList()))
                 .join();
-        return PageDataInfo.genPageData(voList, noticeIPage.getTotal());
+        return PageData.genPageData(voList, noticeIPage.getTotal());
     }
 
     /**

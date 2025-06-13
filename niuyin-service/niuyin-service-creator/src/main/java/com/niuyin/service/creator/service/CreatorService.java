@@ -1,6 +1,6 @@
 package com.niuyin.service.creator.service;
 
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.creator.dto.VideoPageDTO;
 import com.niuyin.model.creator.dto.videoCompilationPageDTO;
 import com.niuyin.model.creator.vo.DashboardAmountVO;
@@ -19,7 +19,7 @@ public interface CreatorService {
      * @param videoPageDTO
      * @return
      */
-    PageDataInfo queryVideoPage(VideoPageDTO videoPageDTO);
+    PageData queryVideoPage(VideoPageDTO videoPageDTO);
 
     /**
      * 视频合集分页
@@ -27,7 +27,7 @@ public interface CreatorService {
      * @param videoCompilationPageDTO
      * @return
      */
-    PageDataInfo queryVideoCompilationPage(videoCompilationPageDTO videoCompilationPageDTO);
+    PageData queryVideoCompilationPage(videoCompilationPageDTO videoCompilationPageDTO);
 
     /**
      * 上传图文视频图片

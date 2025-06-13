@@ -3,7 +3,7 @@ package com.niuyin.service.ai.controller.web.image;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.image.domain.ImageDO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.service.ai.service.IImageService;
@@ -31,8 +31,8 @@ public class ImageController {
      * 分页
      */
     @PostMapping("/list")
-    public PageDataInfo<ImageDO> queryByPage(@Validated @RequestBody PageDTO dto) {
-        return PageDataInfo.page(imageService.getList(dto));
+    public PageData<ImageDO> queryByPage(@Validated @RequestBody PageDTO dto) {
+        return PageData.page(imageService.getList(dto));
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.niuyin.service.search.service;
 
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.search.dto.PageDTO;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
 import com.niuyin.model.search.dto.VideoSearchSuggestDTO;
@@ -39,7 +39,7 @@ public interface VideoSearchService {
      */
     List<VideoSearchVO> searchVideoFromES(VideoSearchKeywordDTO dto);
 
-    PageDataInfo<?> searchVideoFromESForApp(VideoSearchKeywordDTO dto);
+    PageData<?> searchVideoFromESForApp(VideoSearchKeywordDTO dto);
 
     /**
      * 查询当天所有的搜索记录

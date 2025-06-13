@@ -2,7 +2,7 @@ package com.niuyin.service.video.controller.v1;
 
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.domain.UserVideoCompilation;
 import com.niuyin.model.video.dto.CompilationVideoPageDTO;
 import com.niuyin.model.video.dto.UpdateUserVideoCompilationDTO;
@@ -48,7 +48,7 @@ public class UserVideoCompilationController {
      * 分页我的合集
      */
     @PostMapping("/mp")
-    public PageDataInfo videoCompilationMyPage(@RequestBody UserVideoCompilationPageDTO pageDTO) {
+    public PageData videoCompilationMyPage(@RequestBody UserVideoCompilationPageDTO pageDTO) {
         return userVideoCompilationService.videoCompilationMyPage(pageDTO);
     }
 
@@ -56,7 +56,7 @@ public class UserVideoCompilationController {
      * 分页用户合集
      */
     @PostMapping("/up")
-    public PageDataInfo videoCompilationUserPage(@RequestBody UserVideoCompilationPageDTO pageDTO) {
+    public PageData videoCompilationUserPage(@RequestBody UserVideoCompilationPageDTO pageDTO) {
         return userVideoCompilationService.videoCompilationUserPage(pageDTO);
     }
 
@@ -64,7 +64,7 @@ public class UserVideoCompilationController {
      * 分页合集视频
      */
     @PostMapping("/videoPage")
-    public PageDataInfo compilationVideoPage(@RequestBody CompilationVideoPageDTO pageDTO) {
+    public PageData compilationVideoPage(@RequestBody CompilationVideoPageDTO pageDTO) {
         return userVideoCompilationService.compilationVideoPage(pageDTO);
     }
 

@@ -3,7 +3,7 @@ package com.niuyin.service.behave.controller.v1;
 import com.alibaba.fastjson2.JSON;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -57,7 +57,7 @@ public class VideoUserCommentController {
      * 分页查询评论集合树
      */
     @PostMapping("/tree")
-    public PageDataInfo queryTree(@RequestBody VideoUserCommentPageDTO pageDTO) {
+    public PageData queryTree(@RequestBody VideoUserCommentPageDTO pageDTO) {
         return videoUserCommentService.getCommentPageTree(pageDTO);
     }
 

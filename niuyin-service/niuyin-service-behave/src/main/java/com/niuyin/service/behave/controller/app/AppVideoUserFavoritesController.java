@@ -1,6 +1,6 @@
 package com.niuyin.service.behave.controller.app;
 
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ public class AppVideoUserFavoritesController {
      * 分页我的收藏
      */
     @PostMapping("/myPage")
-    public PageDataInfo myFavoritePageForApp(@RequestBody VideoPageDto pageDto) {
+    public PageData myFavoritePageForApp(@RequestBody VideoPageDto pageDto) {
         return videoUserFavoritesService.queryMyFavoriteVideoPageForApp(pageDto);
     }
 
@@ -32,7 +32,7 @@ public class AppVideoUserFavoritesController {
      * 分页用户收藏
      */
     @PostMapping("/userPage")
-    public PageDataInfo userFavoritePage(@RequestBody VideoPageDto pageDto) {
+    public PageData userFavoritePage(@RequestBody VideoPageDto pageDto) {
         return videoUserFavoritesService.queryUserFavoriteVideoPageForApp(pageDto);
     }
 

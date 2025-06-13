@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.cache.annotations.DoubleCache;
 import com.niuyin.common.cache.enums.CacheType;
 import com.niuyin.common.cache.service.RedisService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
@@ -34,7 +34,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -122,9 +121,9 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      * @return
      */
     @Override
-    public PageDataInfo selectVideoByCategory(VideoCategoryPageDTO pageDTO) {
+    public PageData selectVideoByCategory(VideoCategoryPageDTO pageDTO) {
         if (StringUtils.isNull(pageDTO.getCategoryId())) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         // 查询该分类id以及其子分类
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
@@ -136,7 +135,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
                 .map(this::packageUserVideoVOAsync)
                 .toArray(CompletableFuture[]::new));
         allFutures.join();
-        return PageDataInfo.genPageData(videoList, videoCount);
+        return PageData.genPageData(videoList, videoCount);
     }
 
     public CompletableFuture<Void> packageUserVideoVOAsync(VideoVO videoVO) {
@@ -426,7 +425,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
      * @return
      */
     @Override
-    public PageDataInfo getVideoPageByCategoryId(CategoryVideoPageDTO pageDTO) {
+    public PageData getVideoPageByCategoryId(CategoryVideoPageDTO pageDTO) {
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
         List<Video> videoList = videoCategoryMapper.selectVideoPageByCategoryId(pageDTO);
         List<CategoryVideoVo> categoryVideoVoList = BeanCopyUtils.copyBeanList(videoList, CategoryVideoVo.class);
@@ -434,7 +433,7 @@ public class VideoCategoryServiceImpl extends ServiceImpl<VideoCategoryMapper, V
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(categoryVideoVoList.stream()
                 .map(this::packageCategoryVideoVoAsync).toArray(CompletableFuture[]::new));
         allFutures.join();
-        return PageDataInfo.genPageData(categoryVideoVoList, videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getId()));
+        return PageData.genPageData(categoryVideoVoList, videoCategoryMapper.selectVideoCountByCategoryId(pageDTO.getId()));
     }
 
     public CompletableFuture<Void> packageCategoryVideoVoAsync(CategoryVideoVo vo) {

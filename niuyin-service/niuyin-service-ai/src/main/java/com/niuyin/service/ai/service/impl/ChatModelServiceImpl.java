@@ -7,8 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.ai.enums.AiPlatformEnum;
 import com.niuyin.common.ai.factory.AiModelFactory;
 import com.niuyin.common.core.compont.SnowFlake;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
-import com.niuyin.common.core.utils.CollectionUtils;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
 import com.niuyin.model.ai.domain.model.ApiKeyDO;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * AI 聊天模型表(AiChatModel)表服务实现类
@@ -79,7 +77,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
     }
 
     @Override
-    public PageDataInfo<ChatModelDO> getModelPage(AiModelPageDTO pageDTO) {
+    public PageData<ChatModelDO> getModelPage(AiModelPageDTO pageDTO) {
         LambdaQueryWrapper<ChatModelDO> qw = new LambdaQueryWrapper<>();
         qw.like(StringUtils.isNotBlank(pageDTO.getName()), ChatModelDO::getName, pageDTO.getName())
                 .like(StringUtils.isNotBlank(pageDTO.getModel()), ChatModelDO::getModel, pageDTO.getModel())
@@ -89,7 +87,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
                 .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ChatModelDO::getStateFlag, pageDTO.getStateFlag())
                 .orderByAsc(ChatModelDO::getSort);
         Page<ChatModelDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
-        return PageDataInfo.page(page);
+        return PageData.page(page);
     }
 
     private ChatModelDO validateModelExists(Long id) {

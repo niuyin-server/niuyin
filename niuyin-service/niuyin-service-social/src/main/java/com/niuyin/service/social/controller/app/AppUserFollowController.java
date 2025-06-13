@@ -2,7 +2,7 @@ package com.niuyin.service.social.controller.app;
 
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.social.cache.DynamicUser;
 import com.niuyin.model.social.vo.Fans;
@@ -45,7 +45,7 @@ public class AppUserFollowController {
      * 关注动态
      */
     @GetMapping("/dynamic")
-    public PageDataInfo<DynamicUser> followDynamicPage() {
+    public PageData<DynamicUser> followDynamicPage() {
         return socialDynamicsService.getSocialDynamicsUser();
     }
 
@@ -53,7 +53,7 @@ public class AppUserFollowController {
      * 动态视频
      */
     @PostMapping("/dynamicVideoPage")
-    public PageDataInfo<VideoVO> dynamicVideoPage(@RequestBody PageDTO pageDTO) {
+    public PageData<VideoVO> dynamicVideoPage(@RequestBody PageDTO pageDTO) {
         return userFollowService.getSocialDynamicVideoPage(pageDTO);
     }
 
@@ -79,7 +79,7 @@ public class AppUserFollowController {
      * 我的关注分页
      */
     @PostMapping("/followPage")
-    public PageDataInfo<FollowUser> followPage(@RequestBody PageDTO pageDTO) {
+    public PageData<FollowUser> followPage(@RequestBody PageDTO pageDTO) {
         return userFollowService.appGetFollowPage(pageDTO);
     }
 
@@ -87,7 +87,7 @@ public class AppUserFollowController {
      * 我的粉丝分页
      */
     @PostMapping("/fansPage")
-    public PageDataInfo<Fans> fansPage(@RequestBody PageDTO pageDTO) {
+    public PageData<Fans> fansPage(@RequestBody PageDTO pageDTO) {
         return userFollowService.appGetFansPage(pageDTO);
     }
 }

@@ -1,19 +1,18 @@
 package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.model.ToolDO;
 import com.niuyin.model.ai.dto.model.AiToolSaveDTO;
 import com.niuyin.model.ai.dto.model.ToolPageDTO;
 import com.niuyin.service.ai.controller.admin.AdminToolController;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
  * AI 工具表(Tool)表服务接口
  *
- * @author makejava
+ * @author roydon
  * @since 2025-06-05 16:02:47
  */
 public interface IToolService extends IService<ToolDO> {
@@ -26,7 +25,7 @@ public interface IToolService extends IService<ToolDO> {
 
     ToolDO getTool(Long id);
 
-    PageDataInfo<ToolDO> getToolPage(ToolPageDTO pageDTO);
+    PageData<ToolDO> getToolPage(ToolPageDTO pageDTO);
 
     List<ToolDO> getToolListByState(String state);
 

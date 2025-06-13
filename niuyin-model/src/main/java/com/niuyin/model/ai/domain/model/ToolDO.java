@@ -10,7 +10,7 @@ import java.io.Serial;
 /**
  * AI 工具表(Tool)实体类
  *
- * @author makejava
+ * @author roydon
  * @since 2025-06-05 16:02:47
  */
 @Data

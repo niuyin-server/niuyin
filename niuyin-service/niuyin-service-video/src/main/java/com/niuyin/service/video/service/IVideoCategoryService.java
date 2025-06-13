@@ -1,7 +1,7 @@
 package com.niuyin.service.video.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.domain.VideoCategory;
 import com.niuyin.model.video.dto.CategoryVideoPageDTO;
 import com.niuyin.model.video.dto.VideoCategoryPageDTO;
@@ -31,7 +31,7 @@ public interface IVideoCategoryService extends IService<VideoCategory> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo selectVideoByCategory(VideoCategoryPageDTO pageDTO);
+    PageData selectVideoByCategory(VideoCategoryPageDTO pageDTO);
 
     /**
      * 根据分类推送视频
@@ -65,7 +65,7 @@ public interface IVideoCategoryService extends IService<VideoCategory> {
      * @param pageDTO
      * @return
      */
-    PageDataInfo getVideoPageByCategoryId(CategoryVideoPageDTO pageDTO);
+    PageData getVideoPageByCategoryId(CategoryVideoPageDTO pageDTO);
 
     /**
      * 获取视频父分类集合

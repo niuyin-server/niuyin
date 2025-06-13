@@ -1,7 +1,7 @@
 package com.niuyin.service.behave.controller.app;
 
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserLikeService;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +41,7 @@ public class AppVideoUserLikeController {
      * 我的点赞分页查询
      */
     @PostMapping("/myLikePage")
-    public PageDataInfo myLikePageForApp(@RequestBody VideoPageDto pageDto) {
+    public PageData myLikePageForApp(@RequestBody VideoPageDto pageDto) {
         return videoUserLikeService.queryMyLikeVideoPageForApp(pageDto);
     }
 
@@ -49,7 +49,7 @@ public class AppVideoUserLikeController {
      * 分页用户点赞列表
      */
     @PostMapping("/userPage")
-    public PageDataInfo personLikePage(@RequestBody VideoPageDto pageDto) {
+    public PageData personLikePage(@RequestBody VideoPageDto pageDto) {
         return videoUserLikeService.queryPersonLikePage(pageDto);
     }
 

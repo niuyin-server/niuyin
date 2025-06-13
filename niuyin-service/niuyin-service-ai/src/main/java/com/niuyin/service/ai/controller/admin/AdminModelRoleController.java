@@ -1,22 +1,19 @@
 package com.niuyin.service.ai.controller.admin;
 
-import cn.hutool.core.util.ObjUtil;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.model.ModelRoleDO;
-import com.niuyin.model.ai.dto.model.AiModelStateDTO;
 import com.niuyin.model.ai.dto.model.ModelRolePageDTO;
 import com.niuyin.model.ai.dto.model.ModelRoleSaveDTO;
 import com.niuyin.service.ai.service.IModelRoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * AI 聊天角色表(ModelRole)表控制层
@@ -24,6 +21,7 @@ import java.util.List;
  * @author roydon
  * @since 2025-06-02 15:30:42
  */
+@Tag(name = "管理后台 - AI 智能体")
 @RestController
 @RequestMapping("v1/role")
 public class AdminModelRoleController {
@@ -127,8 +125,8 @@ public class AdminModelRoleController {
 
     @GetMapping("/page")
     @Operation(summary = "获得聊天角色分页")
-    public R<PageDataInfo<ModelRoleDO>> getChatRolePage(@Valid ModelRolePageDTO pageDTO) {
-        PageDataInfo<ModelRoleDO> pageResult = modelRoleService.getModelRolePage(pageDTO);
+    public R<PageData<ModelRoleDO>> getChatRolePage(@Valid ModelRolePageDTO pageDTO) {
+        PageData<ModelRoleDO> pageResult = modelRoleService.getModelRolePage(pageDTO);
         return R.ok(pageResult);
     }
 

@@ -3,7 +3,7 @@ package com.niuyin.service.behave.controller.v1;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.VideoUserFavorites;
 import com.niuyin.model.video.dto.VideoPageDto;
 import com.niuyin.service.behave.service.IVideoUserFavoritesService;
@@ -47,7 +47,7 @@ public class VideoUserFavoritesController {
      * @return
      */
     @PostMapping("/mypage")
-    public PageDataInfo myFavoritePage(@RequestBody VideoPageDto pageDto) {
+    public PageData myFavoritePage(@RequestBody VideoPageDto pageDto) {
         return videoUserFavoritesService.queryUserFavoriteVideoPage(pageDto);
     }
 

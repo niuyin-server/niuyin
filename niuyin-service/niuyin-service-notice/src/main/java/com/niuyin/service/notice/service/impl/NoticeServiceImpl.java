@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.dubbo.api.DubboMemberService;
@@ -83,11 +83,11 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
      * @return
      */
     @Override
-    public PageDataInfo getBehaveNoticePage(NoticePageDTO pageDTO) {
+    public PageData getBehaveNoticePage(NoticePageDTO pageDTO) {
         IPage<Notice> noticeIPage = this.queryUserBehaveNoticePage(pageDTO);
         List<Notice> records = noticeIPage.getRecords();
         if (records.isEmpty()) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         // 封装消息通知vo
         List<NoticeVO> noticeVOList = BeanCopyUtils.copyBeanList(records, NoticeVO.class);
@@ -104,7 +104,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
                 v.setVideoCoverImage(video.getCoverImage());
             }
         });
-        return PageDataInfo.genPageData(noticeVOList, noticeIPage.getTotal());
+        return PageData.genPageData(noticeVOList, noticeIPage.getTotal());
     }
 
     /**

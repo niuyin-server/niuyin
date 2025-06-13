@@ -2,7 +2,7 @@ package com.niuyin.service.behave.controller.v1;
 
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.behave.domain.VideoNote;
 import com.niuyin.model.behave.dto.VideoNotePageDTO;
 import com.niuyin.model.behave.vo.VideoNoteVO;
@@ -30,7 +30,7 @@ public class VideoNoteController {
      * 分页查询
      */
     @PostMapping("/page")
-    public PageDataInfo<VideoNoteVO> queryVideoNotePage(@Validated @RequestBody VideoNotePageDTO pageDTO) {
+    public PageData<VideoNoteVO> queryVideoNotePage(@Validated @RequestBody VideoNotePageDTO pageDTO) {
         return this.videoNoteService.queryVideoNotePage(pageDTO);
     }
 

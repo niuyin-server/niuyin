@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.context.UserContext;
-import com.niuyin.common.core.domain.vo.PageDataInfo;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
@@ -209,10 +209,10 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
      * @return
      */
     @Override
-    public PageDataInfo getCommentPageTree(VideoUserCommentPageDTO pageDTO) {
+    public PageData getCommentPageTree(VideoUserCommentPageDTO pageDTO) {
         String videoId = pageDTO.getVideoId();
         if (StringUtil.isEmpty(videoId)) {
-            return PageDataInfo.emptyPage();
+            return PageData.emptyPage();
         }
         IPage<VideoUserComment> iPage = this.getRootListByVideoId(pageDTO);
         List<VideoUserComment> rootRecords = iPage.getRecords();
@@ -253,7 +253,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
                 })).toArray(CompletableFuture[]::new)).join();
         // 获取总评论数
         Long queryCommentCountByVideoId = this.queryCommentCountByVideoId(videoId);
-        return PageDataInfo.genPageData(voList, queryCommentCountByVideoId);
+        return PageData.genPageData(voList, queryCommentCountByVideoId);
     }
 
     /**
@@ -276,7 +276,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
      * @return
      */
     @Override
-    public PageDataInfo getCommentParentPage(VideoUserCommentPageDTO pageDTO) {
+    public PageData getCommentParentPage(VideoUserCommentPageDTO pageDTO) {
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
         switch (pageDTO.getOrderBy()) {
             case "0":
@@ -292,7 +292,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
         List<AppVideoUserCommentParentVO> appVideoUserCommentParentVOS = videoUserCommentMapper.selectCommentParentPage(pageDTO);
         // 获取总评论数
         Long queryCommentCountByVideoId = this.queryCommentCountByVideoId(pageDTO.getVideoId());
-        return PageDataInfo.genPageData(appVideoUserCommentParentVOS, queryCommentCountByVideoId);
+        return PageData.genPageData(appVideoUserCommentParentVOS, queryCommentCountByVideoId);
     }
 
     /**
@@ -349,7 +349,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
      * 视频评论回复分页
      */
     @Override
-    public PageDataInfo getCommentReplyPage(VideoCommentReplayPageDTO pageDTO) {
+    public PageData getCommentReplyPage(VideoCommentReplayPageDTO pageDTO) {
         pageDTO.setPageNum((pageDTO.getPageNum() - 1) * pageDTO.getPageSize());
         switch (pageDTO.getOrderBy()) {
             case "0":
@@ -384,7 +384,7 @@ public class VideoUserCommentServiceImpl extends ServiceImpl<VideoUserCommentMap
                 }
             }
         });
-        return PageDataInfo.genPageData(videoCommentReplayVOS, total);
+        return PageData.genPageData(videoCommentReplayVOS, total);
     }
 
     /**
