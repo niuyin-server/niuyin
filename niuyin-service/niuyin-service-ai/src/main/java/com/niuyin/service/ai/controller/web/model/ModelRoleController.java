@@ -2,7 +2,7 @@ package com.niuyin.service.ai.controller.web.model;
 
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageData;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ModelAgentDO;
 import com.niuyin.model.ai.dto.model.web.WebModelRolePageDTO;
 import com.niuyin.service.ai.service.IModelRoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +26,9 @@ public class ModelRoleController {
     private IModelRoleService modelRoleService;
 
     @GetMapping("/page")
-    @Operation(summary = "获得聊天角色分页")
-    public R<PageData<ModelRoleDO>> getChatRolePage(@Valid WebModelRolePageDTO pageDTO) {
-        PageData<ModelRoleDO> pageResult = modelRoleService.getModelRolePageForWeb(pageDTO);
+    @Operation(summary = "获得智能体分页")
+    public R<PageData<ModelAgentDO>> getChatRolePage(@Valid WebModelRolePageDTO pageDTO) {
+        PageData<ModelAgentDO> pageResult = modelRoleService.getModelRolePageForWeb(pageDTO);
         return R.ok(pageResult);
     }
 

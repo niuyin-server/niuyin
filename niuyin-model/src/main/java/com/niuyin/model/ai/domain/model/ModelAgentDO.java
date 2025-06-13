@@ -12,14 +12,14 @@ import java.io.Serial;
 import java.util.List;
 
 /**
- * AI 聊天角色表(ModelRole)实体类
+ * AI 智能体表(ModelRole)实体类
  *
  * @author roydon
  * @since 2025-06-02 15:30:42
  */
 @Data
-@TableName(value = "ai_model_role",autoResultMap = true)
-public class ModelRoleDO extends BaseDO {
+@TableName(value = "ai_model_agent", autoResultMap = true)
+public class ModelAgentDO extends BaseDO {
     @Serial
     private static final long serialVersionUID = 197421509258722922L;
     /**
@@ -46,7 +46,8 @@ public class ModelRoleDO extends BaseDO {
     /**
      * 角色类别
      */
-    private String category;
+    @TableField(typeHandler = LongListTypeHandler.class)
+    private List<Long> categoryIds;
     /**
      * 角色描述
      */

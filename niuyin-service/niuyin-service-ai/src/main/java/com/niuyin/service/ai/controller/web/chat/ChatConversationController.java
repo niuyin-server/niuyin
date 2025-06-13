@@ -8,7 +8,7 @@ import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.model.ai.domain.chat.ChatConversationDO;
 import com.niuyin.model.ai.domain.chat.ChatMessageDO;
 import com.niuyin.model.ai.domain.model.ChatModelDO;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ModelAgentDO;
 import com.niuyin.model.ai.dto.model.web.ChatConversationSaveDTO;
 import com.niuyin.model.common.dto.PageDTO;
 import com.niuyin.model.common.enums.TrueOrFalseEnum;
@@ -69,7 +69,7 @@ public class ChatConversationController {
         chatConversationDO.setMaxContexts(20);
         // 是否添加了角色
         if (chatConversationDO.getRoleId() != null) {
-            ModelRoleDO modelRole = modelRoleService.getModelRole(chatConversationDO.getRoleId());
+            ModelAgentDO modelRole = modelRoleService.getModelRole(chatConversationDO.getRoleId());
             if (Objects.isNull(modelRole)) {
                 throw new RuntimeException("角色不存在");
             }

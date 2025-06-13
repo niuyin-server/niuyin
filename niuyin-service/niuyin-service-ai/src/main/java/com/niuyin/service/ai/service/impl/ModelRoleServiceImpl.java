@@ -7,7 +7,7 @@ import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.common.core.utils.bean.BeanCopyUtils;
 import com.niuyin.common.core.utils.string.StringUtils;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ModelAgentDO;
 import com.niuyin.model.ai.dto.model.ModelRolePageDTO;
 import com.niuyin.model.ai.dto.model.ModelRoleSaveDTO;
 import com.niuyin.model.ai.dto.model.web.WebModelRolePageDTO;
@@ -20,13 +20,13 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 /**
- * AI 聊天角色表(ModelRole)表服务实现类
+ * AI 智能体表(ModelRole)表服务实现类
  *
  * @author roydon
  * @since 2025-06-02 15:30:43
  */
 @Service
-public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRoleDO> implements IModelRoleService {
+public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelAgentDO> implements IModelRoleService {
     @Resource
     private ModelRoleMapper modelRoleMapper;
 
@@ -36,7 +36,7 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
     @Override
     public Long createModelRole(ModelRoleSaveDTO dto) {
         // todo 校验模型是否可用
-        ModelRoleDO modelRole = BeanCopyUtils.copyBean(dto, ModelRoleDO.class);
+        ModelAgentDO modelRole = BeanCopyUtils.copyBean(dto, ModelAgentDO.class);
         modelRole.setId(snowFlake.nextId());
         modelRole.setPublicFlag(TrueOrFalseEnum.TRUE.getCode());
         modelRoleMapper.insert(modelRole);
@@ -46,8 +46,8 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
     @Override
     public void updateModelRole(ModelRoleSaveDTO dto) {
         // todo 校验模型是否可用
-        ModelRoleDO modelRoleDO = BeanCopyUtils.copyBean(dto, ModelRoleDO.class);
-        modelRoleMapper.updateById(modelRoleDO);
+        ModelAgentDO modelAgentDO = BeanCopyUtils.copyBean(dto, ModelAgentDO.class);
+        modelRoleMapper.updateById(modelAgentDO);
     }
 
     @Override
@@ -56,37 +56,37 @@ public class ModelRoleServiceImpl extends ServiceImpl<ModelRoleMapper, ModelRole
     }
 
     @Override
-    public ModelRoleDO getModelRole(Long id) {
+    public ModelAgentDO getModelRole(Long id) {
         return modelRoleMapper.selectById(id);
     }
 
     @Override
-    public PageData<ModelRoleDO> getModelRolePage(ModelRolePageDTO pageDTO) {
-        LambdaQueryWrapper<ModelRoleDO> qw = new LambdaQueryWrapper<>();
-        qw.like(StringUtils.isNotBlank(pageDTO.getName()), ModelRoleDO::getName, pageDTO.getName())
-                .like(StringUtils.isNotBlank(pageDTO.getCategory()), ModelRoleDO::getCategory, pageDTO.getCategory())
-                .eq(StringUtils.isNotBlank(pageDTO.getPublicFlag()), ModelRoleDO::getPublicFlag, pageDTO.getPublicFlag())
-                .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ModelRoleDO::getStateFlag, pageDTO.getStateFlag())
-                .orderByAsc(ModelRoleDO::getSort);
-        Page<ModelRoleDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
+    public PageData<ModelAgentDO> getModelRolePage(ModelRolePageDTO pageDTO) {
+        LambdaQueryWrapper<ModelAgentDO> qw = new LambdaQueryWrapper<>();
+        qw.like(StringUtils.isNotBlank(pageDTO.getName()), ModelAgentDO::getName, pageDTO.getName())
+                .like(StringUtils.isNotBlank(pageDTO.getCategory()), ModelAgentDO::getCategoryIds, pageDTO.getCategory())
+                .eq(StringUtils.isNotBlank(pageDTO.getPublicFlag()), ModelAgentDO::getPublicFlag, pageDTO.getPublicFlag())
+                .eq(StringUtils.isNotBlank(pageDTO.getStateFlag()), ModelAgentDO::getStateFlag, pageDTO.getStateFlag())
+                .orderByAsc(ModelAgentDO::getSort);
+        Page<ModelAgentDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
         return PageData.page(page);
     }
 
     @Override
     public void updateModelRoleState(AdminModelRoleController.ModelRoleStateDTO dto) {
-        ModelRoleDO modelRoleDO = BeanCopyUtils.copyBean(dto, ModelRoleDO.class);
-        modelRoleMapper.updateById(modelRoleDO);
+        ModelAgentDO modelAgentDO = BeanCopyUtils.copyBean(dto, ModelAgentDO.class);
+        modelRoleMapper.updateById(modelAgentDO);
     }
 
     @Override
-    public PageData<ModelRoleDO> getModelRolePageForWeb(WebModelRolePageDTO pageDTO) {
-        LambdaQueryWrapper<ModelRoleDO> qw = new LambdaQueryWrapper<>();
-        qw.like(StringUtils.isNotBlank(pageDTO.getName()), ModelRoleDO::getName, pageDTO.getName())
-                .like(StringUtils.isNotBlank(pageDTO.getCategory()), ModelRoleDO::getCategory, pageDTO.getCategory())
-                .eq(ModelRoleDO::getPublicFlag, TrueOrFalseEnum.TRUE.getCode())
-                .eq(ModelRoleDO::getStateFlag, StateFlagEnum.ENABLE.getCode())
-                .orderByAsc(ModelRoleDO::getSort);
-        Page<ModelRoleDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
+    public PageData<ModelAgentDO> getModelRolePageForWeb(WebModelRolePageDTO pageDTO) {
+        LambdaQueryWrapper<ModelAgentDO> qw = new LambdaQueryWrapper<>();
+        qw.like(StringUtils.isNotBlank(pageDTO.getName()), ModelAgentDO::getName, pageDTO.getName())
+                .like(StringUtils.isNotBlank(pageDTO.getCategory()), ModelAgentDO::getCategoryIds, pageDTO.getCategory())
+                .eq(ModelAgentDO::getPublicFlag, TrueOrFalseEnum.TRUE.getCode())
+                .eq(ModelAgentDO::getStateFlag, StateFlagEnum.ENABLE.getCode())
+                .orderByAsc(ModelAgentDO::getSort);
+        Page<ModelAgentDO> page = this.page(new Page<>(pageDTO.getPageNum(), pageDTO.getPageSize()), qw);
         return PageData.page(page);
     }
 }

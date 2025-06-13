@@ -34,7 +34,7 @@ public class ModelRoleSaveDTO {
     /**
      * 角色类别
      */
-    private String category;
+    private List<Long> categoryIds;
     /**
      * 角色描述
      */

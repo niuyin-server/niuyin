@@ -2,7 +2,7 @@ package com.niuyin.service.ai.controller.admin;
 
 import com.niuyin.common.core.domain.R;
 import com.niuyin.common.core.domain.vo.PageData;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ModelAgentDO;
 import com.niuyin.model.ai.dto.model.ModelRolePageDTO;
 import com.niuyin.model.ai.dto.model.ModelRoleSaveDTO;
 import com.niuyin.service.ai.service.IModelRoleService;
@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * AI 聊天角色表(ModelRole)表控制层
+ * AI 智能体表(ModelRole)表控制层
  *
  * @author roydon
  * @since 2025-06-02 15:30:42
@@ -30,14 +30,14 @@ public class AdminModelRoleController {
     private IModelRoleService modelRoleService;
 
 //    @GetMapping("/my-page")
-//    @Operation(summary = "获得【我的】聊天角色分页")
+//    @Operation(summary = "获得【我的】智能体分页")
 //    public CommonResult<PageResult<AiChatRoleRespVO>> getChatRoleMyPage(@Valid AiChatRolePageReqVO pageReqVO) {
 //        PageResult<AiChatRoleDO> pageResult = chatRoleService.getChatRoleMyPage(pageReqVO, getLoginUserId());
 //        return success(BeanUtils.toBean(pageResult, AiChatRoleRespVO.class));
 //    }
 //
 //    @GetMapping("/get-my")
-//    @Operation(summary = "获得【我的】聊天角色")
+//    @Operation(summary = "获得【我的】智能体")
 //    @Parameter(name = "id", description = "编号", required = true, example = "1024")
 //    public CommonResult<AiChatRoleRespVO> getChatRoleMy(@RequestParam("id") Long id) {
 //        AiChatRoleDO chatRole = chatRoleService.getChatRole(id);
@@ -48,20 +48,20 @@ public class AdminModelRoleController {
 //    }
 //
 //    @PostMapping("/create-my")
-//    @Operation(summary = "创建【我的】聊天角色")
+//    @Operation(summary = "创建【我的】智能体")
 //    public CommonResult<Long> createChatRoleMy(@Valid @RequestBody AiChatRoleSaveMyReqVO createReqVO) {
 //        return success(chatRoleService.createChatRoleMy(createReqVO, getLoginUserId()));
 //    }
 //
 //    @PutMapping("/update-my")
-//    @Operation(summary = "更新【我的】聊天角色")
+//    @Operation(summary = "更新【我的】智能体")
 //    public CommonResult<Boolean> updateChatRoleMy(@Valid @RequestBody AiChatRoleSaveMyReqVO updateReqVO) {
 //        chatRoleService.updateChatRoleMy(updateReqVO, getLoginUserId());
 //        return success(true);
 //    }
 //
 //    @DeleteMapping("/delete-my")
-//    @Operation(summary = "删除【我的】聊天角色")
+//    @Operation(summary = "删除【我的】智能体")
 //    @Parameter(name = "id", description = "编号", required = true)
 //    public CommonResult<Boolean> deleteChatRoleMy(@RequestParam("id") Long id) {
 //        chatRoleService.deleteChatRoleMy(id, getLoginUserId());
@@ -69,7 +69,7 @@ public class AdminModelRoleController {
 //    }
 //
 //    @GetMapping("/category-list")
-//    @Operation(summary = "获得聊天角色的分类列表")
+//    @Operation(summary = "获得智能体的分类列表")
 //    public CommonResult<List<String>> getChatRoleCategoryList() {
 //        return success(chatRoleService.getChatRoleCategoryList());
 //    }
@@ -77,13 +77,13 @@ public class AdminModelRoleController {
     // ========== 角色管理 ==========
 
     @PostMapping("/create")
-    @Operation(summary = "创建聊天角色")
+    @Operation(summary = "创建智能体")
     public R<Long> createModelRole(@Valid @RequestBody ModelRoleSaveDTO dto) {
         return R.ok(modelRoleService.createModelRole(dto));
     }
 
     @PutMapping("/update")
-    @Operation(summary = "更新聊天角色")
+    @Operation(summary = "更新智能体")
     public R<Boolean> updateModelRole(@Valid @RequestBody ModelRoleSaveDTO dto) {
         modelRoleService.updateModelRole(dto);
         return R.ok(true);
@@ -108,7 +108,7 @@ public class AdminModelRoleController {
     }
 
     @DeleteMapping("/delete")
-    @Operation(summary = "删除聊天角色")
+    @Operation(summary = "删除智能体")
     @Parameter(name = "id", description = "编号", required = true)
     public R<Boolean> deleteModelRole(@RequestParam("id") Long id) {
         modelRoleService.deleteModelRole(id);
@@ -116,17 +116,17 @@ public class AdminModelRoleController {
     }
 
     @GetMapping("/get")
-    @Operation(summary = "获得聊天角色")
+    @Operation(summary = "获得智能体")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    public R<ModelRoleDO> getModelRole(@RequestParam("id") Long id) {
-        ModelRoleDO chatRole = modelRoleService.getModelRole(id);
+    public R<ModelAgentDO> getModelRole(@RequestParam("id") Long id) {
+        ModelAgentDO chatRole = modelRoleService.getModelRole(id);
         return R.ok(chatRole);
     }
 
     @GetMapping("/page")
-    @Operation(summary = "获得聊天角色分页")
-    public R<PageData<ModelRoleDO>> getChatRolePage(@Valid ModelRolePageDTO pageDTO) {
-        PageData<ModelRoleDO> pageResult = modelRoleService.getModelRolePage(pageDTO);
+    @Operation(summary = "获得智能体分页")
+    public R<PageData<ModelAgentDO>> getChatRolePage(@Valid ModelRolePageDTO pageDTO) {
+        PageData<ModelAgentDO> pageResult = modelRoleService.getModelRolePage(pageDTO);
         return R.ok(pageResult);
     }
 

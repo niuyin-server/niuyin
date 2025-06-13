@@ -16,7 +16,7 @@ import com.niuyin.model.ai.domain.chat.ChatConversationDO;
 import com.niuyin.model.ai.domain.chat.ChatMessageDO;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDocumentDO;
 import com.niuyin.model.ai.domain.model.ChatModelDO;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ModelAgentDO;
 import com.niuyin.model.ai.domain.model.ToolDO;
 import com.niuyin.model.ai.vo.chat.ChatMessageRespVO;
 import com.niuyin.model.ai.vo.chat.ChatMessageVO;
@@ -157,11 +157,11 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
      * 知识库召回
      */
     private List<KnowledgeSegmentSearchRespBO> recallKnowledgeSegment(String content, ChatConversationDO conversation) {
-        // 1. 查询聊天角色
+        // 1. 查询智能体
         if (conversation == null || conversation.getRoleId() == null) {
             return Collections.emptyList();
         }
-        ModelRoleDO role = modelRoleService.getModelRole(conversation.getRoleId());
+        ModelAgentDO role = modelRoleService.getModelRole(conversation.getRoleId());
         if (role == null || CollUtil.isEmpty(role.getKnowledgeIds())) {
             return Collections.emptyList();
         }
@@ -220,7 +220,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         Set<String> toolNames = null;
         Map<String, Object> toolContext = Map.of();
         if (conversation.getRoleId() != null) {
-            ModelRoleDO chatRole = modelRoleService.getModelRole(conversation.getRoleId());
+            ModelAgentDO chatRole = modelRoleService.getModelRole(conversation.getRoleId());
             if (chatRole != null && CollUtil.isNotEmpty(chatRole.getToolIds())) {
                 toolNames = convertSet(toolService.getToolList(chatRole.getToolIds()), ToolDO::getName);
                 // todo @roydon 工具集合

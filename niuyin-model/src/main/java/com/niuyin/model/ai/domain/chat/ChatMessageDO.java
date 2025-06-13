@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeSegmentDO;
 import com.niuyin.model.ai.domain.model.ChatModelDO;
-import com.niuyin.model.ai.domain.model.ModelRoleDO;
+import com.niuyin.model.ai.domain.model.ModelAgentDO;
 import com.niuyin.model.common.BaseDO;
 import com.niuyin.model.common.handler.LongListTypeHandler;
 import lombok.Data;
@@ -59,7 +59,7 @@ public class ChatMessageDO extends BaseDO {
     /**
      * 角色编号
      *
-     * 关联 {@link ModelRoleDO#getId()} 字段
+     * 关联 {@link ModelAgentDO#getId()} 字段
      */
     private Long roleId;
 
