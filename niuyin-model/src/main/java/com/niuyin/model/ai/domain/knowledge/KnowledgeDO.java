@@ -33,6 +33,10 @@ public class KnowledgeDO extends BaseDO {
      */
     private String name;
     /**
+     * 封面图片
+     */
+    private String coverImg;
+    /**
      * 知识库描述
      */
     private String description;
