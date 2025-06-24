@@ -1,6 +1,5 @@
 package com.niuyin.service.ai.controller.web.image;
 
-import com.alibaba.cloud.ai.tongyi.image.TongYiImagesClient;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.model.ai.image.domain.ImageDO;
 import com.niuyin.model.ai.image.dto.ImageGenDTO;

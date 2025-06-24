@@ -1,5 +1,7 @@
 package com.niuyin.gateway.util;
 
+import org.springframework.http.HttpStatusCode;
+
 import java.io.Serializable;
 
 /**

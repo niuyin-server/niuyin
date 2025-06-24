@@ -20,10 +20,11 @@ import org.springframework.context.annotation.Import;
  * @AUTHOR: roydon
  * @DATE: 2025/3/15
  **/
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.niuyin.service.ai", "com.niuyin.common"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableCacheConfig
+//@EnableUserTokenInterceptor
 public class AiApplication implements CommandLineRunner {
 
     public static void main(String[] args) {

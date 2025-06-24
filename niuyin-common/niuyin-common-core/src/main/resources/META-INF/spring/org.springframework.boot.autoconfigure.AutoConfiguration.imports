@@ -1,8 +1,5 @@
 com.niuyin.common.core.exception.GlobalExceptionCatch
 com.niuyin.common.core.swagger.SwaggerConfiguration
 com.niuyin.common.core.swagger.Swagger2Configuration
-com.niuyin.common.core.filter.UserTokenInterceptor
-com.niuyin.common.core.config.WebProperties
-com.niuyin.common.core.config.WebMvcConfig
 com.niuyin.common.core.config.MybatisPlusConfig
 com.niuyin.common.core.aspect.MappingCostTimeAspect

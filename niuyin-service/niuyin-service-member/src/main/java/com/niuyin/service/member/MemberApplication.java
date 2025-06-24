@@ -21,7 +21,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign")
-@EnableUserTokenInterceptor
+//@EnableUserTokenInterceptor
 @EnableCacheConfig
 @EnableAsync
 @EnableDubbo

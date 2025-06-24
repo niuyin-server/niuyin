@@ -1,21 +1,9 @@
 package com.niuyin.common.core.config;
 
-import cn.hutool.core.collection.CollUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.filter.UserTokenInterceptor;
-import com.niuyin.common.core.utils.json.JsonUtils;
-import com.niuyin.common.core.utils.json.databind.NumberSerializer;
-import com.niuyin.common.core.utils.json.databind.TimestampLocalDateTimeDeserializer;
-import com.niuyin.common.core.utils.json.databind.TimestampLocalDateTimeSerializer;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
@@ -24,26 +12,21 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-
-@RequiredArgsConstructor
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final UserTokenInterceptor userTokenInterceptor;
-    private final WebProperties webProperties;
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userTokenInterceptor).addPathPatterns("/**");
-    }
+    @Resource
+    private WebProperties webProperties;
+//    @Resource
+//    private UserTokenInterceptor userTokenInterceptor;
 
-    // todo 2-3 启用尾斜线匹配
+//    @Bean
+//    public UserTokenInterceptor userTokenInterceptor() {
+//        return new UserTokenInterceptor();
+//    }
+
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseTrailingSlashMatch(true);
         configurePathMatch(configurer, webProperties.getAdminApi());
         configurePathMatch(configurer, webProperties.getWebApi());
         configurePathMatch(configurer, webProperties.getAppApi());
