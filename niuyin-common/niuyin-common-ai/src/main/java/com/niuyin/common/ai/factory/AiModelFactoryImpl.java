@@ -707,22 +707,9 @@ public class AiModelFactoryImpl implements AiModelFactory {
 //        vectorStore.afterPropertiesSet();
 //        return vectorStore;
 //    }
+
     private static ObjectProvider<ObservationRegistry> getObservationRegistry() {
         return new ObjectProvider<>() {
-            @Override
-            public ObservationRegistry getObject(Object... args) throws BeansException {
-                return null;
-            }
-
-            @Override
-            public ObservationRegistry getIfAvailable() throws BeansException {
-                return null;
-            }
-
-            @Override
-            public ObservationRegistry getIfUnique() throws BeansException {
-                return null;
-            }
 
             @Override
             public ObservationRegistry getObject() throws BeansException {
@@ -734,21 +721,6 @@ public class AiModelFactoryImpl implements AiModelFactory {
 
     private static ObjectProvider<VectorStoreObservationConvention> getCustomObservationConvention() {
         return new ObjectProvider<>() {
-            @Override
-            public VectorStoreObservationConvention getObject(Object... args) throws BeansException {
-                return null;
-            }
-
-            @Override
-            public VectorStoreObservationConvention getIfAvailable() throws BeansException {
-                return null;
-            }
-
-            @Override
-            public VectorStoreObservationConvention getIfUnique() throws BeansException {
-                return null;
-            }
-
             @Override
             public VectorStoreObservationConvention getObject() throws BeansException {
                 return new DefaultVectorStoreObservationConvention();

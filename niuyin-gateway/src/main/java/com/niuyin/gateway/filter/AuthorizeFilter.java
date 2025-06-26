@@ -46,11 +46,11 @@ public class AuthorizeFilter implements GlobalFilter {
             "/api/v1/video/search/hot",
             "/websocket",
             "/userVideoBehave/syncViewBehave",
-            "/api/v1/video/feed",
-            "/api/v1/category/tree",
-            "/api/v1/category/parentList",
-            "/api/v1/category/children",
-            "/api/v1/category/pushVideo",
+            "/*/api/v1/video/feed",
+            "/*/api/v1/category/tree",
+            "/*/api/v1/category/parentList",
+            "/*/api/v1/category/children",
+            "/*/api/v1/category/pushVideo",
             "/chat/stream",
             "/test"
     };
