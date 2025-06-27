@@ -15,7 +15,7 @@ import java.util.List;
  * 超时与重试，预防网络抖动
  * mock=true实现服务降级
  */
-@DubboService(timeout = 2000, retries = 4, weight = 1)
+@DubboService(timeout = 5000, retries = 4, weight = 1)
 public class DubboMemberServiceImpl implements DubboMemberService {
 
     @Resource

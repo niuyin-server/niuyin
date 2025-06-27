@@ -72,7 +72,7 @@ public class EsTest {
     void searchVideo() {
         // 构建查询请求
         VideoSearchKeywordDTO videoSearchKeywordDTO = new VideoSearchKeywordDTO();
-        videoSearchKeywordDTO.setKeyword("如何学习并发编程");
+        videoSearchKeywordDTO.setKeyword("与其向往，不如出发");
         videoSearchKeywordDTO.setPageNum(1);
         videoSearchKeywordDTO.setPageSize(10);
 //        long todayStartLong = DateUtils.getTodayPlusStartLocalLong(-1); //今日数据
@@ -129,7 +129,7 @@ public class EsTest {
                                             TimeRange timeRange, Date customStartDate, Date customEndDate,
                                             Pageable pageable) throws IOException {
         // 构建时间范围查询
-        Query timeRangeQuery = buildTimeRangeQuery(timeRange, customStartDate, customEndDate);
+//        Query timeRangeQuery = buildTimeRangeQuery(timeRange, customStartDate, customEndDate);
 
         // 构建高亮字段
         Map<String, HighlightField> highlightFields = Map.of(
@@ -158,7 +158,7 @@ public class EsTest {
                                                 )
                                         )
                                 )
-                                .must(timeRangeQuery)
+//                                .must(timeRangeQuery)
                         )
                 )
                 .highlight(h -> h
@@ -198,42 +198,42 @@ public class EsTest {
         );
     }
 
-    private Query buildTimeRangeQuery(TimeRange timeRange, Date customStartDate, Date customEndDate) {
-        Instant startInstant = null;
-        Instant endInstant = Instant.now();
-
-        LocalDateTime now = LocalDateTime.now();
-
-        switch (timeRange) {
-            case TODAY:
-                startInstant = now.with(LocalTime.MIN).atZone(ZoneId.systemDefault()).toInstant();
-                break;
-            case THIS_WEEK:
-                startInstant = now.with(DayOfWeek.MONDAY).with(LocalTime.MIN)
-                        .atZone(ZoneId.systemDefault()).toInstant();
-                break;
-            case THIS_MONTH:
-                startInstant = now.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN)
-                        .atZone(ZoneId.systemDefault()).toInstant();
-                break;
-            case THIS_YEAR:
-                startInstant = now.with(TemporalAdjusters.firstDayOfYear()).with(LocalTime.MIN)
-                        .atZone(ZoneId.systemDefault()).toInstant();
-                break;
-            case CUSTOM:
-                startInstant = customStartDate.toInstant();
-                endInstant = customEndDate != null ? customEndDate.toInstant() : Instant.now();
-                break;
-        }
-
-        Instant finalStartInstant = startInstant;
-        Instant finalEndInstant = endInstant;
-        return Query.of(q -> q
-                .range(r -> r
-                        .field(VideoSearchVO.PUBLISH_TIME)
-                        .gte(JsonData.of(finalStartInstant.toEpochMilli()))
-                        .lte(JsonData.of(finalEndInstant.toEpochMilli()))
-                )
-        );
-    }
+//    private Query buildTimeRangeQuery(TimeRange timeRange, Date customStartDate, Date customEndDate) {
+//        Instant startInstant = null;
+//        Instant endInstant = Instant.now();
+//
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        switch (timeRange) {
+//            case TODAY:
+//                startInstant = now.with(LocalTime.MIN).atZone(ZoneId.systemDefault()).toInstant();
+//                break;
+//            case THIS_WEEK:
+//                startInstant = now.with(DayOfWeek.MONDAY).with(LocalTime.MIN)
+//                        .atZone(ZoneId.systemDefault()).toInstant();
+//                break;
+//            case THIS_MONTH:
+//                startInstant = now.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN)
+//                        .atZone(ZoneId.systemDefault()).toInstant();
+//                break;
+//            case THIS_YEAR:
+//                startInstant = now.with(TemporalAdjusters.firstDayOfYear()).with(LocalTime.MIN)
+//                        .atZone(ZoneId.systemDefault()).toInstant();
+//                break;
+//            case CUSTOM:
+//                startInstant = customStartDate.toInstant();
+//                endInstant = customEndDate != null ? customEndDate.toInstant() : Instant.now();
+//                break;
+//        }
+//
+//        Instant finalStartInstant = startInstant;
+//        Instant finalEndInstant = endInstant;
+//        return Query.of(q -> q
+//                .range(r -> r
+//                        .field(VideoSearchVO.PUBLISH_TIME)
+//                        .gte(JsonData.of(finalStartInstant.toEpochMilli()))
+//                        .lte(JsonData.of(finalEndInstant.toEpochMilli()))
+//                )
+//        );
+//    }
 }

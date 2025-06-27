@@ -194,13 +194,13 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                                                 .fields(VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS)
                                         )
                                 )
-                                .filter(f -> f
-                                        .range(r -> r
-                                                .field(VideoSearchVO.PUBLISH_TIME)
-                                                .gte(JsonData.of(minBehotTime))
-                                                .lte(JsonData.of(new Date()))
-                                        )
-                                )
+//                                .filter(f -> f
+//                                        .range(r -> r
+//                                                .field(VideoSearchVO.PUBLISH_TIME)
+//                                                .gte(JsonData.of(minBehotTime))
+//                                                .lte(JsonData.of(new Date()))
+//                                        )
+//                                )
                         )
                 )
                 .from((dto.getPageNum() - 1) * dto.getPageSize())
@@ -280,12 +280,12 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                                                             .value(dto.getKeyword())
                                                     )
                                             )
-                                            .filter(f -> f
-                                                    .range(r -> r
-                                                            .field("publishTime")
-                                                            .lt(JsonData.of(dto.getMinBehotTime() != null ? dto.getMinBehotTime() : new Date()))
-                                                    )
-                                            )
+//                                            .filter(f -> f
+//                                                    .range(r -> r
+//                                                            .field("publishTime")
+//                                                            .lt(JsonData.of(dto.getMinBehotTime() != null ? dto.getMinBehotTime() : new Date()))
+//                                                    )
+//                                            )
                                     )
                             )
                             .from((dto.getPageNum() - 1) * dto.getPageSize())
@@ -418,13 +418,13 @@ public class VideoSearchServiceImpl implements VideoSearchService {
                                                 .fields(VideoSearchVO.VIDEO_TITLE, VideoSearchVO.TAGS)
                                         )
                                 )
-                                .filter(f -> f
-                                        .range(r -> r
-                                                .field(VideoSearchVO.PUBLISH_TIME)
-                                                .gte(JsonData.of(minBehotTime))
-                                                .lte(JsonData.of(new Date()))
-                                        )
-                                )
+//                                .filter(f -> f
+//                                        .range(r -> r
+//                                                .field(VideoSearchVO.PUBLISH_TIME)
+//                                                .gte(JsonData.of(minBehotTime))
+//                                                .lte(JsonData.of(new Date()))
+//                                        )
+//                                )
                         )
                 )
                 .from((dto.getPageNum() - 1) * dto.getPageSize())

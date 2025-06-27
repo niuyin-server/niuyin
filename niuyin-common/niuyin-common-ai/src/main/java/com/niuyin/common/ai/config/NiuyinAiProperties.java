@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  *  AI 配置类
  */
-@ConfigurationProperties(prefix = "niuyin.ai")
 @Data
+@ConfigurationProperties(prefix = "niuyin.ai")
 public class NiuyinAiProperties {
 
     /**

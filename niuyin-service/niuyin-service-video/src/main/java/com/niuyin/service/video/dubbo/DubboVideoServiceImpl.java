@@ -23,7 +23,7 @@ import java.util.Map;
  * @AUTHOR: roydon
  * @DATE: 2023/12/7
  **/
-@DubboService(timeout = 2000, retries = 3, weight = 1)
+@DubboService(timeout = 5000, retries = 3, weight = 1)
 public class DubboVideoServiceImpl implements DubboVideoService {
 
     @Resource

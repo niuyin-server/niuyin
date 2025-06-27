@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.niuyin.service.search", "com.niuyin.common"})
 @EnableDiscoveryClient
 @EnableAsync
 @EnableScheduling

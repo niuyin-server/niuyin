@@ -24,6 +24,6 @@ public class VideoDelayedQueueConstant {
     /**
      * video同步es延时时间，默认1分钟
      */
-    public static final Integer ESSYNC_DELAYED_TIME = 60 * 1000;
+    public static final Long ESSYNC_DELAYED_TIME = 60 * 1000L;
 
 }

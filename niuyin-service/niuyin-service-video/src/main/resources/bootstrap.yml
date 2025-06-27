@@ -9,10 +9,18 @@ spring:
     active: dev
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  config:
+    import:
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension} # 加载【Nacos】的配置
+      - nacos:shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - nacos:shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - nacos:shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - nacos:shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - nacos:shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
   cloud:
     nacos:
+      server-addr: 127.0.0.1:8848
       discovery:
-        server-addr: 127.0.0.1:8848
         namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
       config:
@@ -20,12 +28,12 @@ spring:
         namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
         file-extension: yml
-        shared-configs:
-          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-          - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+#        shared-configs:
+#          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+#          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+#          - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+#          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+#          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
     loadbalancer:
       ribbon:
         enabled: false

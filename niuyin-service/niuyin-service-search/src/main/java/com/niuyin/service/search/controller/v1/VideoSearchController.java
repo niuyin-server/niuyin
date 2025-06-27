@@ -34,13 +34,13 @@ public class VideoSearchController {
     @Resource
     private VideoSearchService videoSearchService;
 
-    @DubboReference
+    @DubboReference(retries = 3, mock = "return null")
     private DubboMemberService dubboMemberService;
 
-    @DubboReference
+    @DubboReference(retries = 3, mock = "return null")
     private DubboVideoService dubboVideoService;
 
-    @DubboReference
+    @DubboReference(retries = 3, mock = "return null")
     private DubboBehaveService dubboBehaveService;
 
     /**

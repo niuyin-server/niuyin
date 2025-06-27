@@ -247,7 +247,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 // 发送rabbit消息
                 rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, videoId, message -> {
                     // 添加延迟消息属性，设置1分钟
-                    message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
+                    message.getMessageProperties().setDelayLong(ESSYNC_DELAYED_TIME);
                     return message;
                 });
                 log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, videoId);
@@ -302,7 +302,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 // 发送消息
                 rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, video.getVideoId(), message -> {
                     // 添加延迟消息属性，设置1分钟
-                    message.getMessageProperties().setDelay(ESSYNC_DELAYED_TIME);
+                    message.getMessageProperties().setDelayLong(ESSYNC_DELAYED_TIME);
                     return message;
                 });
                 log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, video.getVideoId());

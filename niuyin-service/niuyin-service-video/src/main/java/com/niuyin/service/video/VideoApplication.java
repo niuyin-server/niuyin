@@ -23,7 +23,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @AUTHOR: roydon
  * @DATE: 2023/10/25
  **/
-@SpringBootApplication(scanBasePackages = {"com.niuyin"})
+@SpringBootApplication(scanBasePackages = {"com.niuyin.service.video", "com.niuyin.common"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
