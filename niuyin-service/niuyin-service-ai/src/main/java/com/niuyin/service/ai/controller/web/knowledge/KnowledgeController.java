@@ -61,5 +61,10 @@ public class KnowledgeController {
         return R.ok(BeanCopyUtils.copyBeanList(knowledgeDOS, KnowledgeSimpleVO.class));
     }
 
+    @GetMapping("/get")
+    public R<KnowledgeDO> get(@RequestParam("id") Long id) {
+        return R.ok(knowledgeService.getById(id));
+    }
+
 }
 
