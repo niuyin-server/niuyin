@@ -1,8 +1,12 @@
 package com.niuyin.service.ai.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.niuyin.common.core.domain.vo.PageData;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDocumentDO;
 import com.niuyin.model.ai.dto.knowledge.web.KnowledgeDocumentCreateDTO;
+import com.niuyin.model.ai.dto.knowledge.web.KnowledgeDocumentPageDTO;
+import com.niuyin.model.ai.vo.knowledge.web.KnowledgeDocumentVO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,4 +57,28 @@ public interface IKnowledgeDocumentService extends IService<KnowledgeDocumentDO>
     String readUrl(String url);
 
     KnowledgeDocumentDO validateKnowledgeDocumentExists(Long documentId);
+
+    /**
+     * 上传文档
+     *
+     * @param file 文件
+     * @return 文档url
+     */
+    String uploadKnowledgeDocument(Long knowledgeId, Integer segmentMaxTokens, MultipartFile file);
+
+    /**
+     * 删除文档
+     *
+     * @param id 文档编号
+     * @return 是否成功
+     */
+    Boolean removeKnowledgeDocumentById(Long id);
+
+    /**
+     * 获取文档分页
+     *
+     * @param dto 分页参数
+     * @return 文档分页
+     */
+    PageData<KnowledgeDocumentVO> getKnowledgeDocumentPage(KnowledgeDocumentPageDTO dto);
 }

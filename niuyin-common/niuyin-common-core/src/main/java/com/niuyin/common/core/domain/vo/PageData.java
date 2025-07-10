@@ -66,6 +66,12 @@ public class PageData<T> implements Serializable {
     public static <T> PageData<T> genPageData(List<T> rows, long total) {
         return new PageData<>(R.SUCCESS, "OK", rows, total, true);
     }
+    /**
+     * 返回分页数据
+     */
+    public static <T> PageData<T> genPage(List<T> rows, long total,long current,long pages) {
+        return new PageData<>(R.SUCCESS, "OK", rows, total, current < pages);
+    }
 
     /**
      * 返回空数据

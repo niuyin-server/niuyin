@@ -6,6 +6,12 @@ spring:
     name: niuyin-recommend
   profiles:
     active: dev
+  config:
+    import:
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension} # 加载【Nacos】的配置
+      - nacos:shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - nacos:shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - nacos:shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
   cloud:
     nacos:
       discovery:
@@ -17,7 +23,3 @@ spring:
         namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
         file-extension: yml
-        shared-configs:
-          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

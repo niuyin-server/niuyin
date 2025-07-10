@@ -52,15 +52,20 @@ public enum HttpCodeEnum {
     COMMENT_CONTENT_NULL(1301, "请输入评论内容"),
 
     UPLOAD_FAIL(10001, "上传失败"),
-    BIND_FAIL(10002,"绑定失败"),
-    BIND_CONTENT_TITLE_FAIL(10003,"视频标题需在100字符以内"),
-    BIND_CONTENT_DESC_FAIL(10004,"视频描述需在200字符以内"),
+    BIND_FAIL(10002, "绑定失败"),
+    BIND_CONTENT_TITLE_FAIL(10003, "视频标题需在100字符以内"),
+    BIND_CONTENT_DESC_FAIL(10004, "视频描述需在200字符以内"),
 
-    VIDEO_TAG_NAME_FAIL(10010,"标签不得超过20字符"),
+    VIDEO_TAG_NAME_FAIL(10010, "标签不得超过20字符"),
 
-    FAVORITE_FAIL(10011,"收藏失败"),
+    FAVORITE_FAIL(10011, "收藏失败"),
 
-    TELEPHONE_NOT_EXIST(10012,"该手机号未注册"),
+    TELEPHONE_NOT_EXIST(10012, "该手机号未注册"),
+
+    // ai模块
+
+    // 知识库
+    DOCUMENT_TYPE_ERROR(200_003_0001, "文档类型错误"),
     ;
 
     int code;

@@ -26,10 +26,3 @@ spring:
         namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
         group: DEFAULT_GROUP
         file-extension: yml
-#        shared-configs:
-#          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-#          - dataId: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-#          - dataId: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-#          - dataId: shared-oss-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-#          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-#          - dataId: shared-sms-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

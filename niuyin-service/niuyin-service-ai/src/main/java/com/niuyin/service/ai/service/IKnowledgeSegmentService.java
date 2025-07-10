@@ -48,4 +48,11 @@ public interface IKnowledgeSegmentService extends IService<KnowledgeSegmentDO> {
      * @return 切片后的段落列表
      */
     List<KnowledgeSegmentDO> splitContent(String url, Integer segmentMaxTokens);
+
+    /**
+     * 根据文档编号删除段落
+     *
+     * @param documentId 文档编号
+     */
+    void deleteKnowledgeSegmentByDocumentId(Long documentId);
 }

@@ -3,24 +3,32 @@ package com.niuyin.service.ai.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niuyin.common.core.domain.vo.PageData;
+import com.niuyin.common.core.exception.CustomException;
 import com.niuyin.common.core.utils.bean.BeanUtils;
 import com.niuyin.model.ai.domain.knowledge.KnowledgeDocumentDO;
 import com.niuyin.model.ai.dto.knowledge.web.KnowledgeDocumentCreateDTO;
+import com.niuyin.model.ai.dto.knowledge.web.KnowledgeDocumentPageDTO;
+import com.niuyin.model.ai.vo.knowledge.web.KnowledgeDocumentVO;
+import com.niuyin.model.common.enums.HttpCodeEnum;
 import com.niuyin.model.common.enums.StateFlagEnum;
 import com.niuyin.service.ai.mapper.KnowledgeDocumentMapper;
 import com.niuyin.service.ai.service.IKnowledgeDocumentService;
 import com.niuyin.service.ai.service.IKnowledgeSegmentService;
 import com.niuyin.service.ai.service.IKnowledgeService;
-import jakarta.annotation.Resource;
+import com.niuyin.starter.file.service.AliyunOssService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.tokenizer.TokenCountEstimator;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +48,7 @@ public class KnowledgeDocumentServiceImpl extends ServiceImpl<KnowledgeDocumentM
     private final IKnowledgeService knowledgeService;
     private final TokenCountEstimator tokenCountEstimator;
     private final IKnowledgeSegmentService knowledgeSegmentService;
+    private final AliyunOssService aliyunOssService;
 
     /**
      * 获取文档列表
@@ -119,5 +128,63 @@ public class KnowledgeDocumentServiceImpl extends ServiceImpl<KnowledgeDocumentM
             throw new RuntimeException("文档不存在!");
         }
         return knowledgeDocumentDO;
+    }
+
+    /**
+     * 上传文档
+     *
+     * @param file 文件
+     * @return 文档 URL
+     */
+    @Override
+    public String uploadKnowledgeDocument(Long knowledgeId, Integer segmentMaxTokens, MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        // todo 对文件大小进行判断
+        // 原始文件名是否符合类型
+        if (originalFilename.endsWith(".pdf")
+                || originalFilename.endsWith(".doc")
+                || originalFilename.endsWith(".docx")) {
+            String uploadUrl = aliyunOssService.uploadFile(file, "ai/knowledge");
+            KnowledgeDocumentCreateDTO knowledgeDocumentCreateDTO = new KnowledgeDocumentCreateDTO();
+            knowledgeDocumentCreateDTO.setKnowledgeId(knowledgeId)
+                    .setName(originalFilename)
+                    .setUrl(uploadUrl)
+                    .setSegmentMaxTokens(segmentMaxTokens);
+            createKnowledgeDocument(knowledgeDocumentCreateDTO);
+
+            // todo 返回sse id去轮询文档状态
+            return uploadUrl;
+        }
+        throw new CustomException(HttpCodeEnum.DOCUMENT_TYPE_ERROR);
+    }
+
+    /**
+     * 删除文档
+     *
+     * @param id 文档编号
+     * @return 是否成功
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Boolean removeKnowledgeDocumentById(Long id) {
+        // 1. 删除文档
+        this.removeById(id);
+        // 2. 删除文档分段
+        knowledgeSegmentService.deleteKnowledgeSegmentByDocumentId(id);
+        return true;
+    }
+
+    /**
+     * 获取文档分页
+     *
+     * @param dto 分页参数
+     * @return 文档分页
+     */
+    @Override
+    public PageData<KnowledgeDocumentVO> getKnowledgeDocumentPage(KnowledgeDocumentPageDTO dto) {
+        Page<KnowledgeDocumentDO> page = this.page(new Page<>(dto.getPageNum(), dto.getPageSize()), Wrappers.<KnowledgeDocumentDO>lambdaQuery()
+                .eq(KnowledgeDocumentDO::getKnowledgeId, dto.getKnowledgeId()));
+        List<KnowledgeDocumentVO> knowledgeDocumentVOS = BeanUtils.toBean(page.getRecords(), KnowledgeDocumentVO.class);
+        return PageData.genPage(knowledgeDocumentVOS, page.getTotal(), dto.getPageNum(), page.getPages());
     }
 }

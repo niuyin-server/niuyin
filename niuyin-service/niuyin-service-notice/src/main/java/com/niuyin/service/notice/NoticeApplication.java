@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @AUTHOR: roydon
  * @DATE: 2023/11/2
  **/
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.niuyin.service.notice", "com.niuyin.common"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign")
 @EnableUserTokenInterceptor

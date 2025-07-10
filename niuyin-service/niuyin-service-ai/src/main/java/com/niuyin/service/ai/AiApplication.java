@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Import;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableCacheConfig
-//@EnableUserTokenInterceptor
 public class AiApplication implements CommandLineRunner {
 
     public static void main(String[] args) {

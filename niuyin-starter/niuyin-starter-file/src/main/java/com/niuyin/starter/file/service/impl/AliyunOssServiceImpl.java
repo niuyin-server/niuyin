@@ -42,7 +42,7 @@ public class AliyunOssServiceImpl implements AliyunOssService {
 
     @Override
     public String uploadFile(MultipartFile file, String folder) {
-        return uploadCommonImage(file, folder);
+        return putObject(file, folder);
     }
 
     /**

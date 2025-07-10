@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niuyin.common.core.utils.bean.BeanUtils;
@@ -76,7 +77,7 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
         KnowledgeDO knowledge = knowledgeService.validateKnowledgeExists(bo.getKnowledgeId());
 
         // 2.1 向量检索
-        VectorStore vectorStore = getVectorStoreById(knowledge);
+        VectorStore vectorStore = chatModelService.getOrCreateVectorStore(knowledge.getEmbeddingModelId(), VECTOR_STORE_METADATA_TYPES);
         List<Document> documents = vectorStore.similaritySearch(SearchRequest.builder()
                 .query(bo.getContent())
                 .topK(ObjUtil.defaultIfNull(bo.getTopK(), knowledge.getTopK()))
@@ -109,7 +110,8 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
         return result;
     }
 
-    private VectorStore getVectorStoreById(KnowledgeDO knowledge) {
+    private VectorStore getVectorStoreById(Long knowledgeId) {
+        KnowledgeDO knowledge = knowledgeService.validateKnowledgeExists(knowledgeId);
         return chatModelService.getOrCreateVectorStore(knowledge.getEmbeddingModelId(), VECTOR_STORE_METADATA_TYPES);
     }
 
@@ -124,8 +126,8 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
     public void createKnowledgeSegmentBySplitContent(Long documentId, String content) {
         // 1. 校验
         KnowledgeDocumentDO documentDO = knowledgeDocumentService.validateKnowledgeDocumentExists(documentId);
-        KnowledgeDO knowledgeDO = knowledgeService.validateKnowledgeExists(documentDO.getKnowledgeId());
-        VectorStore vectorStore = getVectorStoreById(knowledgeDO);
+
+        VectorStore vectorStore = getVectorStoreById(documentDO.getKnowledgeId());
 
         // 2. 文档切片
         List<Document> documentSegments = splitContentByToken(content, documentDO.getSegmentMaxTokens());
@@ -203,5 +205,24 @@ public class KnowledgeSegmentServiceImpl extends ServiceImpl<KnowledgeSegmentMap
                     .setContentLength(segment.getText().length())
                     .setTokens(tokenCountEstimator.estimate(segment.getText()));
         });
+    }
+
+    /**
+     * 根据文档编号删除段落
+     *
+     * @param documentId 文档编号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteKnowledgeSegmentByDocumentId(Long documentId) {
+        List<KnowledgeSegmentDO> segments = this.list(new LambdaQueryWrapper<KnowledgeSegmentDO>().eq(KnowledgeSegmentDO::getDocumentId, documentId));
+        if (CollUtil.isEmpty(segments)) {
+            return;
+        }
+        // 1. 删db
+        this.removeBatchByIds(convertList(segments, KnowledgeSegmentDO::getId));
+        // 2. 删向量存储
+        VectorStore vectorStore = getVectorStoreById(segments.get(0).getKnowledgeId());
+        vectorStore.delete(convertList(segments, KnowledgeSegmentDO::getVectorId));
     }
 }

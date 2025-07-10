@@ -19,7 +19,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @AUTHOR: roydon
  * @DATE: 2024/4/27
  **/
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.niuyin.service.recommend", "com.niuyin.common"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.niuyin.feign", defaultConfiguration = {FeignConfig.class})
 @EnableUserTokenInterceptor
