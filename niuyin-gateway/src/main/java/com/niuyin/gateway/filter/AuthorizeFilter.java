@@ -83,7 +83,6 @@ public class AuthorizeFilter implements GlobalFilter {
 
             // 提取用户信息并设置到请求头
             Object userId = claimsBody.get("id");
-            log.debug("登录用户id: {}", userId);
 
             ServerHttpRequest newRequest = request.mutate()
                     .header("X-User-Id", userId.toString())
@@ -116,7 +115,6 @@ public class AuthorizeFilter implements GlobalFilter {
 
                 if (result != 1 && result != 2) {
                     Object userId = claimsBody.get("id");
-                    log.debug("登录用户id: {}", userId);
 
                     ServerHttpRequest newRequest = request.mutate()
                             .header("X-User-Id", userId.toString())

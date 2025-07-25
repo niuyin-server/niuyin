@@ -23,7 +23,6 @@ public class UserTokenInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String userId = request.getHeader("X-User-Id");
         request.getHeaderNames().asIterator().forEachRemaining(headerName -> log.debug("headerName: " + headerName + " headerValue: " + request.getHeader(headerName)));
-        log.debug("登录用户id: " + userId);
         if (userId != null) {
             //存入到当前线程中
             Member user = new Member();

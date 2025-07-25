@@ -19,7 +19,6 @@ public class UserInfoFilter implements Filter {
         try {
             // 从请求头获取用户ID
             String userId = httpRequest.getHeader("X-User-Id");
-            log.debug("登录用户id: " + userId);
             // 存入 ThreadLocal
             if (userId != null) {
                 Member user = new Member();
