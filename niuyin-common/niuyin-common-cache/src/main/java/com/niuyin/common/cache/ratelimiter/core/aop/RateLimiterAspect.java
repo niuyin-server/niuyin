@@ -1,7 +1,5 @@
 package com.niuyin.common.cache.ratelimiter.core.aop;
 
-import cn.hutool.core.util.StrUtil;
-import com.google.protobuf.ServiceException;
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
 import com.niuyin.common.cache.ratelimiter.core.keyresolver.RateLimiterKeyResolver;
 import com.niuyin.common.cache.ratelimiter.core.redis.RateLimiterRedisDAO;
@@ -11,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -21,8 +18,6 @@ import static com.niuyin.model.common.enums.HttpCodeEnum.TOO_MANY_REQUESTS;
 
 /**
  * 拦截声明了 {@link RateLimiter} 注解的方法，实现限流操作
- *
- * @author 芋道源码
  */
 @Aspect
 @Slf4j

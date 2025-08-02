@@ -6,8 +6,6 @@ import lombok.Data;
 
 /**
  * AI 知识库段落搜索 Request BO
- *
- * @author 芋道源码
  */
 @Data
 public class KnowledgeSegmentSearchReqBO {
