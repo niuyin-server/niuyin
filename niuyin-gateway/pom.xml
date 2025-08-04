@@ -102,7 +102,7 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-<!--        knife4j接口文档-->
+        <!--        knife4j接口文档-->
         <!--        <dependency>-->
         <!--            <groupId>com.github.xiaoymin</groupId> &lt;!&ndash; 接口文档 &ndash;&gt;-->
         <!--            <artifactId>knife4j-gateway-spring-boot-starter</artifactId>-->
@@ -112,17 +112,17 @@
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
-            <!--            <plugin>-->
-            <!--                <groupId>org.springframework.boot</groupId>-->
-            <!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <goals>-->
-            <!--                            <goal>repackage</goal>-->
-            <!--                        </goals>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

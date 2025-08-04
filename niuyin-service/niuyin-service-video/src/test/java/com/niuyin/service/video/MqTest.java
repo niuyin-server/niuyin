@@ -44,7 +44,7 @@ public class MqTest {
         // 1.发送整个video对象发送消息，利用消息后置处理器添加消息头
         rabbitTemplate.convertAndSend(ESSYNC_DELAYED_EXCHANGE, ESSYNC_ROUTING_KEY, msg, message -> {
             // 2.添加延迟消息属性，设置10秒
-            message.getMessageProperties().setDelay(10000);
+            message.getMessageProperties().setDelayLong(10000L);
             return message;
         });
         log.debug(" ==> {} 发送了一条消息 ==> {}", ESSYNC_DELAYED_EXCHANGE, msg);
