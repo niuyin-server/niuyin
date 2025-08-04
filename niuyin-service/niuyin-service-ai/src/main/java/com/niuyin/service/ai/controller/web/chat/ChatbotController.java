@@ -2,11 +2,9 @@ package com.niuyin.service.ai.controller.web.chat;
 
 import com.niuyin.common.cache.ratelimiter.core.annotation.RateLimiter;
 import com.niuyin.common.cache.ratelimiter.core.keyresolver.impl.ClientIpRateLimiterKeyResolver;
-import com.niuyin.common.core.compont.SnowFlake;
 import com.niuyin.common.core.context.UserContext;
 import com.niuyin.common.core.domain.R;
 import com.niuyin.model.ai.vo.chat.ChatMessageVO;
-import com.niuyin.service.ai.service.IChatConversationService;
 import com.niuyin.service.ai.service.IChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,9 +13,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.util.concurrent.TimeUnit;

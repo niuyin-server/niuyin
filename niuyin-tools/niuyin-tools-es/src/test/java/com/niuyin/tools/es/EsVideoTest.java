@@ -1,6 +1,5 @@
 package com.niuyin.tools.es;
 
-import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.model.search.vo.VideoSearchVO;
 import com.niuyin.model.video.domain.Video;
 import com.niuyin.model.video.domain.VideoTag;

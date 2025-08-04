@@ -1,6 +1,6 @@
 package com.niuyin.service.search.domain.vo;
 
-import com.niuyin.service.search.domain.UserEO;
+import com.niuyin.model.search.domain.UserEO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

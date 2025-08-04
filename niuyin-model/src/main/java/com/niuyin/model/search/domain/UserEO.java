@@ -1,11 +1,13 @@
-package com.niuyin.service.search.domain;
+package com.niuyin.model.search.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.niuyin.model.search.ESIndexConstants;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.util.Date;
 
-import static com.niuyin.service.search.constant.ESIndexConstants.INDEX_USER;
 
 /**
  * 用户es对象
@@ -14,9 +16,11 @@ import static com.niuyin.service.search.constant.ESIndexConstants.INDEX_USER;
  * @DATE: 2024/10/11
  **/
 @Data
-@Document(indexName = INDEX_USER, createIndex = true)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@Document(indexName = ESIndexConstants.INDEX_USER, createIndex = true)
 public class UserEO {
     // 用户id
+    @Id
     private String userId;
     public static final String USER_ID = "userId";
     // 用户名

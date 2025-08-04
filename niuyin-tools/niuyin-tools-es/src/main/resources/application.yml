@@ -23,7 +23,7 @@ spring:
       password: n3f55MhYix6CPjKw
   elasticsearch:
     uris:
-      - http://127.0.0.1:9201
+      - http://43.240.221.8:9200
     username: elastic
     password: roydon#Elasticsearch
     connection-timeout: 5s

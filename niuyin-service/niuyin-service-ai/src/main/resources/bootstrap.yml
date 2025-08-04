@@ -34,14 +34,14 @@ spring:
           api-key: sk-6879fb6daefa445d890bb9edf8dbab7c
   ai:
     openai:
-      base-url: https://dashscope.aliyuncs.com/compatible-mode # https://api.siliconflow.cn/
-      api-key: sk-6879fb6daefa445d890bb9edf8dbab7c # sk-yxyznxhniyfnksfmjvyqxvhcuqbinifqlycvniqxpztrfetw
+      base-url: https://api.siliconflow.cn/ # https://dashscope.aliyuncs.com/compatible-mode
+      api-key: sk-epsakfenqnyzoxhmbucsxlhkdqlcbnimslqoivkshalvdozz # sk-6879fb6daefa445d890bb9edf8dbab7c
       chat:
         options:
-          model: qwen-plus # deepseek-ai/DeepSeek-V3
+          model: deepseek-ai/DeepSeek-V3 # qwen-plus
       image:
         options:
-          model: wanx2.1-t2i-turbo # Kwai-Kolors/Kolors
+          model: Kwai-Kolors/Kolors # wanx2.1-t2i-turbo
 
   datasource:
     hikari:
