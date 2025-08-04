@@ -1,0 +1,47 @@
+server:
+  port: 9009
+
+spring:
+  application:
+    name: niuyin-im
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
+        group: DEFAULT_GROUP
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
+        group: DEFAULT_GROUP
+        file-extension: yml
+        shared-configs:
+          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+  #          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+
+ribbon:
+  eager-load:
+    enabled: true
+
+# dubbo
+#dubbo:
+#  protocol:
+#    name: dubbo
+#    port: -1
+#  registry:
+#    address: nacos://43.240.221.8:8848   # nacos注册中心
+#    parameters[namespace]: 0427586a-d828-4518-bd27-b38d404c9f5e
+#    group: dubbo
+#  metadata-report:
+#    address: nacos://43.240.221.8:8848
+#    parameters[namespace]: 0427586a-d828-4518-bd27-b38d404c9f5e
+#  consumer:
+#    check: false   #dubbo默认有启动检查
+#    retries: 0     #dubbo内置的重试机制，重试 1 次
+#  scan:
+#    base-packages: com.niuyin.service.video.dubbo
+#  cloud:
+#    subscribed-services: niuyin-member,niuyin-behave
+
