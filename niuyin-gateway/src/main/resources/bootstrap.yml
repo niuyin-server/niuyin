@@ -6,7 +6,8 @@ spring:
   application:
     name: niuyin-gateway
   profiles:
-    active: dev
+#    active: dev
+    active: pro
   config:
     import:
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension} # 加载【Nacos】的配置
@@ -14,17 +15,14 @@ spring:
       - nacos:shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848
+      server-addr: 43.240.221.8:8848
       discovery:
-        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
+        namespace: pro
         group: DEFAULT_GROUP
       config:
-        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
+        namespace: pro
         group: DEFAULT_GROUP
         file-extension: yml
-    #        shared-configs:
-    #          - dataId: shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-    #          - dataId: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
     gateway:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_UNIQUE

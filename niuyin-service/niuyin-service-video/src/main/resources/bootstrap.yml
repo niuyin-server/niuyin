@@ -6,7 +6,8 @@ spring:
   application:
     name: niuyin-video
   profiles:
-    active: dev
+#    active: dev
+    active: pro
   lifecycle:
     timeout-per-shutdown-phase: 30s
   config:
@@ -19,13 +20,12 @@ spring:
       - nacos:shared-logging-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848
+      server-addr: 43.240.221.8:8848
       discovery:
-        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
+        namespace: pro
         group: DEFAULT_GROUP
       config:
-        server-addr: 127.0.0.1:8848
-        namespace: 5cfcb54e-857c-4935-bfda-f99ecd13ccbb
+        namespace: pro
         group: DEFAULT_GROUP
         file-extension: yml
     loadbalancer:
