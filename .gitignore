@@ -42,5 +42,5 @@ build/
 **/.bin/**
 
 ### Spring Boot Properties ###
-#**/bootstrap.yml
+**/bootstrap.yml
 

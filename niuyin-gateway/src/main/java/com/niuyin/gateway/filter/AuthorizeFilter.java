@@ -33,25 +33,25 @@ public class AuthorizeFilter implements GlobalFilter {
     // 定义不需要拦截的路径列表
     private static final String[] EXCLUDE_PATHS = {
             "/*/api/v1/login", // 登录接口：/member/api/v1/login
-            "/sms-login",
-            "/register",
-            "/app/sms-register",
+            "/*/api/v1/sms-login", // 短信登陆接口：/member/api/v1/sms-login
+            "/*/register",
+            "/*/app/sms-register",
             "/swagger-ui/**",
-            "/api/v1/feed",
-            "/api/v1/pushVideo",
-            "/api/v1/app/recommend",
-            "/api/v1/app/hotVideo",
-            "/api/v1/app/video/hotSearch",
-            "/api/v1/hot",
-            "/api/v1/video/search/hot",
-            "/websocket",
-            "/userVideoBehave/syncViewBehave",
+            "/*/api/v1/feed",
+            "/*/api/v1/pushVideo",
+            "/*/api/v1/app/recommend",
+            "/*/api/v1/app/hotVideo",
+            "/*/api/v1/app/video/hotSearch",
+            "/*/api/v1/hot",
+            "/*/api/v1/video/search/hot",
+            "/*/websocket",
+            "/*/userVideoBehave/syncViewBehave",
             "/*/api/v1/video/feed",
             "/*/api/v1/category/tree",
             "/*/api/v1/category/parentList",
             "/*/api/v1/category/children",
             "/*/api/v1/category/pushVideo",
-            "/chat/stream",
+            "/*/chat/stream",
             "/test"
     };
 
