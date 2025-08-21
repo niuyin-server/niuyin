@@ -47,7 +47,7 @@ public class AppVideoController {
      * 热门视频分页
      */
     @PostMapping("/hotVideo")
-    @Cacheable(value = "hotVideos", key = "'hotVideos'+ #pageDTO.pageNum + '_' + #pageDTO.pageSize")
+    @Cacheable(value = "hotVideos", key = "'hotVideos'+ #pageDTO.pageNum + ':' + #pageDTO.pageSize")
     public PageData<?> hotVideosForApp(@RequestBody PageDTO pageDTO) {
         return videoService.getHotVideos(pageDTO);
     }

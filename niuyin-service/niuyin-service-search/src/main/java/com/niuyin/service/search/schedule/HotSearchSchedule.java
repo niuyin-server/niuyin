@@ -1,5 +1,6 @@
 package com.niuyin.service.search.schedule;
 
+import com.niuyin.common.cache.annotations.RedissonLock;
 import com.niuyin.common.cache.service.RedisService;
 import com.niuyin.dubbo.api.DubboBehaveService;
 import com.niuyin.model.search.dto.VideoSearchKeywordDTO;
@@ -54,7 +55,7 @@ public class HotSearchSchedule {
      */
 //    @RedissonLock(prefixKey = SEARCH_KEY)
     @SneakyThrows
-//    @Scheduled(fixedRate = 1000 * 60 * 10)
+    @Scheduled(fixedRate = 1000 * 60 * 10)
     public void computeHotSearch() {
         List<String> list = new ArrayList<>();
 //        List<Term> termList;

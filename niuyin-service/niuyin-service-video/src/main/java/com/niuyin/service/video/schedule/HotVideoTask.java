@@ -56,7 +56,7 @@ public class HotVideoTask {
                     }
                 });
                 // 缓存热门视频过期时间7天
-                redisService.expire(VideoCacheConstants.VIDEO_HOT, 7, TimeUnit.DAYS);
+                redisService.expire(VideoCacheConstants.VIDEO_HOT, 30, TimeUnit.DAYS);
                 log.info("==> 热门视频缓存到redis完成");
             }
         } finally {

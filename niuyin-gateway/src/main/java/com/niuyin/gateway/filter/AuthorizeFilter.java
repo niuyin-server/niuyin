@@ -34,7 +34,7 @@ public class AuthorizeFilter implements GlobalFilter {
     private static final String[] EXCLUDE_PATHS = {
             "/*/api/v1/login", // 登录接口：/member/api/v1/login
             "/*/api/v1/sms-login", // 短信登陆接口：/member/api/v1/sms-login
-            "/*/register",
+            "/*/api/v1/register",
             "/*/app/sms-register",
             "/swagger-ui/**",
             "/*/api/v1/feed",

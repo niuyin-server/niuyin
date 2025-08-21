@@ -84,7 +84,7 @@ public class VideoSearchController {
      * 牛音热搜
      */
     @PostMapping("/search/hot")
-    @Cacheable(value = "hotSearch", key = "'hotSearch' + #pageDTO.pageNum + '_' + #pageDTO.pageSize")
+    @Cacheable(value = "hotSearch", key = "'hotSearch' + #pageDTO.pageNum + ':' + #pageDTO.pageSize")
     public R<?> getSearchHot(@RequestBody PageDTO pageDTO) {
         return R.ok(videoSearchService.findSearchHot(pageDTO));
     }

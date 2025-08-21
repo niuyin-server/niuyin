@@ -131,7 +131,7 @@ public class VideoController {
      * @return
      */
     @PostMapping("/hot")
-    @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + '_' + #pageDTO.pageSize")
+    @Cacheable(value = "hotVideos", key = "'hotVideos'+#pageDTO.pageNum + ':' + #pageDTO.pageSize")
     public PageData hotVideos(@RequestBody PageDTO pageDTO) {
         return videoService.getHotVideos(pageDTO);
     }
