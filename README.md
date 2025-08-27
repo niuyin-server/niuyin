@@ -1,8 +1,35 @@
 # 芝士学爆 - 短视频学习平台 🎓
 
-## 项目简介
+## 👋 项目简介
 
 芝士学爆是一个基于Spring Cloud微服务架构的短视频学习平台，旨在通过短视频形式提供高效、便捷的学习体验。平台结合了现代化的技术栈和AI智能功能，为学生、职场人士及其他用户提供轻松、互动、高效的学习方式。
+
+## 📱 运行效果
+
+### 首页
+![index.png](docs/images/niuyin-index.png)
+
+### 推荐页面
+![discover.png](docs/images/niuyin-discover.png)
+
+### 热门视频
+![hot.png](docs/images/niuyin-hot.png)
+
+### 关注动态
+![follow.png](docs/images/niuyin-follow.png)
+
+### 个人中心
+![my.png](docs/images/niuyin-user.png)
+
+### 分类浏览
+![category.png](docs/images/niuyin-category.png)
+
+### 搜索功能
+![search.png](docs/images/niuyin-search.png)
+
+### 全屏播放
+![fullscreen.png](docs/images/niuyin-fullscreen.png)
+
 
 ## 技术架构
 
@@ -303,33 +330,6 @@ mvn spring-boot:run -pl niuyin-service/niuyin-service-video
 # 构建并启动所有服务
 docker-compose -f docker/docker-compose.yml up -d
 ```
-
-## 📱 运行效果
-
-### 首页
-![index.png](docs/images/niuyin-index.png)
-
-### 推荐页面
-![discover.png](docs/images/niuyin-discover.png)
-
-### 热门视频
-![hot.png](docs/images/niuyin-hot.png)
-
-### 关注动态
-![follow.png](docs/images/niuyin-follow.png)
-
-### 个人中心
-![my.png](docs/images/niuyin-user.png)
-
-### 分类浏览
-![category.png](docs/images/niuyin-category.png)
-
-### 搜索功能
-![search.png](docs/images/niuyin-search.png)
-
-### 全屏播放
-![fullscreen.png](docs/images/niuyin-fullscreen.png)
-
 ## 🔧 配置说明
 
 ### 数据库配置
